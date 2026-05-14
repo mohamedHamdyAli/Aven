@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Корректировки запасов',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Товар с артикулом: \'%s\' не найден в системе.',
+                    'invalid-source-code'  => 'Код источника запасов: \'%s\' недействителен или не найден.',
+                    'duplicate-sku-source' => 'Дублирующая запись для комбинации SKU и источника.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

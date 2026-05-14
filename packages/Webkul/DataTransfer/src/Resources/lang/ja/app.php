@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => '在庫調整',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'SKU: \'%s\' の製品がシステムに見つかりません。',
+                    'invalid-source-code'  => '在庫ソースコード: \'%s\' が無効または見つかりません。',
+                    'duplicate-sku-source' => 'SKUとソースの組み合わせに重複エントリがあります。',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

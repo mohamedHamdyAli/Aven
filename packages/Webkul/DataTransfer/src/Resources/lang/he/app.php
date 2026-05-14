@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'התאמות מלאי',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'מוצר עם SKU: \'%s\' לא נמצא במערכת.',
+                    'invalid-source-code'  => 'קוד מקור מלאי: \'%s\' אינו חוקי או לא נמצא.',
+                    'duplicate-sku-source' => 'רשומה כפולה עבור SKU ושילוב מקור.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

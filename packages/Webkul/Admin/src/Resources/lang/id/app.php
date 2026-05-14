@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Tambah Gambar',
                             'apply-to-all-btn' => 'Terapkan ke Semua',
+                            'auto-assign-by-color' => 'Tetapkan Otomatis berdasarkan Warna',
+                            'auto-assign-description' => 'Unggah gambar dengan nama warna dalam nama file (contoh: hitam.jpg) untuk secara otomatis menetapkannya ke semua varian yang cocok.',
+                            'auto-assign-no-match' => 'Tidak ada warna yang cocok ditemukan dalam nama file.',
+                            'auto-assign-success' => 'Gambar berhasil ditetapkan ke varian yang cocok.',
                             'apply-to-all-name' => 'Terapkan nama ke semua varian.',
                             'apply-to-all-sku' => 'Terapkan harga ke semua SKU.',
                             'apply-to-all-status' => 'Terapkan status ke semua varian.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Skrip Kustom',
                         'title-info' => 'Skrip kustom adalah potongan kode yang dibuat secara khusus untuk menambahkan fungsi atau fitur tertentu ke dalam perangkat lunak, sehingga meningkatkan kemampuannya secara unik.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Keluarga Atribut',
                 'attributes' => 'Atribut',
                 'booking-product' => 'Pemesanan',

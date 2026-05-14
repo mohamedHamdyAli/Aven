@@ -88,6 +88,25 @@
             </script>
         @endif
 
+        @if (core()->getConfigData('general.content.facebook_pixel.enabled') && core()->getConfigData('general.content.facebook_pixel.pixel_id'))
+            <script>
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '{{ core()->getConfigData('general.content.facebook_pixel.pixel_id') }}');
+                fbq('track', 'PageView');
+            </script>
+            <noscript>
+                <img height="1" width="1" style="display:none"
+                    src="https://www.facebook.com/tr?id={{ core()->getConfigData('general.content.facebook_pixel.pixel_id') }}&ev=PageView&noscript=1"/>
+            </noscript>
+        @endif
+
         {!! view_render_event('bagisto.shop.layout.head.after') !!}
 
     </head>
@@ -109,6 +128,9 @@
 
             <!-- Confirm Modal Blade Component -->
             <x-shop::modal.confirm />
+
+            <!-- Package modals (size guide, etc.) -->
+            @stack('modals')
 
             <!-- Page Header Blade Component -->
             @if ($hasHeader)
@@ -165,5 +187,30 @@
         <script type="text/javascript">
             {!! core()->getConfigData('general.content.custom_scripts.custom_javascript') !!}
         </script>
+
+        @if (core()->getConfigData('general.content.facebook_pixel.enabled') && core()->getConfigData('general.content.facebook_pixel.pixel_id'))
+            <script>
+                (function () {
+                    if (typeof fbq === 'undefined') return;
+
+                    var _fetch = window.fetch;
+                    window.fetch = function () {
+                        var args = arguments;
+                        var url  = typeof args[0] === 'string' ? args[0] : (args[0] instanceof Request ? args[0].url : '');
+
+                        return _fetch.apply(window, args).then(function (response) {
+                            if (/\/cart\/add/.test(url)) {
+                                response.clone().json().then(function (data) {
+                                    if (data && data.message === 'success') {
+                                        fbq('track', 'AddToCart');
+                                    }
+                                }).catch(function () {});
+                            }
+                            return response;
+                        });
+                    };
+                })();
+            </script>
+        @endif
     </body>
 </html>

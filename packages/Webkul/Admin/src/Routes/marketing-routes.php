@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Webkul\Admin\Http\Controllers\Marketing\AdHealthController;
 use Webkul\Admin\Http\Controllers\Marketing\Communications\CampaignController;
 use Webkul\Admin\Http\Controllers\Marketing\Communications\EventController;
 use Webkul\Admin\Http\Controllers\Marketing\Communications\SubscriptionController;
 use Webkul\Admin\Http\Controllers\Marketing\Communications\TemplateController;
+use Webkul\Admin\Http\Controllers\Marketing\Promotions\BulkDealController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CartRuleController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CartRuleCouponController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CatalogRuleController;
@@ -18,9 +20,28 @@ use Webkul\Admin\Http\Controllers\Marketing\SearchSEO\URLRewriteController;
  */
 Route::prefix('marketing')->group(function () {
     /**
+     * Ads & Tracking Health Check.
+     */
+    Route::controller(AdHealthController::class)->prefix('ad-health')->group(function () {
+        Route::get('', 'index')->name('admin.marketing.ad-health.index');
+    });
+
+    /**
      * Promotions routes.
      */
     Route::prefix('promotions')->group(function () {
+        /**
+         * Bulk deals routes.
+         */
+        Route::controller(BulkDealController::class)->prefix('bulk-deals')->group(function () {
+            Route::get('', 'index')->name('admin.marketing.promotions.bulk_deals.index');
+            Route::get('create', 'create')->name('admin.marketing.promotions.bulk_deals.create');
+            Route::post('create', 'store')->name('admin.marketing.promotions.bulk_deals.store');
+            Route::get('edit/{id}', 'edit')->name('admin.marketing.promotions.bulk_deals.edit');
+            Route::put('edit/{id}', 'update')->name('admin.marketing.promotions.bulk_deals.update');
+            Route::delete('edit/{id}', 'destroy')->name('admin.marketing.promotions.bulk_deals.delete');
+        });
+
         /**
          * Cart rules routes.
          */

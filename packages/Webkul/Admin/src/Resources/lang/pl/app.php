@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Dodaj obrazy',
                             'apply-to-all-btn' => 'Zastosuj do wszystkich',
+                            'auto-assign-by-color' => 'Automatyczne przypisanie według koloru',
+                            'auto-assign-description' => 'Prześlij obrazy z nazwą koloru w nazwie pliku (np. czarny.jpg), aby automatycznie przypisać je do wszystkich pasujących wariantów.',
+                            'auto-assign-no-match' => 'Nie znaleziono pasującego koloru w nazwie/nazwach pliku.',
+                            'auto-assign-success' => 'Obrazy zostały pomyślnie przypisane do pasujących wariantów.',
                             'apply-to-all-name' => 'Zastosuj nazwę do wszystkich wariantów.',
                             'apply-to-all-sku' => 'Zastosuj cenę do wszystkich SKU.',
                             'apply-to-all-status' => 'Zastosuj status do wszystkich wariantów.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Niestandardowe skrypty',
                         'title-info' => 'Niestandardowe skrypty to spersonalizowane fragmenty kodu stworzone w celu dodania określonych funkcji lub cech do oprogramowania, zwiększając jego możliwości w unikalny sposób.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Rodziny atrybutów',
                 'attributes' => 'Atrybuty',
                 'booking-product' => 'Rezerwacje',

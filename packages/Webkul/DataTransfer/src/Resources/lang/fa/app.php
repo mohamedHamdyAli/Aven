@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'تنظیمات موجودی',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'محصول با SKU: \'%s\' در سیستم یافت نشد.',
+                    'invalid-source-code'  => 'کد منبع موجودی: \'%s\' نامعتبر یا یافت نشد.',
+                    'duplicate-sku-source' => 'ورودی تکراری برای ترکیب SKU و منبع موجودی.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

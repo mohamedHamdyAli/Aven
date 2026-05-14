@@ -4,6 +4,7 @@ namespace Webkul\Core;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Webkul\Core\Concerns\CurrencyFormatter;
 use Webkul\Core\Models\Channel;
@@ -29,6 +30,8 @@ class Core
      * @var string
      */
     const BAGISTO_VERSION = '2.4.4';
+
+    const CACHE_TTL = 3600;
 
     /**
      * Current Channel.
@@ -126,7 +129,7 @@ class Core
      */
     public function getAllChannels()
     {
-        return $this->channelRepository->all();
+        return Cache::remember('core:channels:all', self::CACHE_TTL, fn () => $this->channelRepository->all());
     }
 
     /**
@@ -144,15 +147,18 @@ class Core
             return $this->currentChannel;
         }
 
-        $this->currentChannel = $this->channelRepository->findWhereIn('hostname', [
-            $hostname,
-            'http://'.$hostname,
-            'https://'.$hostname,
-        ])->first();
+        $generation = Cache::get('core:channels:generation', 0);
+        $cacheKey = 'core:channels:current:'.$generation.':'.md5($hostname);
 
-        if (! $this->currentChannel) {
-            $this->currentChannel = $this->channelRepository->first();
-        }
+        $this->currentChannel = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($hostname) {
+            $channel = $this->channelRepository->findWhereIn('hostname', [
+                $hostname,
+                'http://'.$hostname,
+                'https://'.$hostname,
+            ])->first();
+
+            return $channel ?? $this->channelRepository->first();
+        });
 
         return $this->currentChannel;
     }
@@ -184,13 +190,12 @@ class Core
             return $this->defaultChannel;
         }
 
-        $this->defaultChannel = $this->channelRepository->findOneByField('code', config('app.channel'));
+        $this->defaultChannel = Cache::remember('core:channels:default', self::CACHE_TTL, function () {
+            return $this->channelRepository->findOneByField('code', config('app.channel'))
+                ?? $this->channelRepository->first();
+        });
 
-        if ($this->defaultChannel) {
-            return $this->defaultChannel;
-        }
-
-        return $this->defaultChannel = $this->channelRepository->first();
+        return $this->defaultChannel;
     }
 
     /**
@@ -265,7 +270,7 @@ class Core
      */
     public function getAllLocales()
     {
-        return $this->localeRepository->all()->sortBy('name');
+        return Cache::remember('core:locales:all', self::CACHE_TTL, fn () => $this->localeRepository->all()->sortBy('name'));
     }
 
     /**
@@ -279,11 +284,12 @@ class Core
             return $this->currentLocale;
         }
 
-        $this->currentLocale = $this->localeRepository->findOneByField('code', app()->getLocale());
+        $code = app()->getLocale();
 
-        if (! $this->currentLocale) {
-            $this->currentLocale = $this->localeRepository->findOneByField('code', config('app.fallback_locale'));
-        }
+        $this->currentLocale = Cache::remember('core:locales:current:'.$code, self::CACHE_TTL, function () use ($code) {
+            return $this->localeRepository->findOneByField('code', $code)
+                ?? $this->localeRepository->findOneByField('code', config('app.fallback_locale'));
+        });
 
         return $this->currentLocale;
     }
@@ -349,7 +355,7 @@ class Core
      */
     public function getAllCurrencies()
     {
-        return $this->currencyRepository->all();
+        return Cache::remember('core:currencies:all', self::CACHE_TTL, fn () => $this->currencyRepository->all());
     }
 
     /**
@@ -363,11 +369,10 @@ class Core
             return $this->baseCurrency;
         }
 
-        $this->baseCurrency = $this->currencyRepository->findOneByField('code', config('app.currency'));
-
-        if (! $this->baseCurrency) {
-            $this->baseCurrency = $this->currencyRepository->first();
-        }
+        $this->baseCurrency = Cache::remember('core:currencies:base', self::CACHE_TTL, function () {
+            return $this->currencyRepository->findOneByField('code', config('app.currency'))
+                ?? $this->currencyRepository->first();
+        });
 
         return $this->baseCurrency;
     }
@@ -663,7 +668,7 @@ class Core
      */
     public function countries()
     {
-        return DB::table('countries')->get();
+        return Cache::rememberForever('core:countries:all', fn () => DB::table('countries')->get());
     }
 
     /**
@@ -697,13 +702,15 @@ class Core
      */
     public function groupedStatesByCountries()
     {
-        $collection = [];
+        return Cache::rememberForever('core:country_states:grouped', function () {
+            $collection = [];
 
-        foreach (DB::table('country_states')->get() as $state) {
-            $collection[$state->country_code][] = $state;
-        }
+            foreach (DB::table('country_states')->get() as $state) {
+                $collection[$state->country_code][] = $state;
+            }
 
-        return $collection;
+            return $collection;
+        });
     }
 
     /**
@@ -735,7 +742,11 @@ class Core
             return $this->guestCustomerGroup;
         }
 
-        return $this->guestCustomerGroup = $this->customerGroupRepository->findOneByField('code', 'guest');
+        return $this->guestCustomerGroup = Cache::remember(
+            'core:customer_groups:guest',
+            self::CACHE_TTL,
+            fn () => $this->customerGroupRepository->findOneByField('code', 'guest')
+        );
     }
 
     /**

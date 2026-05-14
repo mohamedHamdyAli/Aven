@@ -4,10 +4,10 @@ namespace Webkul\Admin\DataGrids\Sales;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Webkul\DataGrid\DataGrid;
 use Webkul\Sales\Models\Order;
 use Webkul\Sales\Models\OrderAddress;
-use Webkul\Sales\Repositories\OrderRepository;
 
 class OrderDataGrid extends DataGrid
 {
@@ -38,9 +38,12 @@ class OrderDataGrid extends DataGrid
                 'channel_id',
                 'status',
                 'customer_email',
-                'orders.cart_id as items',
                 DB::raw('CONCAT('.DB::getTablePrefix().'orders.customer_first_name, " ", '.DB::getTablePrefix().'orders.customer_last_name) as full_name'),
-                DB::raw('CONCAT('.DB::getTablePrefix().'order_address_billing.city, ", ", '.DB::getTablePrefix().'order_address_billing.state,", ", '.DB::getTablePrefix().'order_address_billing.country) as location')
+                DB::raw('CONCAT('.DB::getTablePrefix().'order_address_billing.city, ", ", '.DB::getTablePrefix().'order_address_billing.state,", ", '.DB::getTablePrefix().'order_address_billing.country) as location'),
+                DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    "qty_ordered", oi.qty_ordered,
+                    "image_path", (SELECT pi.path FROM '.DB::getTablePrefix().'product_images pi WHERE pi.product_id = oi.product_id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1)
+                )) FROM '.DB::getTablePrefix().'order_items oi WHERE oi.order_id = '.DB::getTablePrefix().'orders.id) as items_data')
             )
             ->groupBy('orders.id');
 
@@ -138,13 +141,21 @@ class OrderDataGrid extends DataGrid
             'sortable' => true,
         ]);
 
+        $paymentTitles = [];
+
         $this->addColumn([
             'index' => 'method',
             'label' => trans('admin::app.sales.orders.index.datagrid.pay-via'),
             'type' => 'string',
-            'closure' => function ($row) {
+            'closure' => function ($row) use (&$paymentTitles) {
                 return collect(explode('|', $row->method))
-                    ->map(fn ($method) => core()->getConfigData('sales.payment_methods.'.$method.'.title'))
+                    ->map(function ($method) use (&$paymentTitles) {
+                        if (! isset($paymentTitles[$method])) {
+                            $paymentTitles[$method] = core()->getConfigData('sales.payment_methods.'.$method.'.title');
+                        }
+
+                        return $paymentTitles[$method];
+                    })
                     ->filter()
                     ->unique()
                     ->join(', ');
@@ -191,12 +202,28 @@ class OrderDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index' => 'items',
+            'index' => 'items_data',
             'label' => trans('admin::app.sales.orders.index.datagrid.items'),
             'type' => 'string',
             'exportable' => false,
-            'closure' => function ($value) {
-                $order = app(OrderRepository::class)->with('items')->find($value->id);
+            'closure' => function ($row) {
+                $rawItems = json_decode($row->items_data ?? '[]') ?? [];
+
+                $items = collect($rawItems)->map(function ($item) {
+                    $product = new \stdClass;
+                    $product->base_image_url = $item->image_path ? Storage::url($item->image_path) : null;
+                    $product->images = collect($item->image_path ? [1] : []);
+
+                    $fakeItem = new \stdClass;
+                    $fakeItem->qty_ordered = $item->qty_ordered;
+                    $fakeItem->product = $product;
+
+                    return $fakeItem;
+                });
+
+                $order = new \stdClass;
+                $order->id = $row->id;
+                $order->items = $items;
 
                 return view('admin::sales.orders.items', compact('order'))->render();
             },

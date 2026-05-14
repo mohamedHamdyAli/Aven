@@ -17,6 +17,11 @@ class SystemConfig
     public array $items = [];
 
     /**
+     * In-memory cache for DB config values (per request).
+     */
+    protected array $configCache = [];
+
+    /**
      * Create a new class instance.
      *
      * @return void
@@ -162,6 +167,12 @@ class SystemConfig
      */
     protected function getCoreConfig(string $field, ?string $channel, ?string $locale): ?CoreConfig
     {
+        $cacheKey = $field.'|'.$channel.'|'.$locale;
+
+        if (array_key_exists($cacheKey, $this->configCache)) {
+            return $this->configCache[$cacheKey];
+        }
+
         $fields = $this->getConfigField($field);
 
         if (! empty($fields['channel_based'])) {
@@ -190,7 +201,15 @@ class SystemConfig
             }
         }
 
-        return $coreConfigValue;
+        return $this->configCache[$cacheKey] = $coreConfigValue;
+    }
+
+    /**
+     * Flush the in-memory config cache (call after saving settings).
+     */
+    public function flushConfigCache(): void
+    {
+        $this->configCache = [];
     }
 
     /**

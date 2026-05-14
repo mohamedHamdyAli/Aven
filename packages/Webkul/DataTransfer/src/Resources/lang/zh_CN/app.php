@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => '库存调整',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => '系统中未找到SKU为: \'%s\' 的产品。',
+                    'invalid-source-code'  => '库存来源代码: \'%s\' 无效或未找到。',
+                    'duplicate-sku-source' => 'SKU与来源组合存在重复条目。',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

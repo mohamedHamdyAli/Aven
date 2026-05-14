@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1343,8 +1343,12 @@ return [
                         ],
 
                         'mass-edit' => [
-                            'add-images' => 'Add Images',
-                            'apply-to-all-btn' => 'Apply to All',
+                            'add-images' => 'Adaugă Imagini',
+                            'apply-to-all-btn' => 'Aplică la Toate',
+                            'auto-assign-by-color' => 'Atribuire Automată după Culoare',
+                            'auto-assign-description' => 'Încărcați imagini cu un nume de culoare în numele fișierului (ex: negru.jpg) pentru a le atribui automat tuturor variantelor corespunzătoare.',
+                            'auto-assign-no-match' => 'Nu s-a găsit nicio culoare corespunzătoare în numele fișierului/fișierelor.',
+                            'auto-assign-success' => 'Imaginile au fost atribuite cu succes variantelor corespunzătoare.',
                             'apply-to-all-name' => 'Apply a name to all variants.',
                             'apply-to-all-sku' => 'Apply a price to all SKU.',
                             'apply-to-all-status' => 'Apply a status to all variants.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Custom Scripts',
                         'title-info' => 'Custom scripts are personalized pieces of code created to add specific functions or features to software, enhancing its capabilities uniquely.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Attribute Families',
                 'attributes' => 'Attributes',
                 'booking-product' => 'Bookings',

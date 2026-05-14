@@ -90,6 +90,8 @@ class ConfigurationController extends Controller
 
         $this->coreConfigRepository->create($request->except(['_token', 'admin_locale']));
 
+        system_config()->flushConfigCache();
+
         session()->flash('success', trans('admin::app.configuration.index.save-message'));
 
         return redirect()->back();

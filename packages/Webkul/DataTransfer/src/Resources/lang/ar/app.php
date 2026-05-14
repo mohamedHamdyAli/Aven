@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'تسويات المخزون',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'المنتج بالرمز SKU: \'%s\' غير موجود في النظام.',
+                    'invalid-source-code'  => 'كود مصدر المخزون: \'%s\' غير صالح أو غير موجود.',
+                    'duplicate-sku-source' => 'إدخال مكرر لنفس SKU ومصدر المخزون.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

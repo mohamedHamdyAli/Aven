@@ -57,6 +57,12 @@
                     default: 'id'
                 },
 
+                imageField: {
+                    type: String,
+                    required: false,
+                    default: null
+                },
+
                 labelField: {
                     type: String,
                     required: false,
@@ -147,10 +153,15 @@
                         ...props,
 
                         onClick: (selection) => {
-                            selection.srcElement.parentElement.classList.toggle('active');
+                            const icon = selection.currentTarget;
+                            const treeItem = icon.closest('.v-tree-item');
 
-                            selection.srcElement.classList.toggle('icon-sort-down', !selection.srcElement.classList.contains('icon-sort-down'));
-                            selection.srcElement.classList.toggle('icon-sort-right', !selection.srcElement.classList.contains('icon-sort-right'));
+                            if (treeItem) {
+                                treeItem.classList.toggle('active');
+                            }
+
+                            icon.classList.toggle('icon-sort-down', !icon.classList.contains('icon-sort-down'));
+                            icon.classList.toggle('icon-sort-right', !icon.classList.contains('icon-sort-right'));
                         },
                     });
                 },
@@ -159,6 +170,27 @@
                     return this.$h('i', {
                         ...props,
                     });
+                },
+
+                generateImageComponent(item) {
+                    if (! this.imageField) {
+                        return null;
+                    }
+
+                    const src = item[this.imageField];
+
+                    if (src) {
+                        return this.$h('img', {
+                            src: src,
+                            class: 'h-6 w-6 rounded-full object-cover flex-shrink-0',
+                        });
+                    }
+
+                    return this.$h('span', {
+                        class: 'h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-800 flex-shrink-0 flex items-center justify-center',
+                    }, [
+                        this.$h('i', { class: 'icon-category text-sm text-gray-400' })
+                    ]);
                 },
 
                 generateCheckboxComponent(props) {
@@ -202,6 +234,41 @@
                     for (let key in items) {
                         let hasChildren = Object.entries(items[key][this.childrenField]).length > 0;
 
+                        const rowChildren = [
+                            this.generateToggleIconComponent({
+                                class: [
+                                    hasChildren ? 'icon-sort-down' : '',
+                                    'text-xl rounded-md cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-950'
+                                ],
+                            }),
+                        ];
+
+                        if (this.imageField) {
+                            const imgEl = this.generateImageComponent(items[key]);
+
+                            if (imgEl) {
+                                rowChildren.push(imgEl);
+                            }
+                        } else {
+                            rowChildren.push(
+                                this.generateFolderIconComponent({
+                                    class: [
+                                        hasChildren ? 'icon-folder' : 'icon-attribute',
+                                        'text-2xl cursor-pointer'
+                                    ],
+                                })
+                            );
+                        }
+
+                        rowChildren.push(
+                            this.generateInputComponent({
+                                id: this.getId(items[key]),
+                                label: this.getLabel(items[key]),
+                                name: this.nameField,
+                                value: items[key][this.valueField],
+                            })
+                        );
+
                         treeItems.push(
                             this.$h(
                                 'div', {
@@ -215,26 +282,9 @@
                                             : '',
                                     ],
                                 }, [
-                                    this.generateToggleIconComponent({
-                                        class: [
-                                            hasChildren ? 'icon-sort-down' : '',
-                                            'text-xl rounded-md cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-950'
-                                        ],
-                                    }),
-
-                                    this.generateFolderIconComponent({
-                                        class: [
-                                            hasChildren ? 'icon-folder' : 'icon-attribute',
-                                            'text-2xl cursor-pointer'
-                                        ],
-                                    }),
-
-                                    this.generateInputComponent({
-                                        id: this.getId(items[key]),
-                                        label: this.getLabel(items[key]),
-                                        name: this.nameField,
-                                        value: items[key][this.valueField],
-                                    }),
+                                    this.$h('div', {
+                                        class: 'flex items-center gap-1',
+                                    }, rowChildren),
 
                                     this.generateTreeItemComponents(items[key][this.childrenField], level + 1),
                                 ]

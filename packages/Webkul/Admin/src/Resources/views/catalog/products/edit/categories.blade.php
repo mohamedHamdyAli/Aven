@@ -64,6 +64,7 @@
                     name-field="categories"
                     id-field="id"
                     value-field="id"
+                    image-field="logo_url"
                     ::items="categories"
                     :value="json_encode($product->categories->pluck('id'))"
                     :fallback-locale="config('app.fallback_locale')"

@@ -46,6 +46,23 @@
     <meta property="og:url" content="{{ route('shop.product_or_category.index', $product->url_key) }}" />
 @endPush
 
+@if (core()->getConfigData('general.content.facebook_pixel.enabled') && core()->getConfigData('general.content.facebook_pixel.pixel_id'))
+    @push('scripts')
+        <script>
+            window.addEventListener('load', function () {
+                if (typeof fbq === 'undefined') return;
+                fbq('track', 'ViewContent', {
+                    content_ids:  ['{{ $product->sku }}'],
+                    content_name: @json($product->name),
+                    content_type: 'product',
+                    value:        {{ (float) $product->getTypeInstance()->getMinimalPrice() }},
+                    currency:     '{{ core()->getCurrentCurrencyCode() }}',
+                });
+            });
+        </script>
+    @endpush
+@endif
+
 <!-- Page Layout -->
 <x-shop::layouts>
     <!-- Page Title -->
@@ -259,6 +276,9 @@
         </x-shop::accordion>
     </div>
 
+    <!-- Shop The Look -->
+    @include('shop-the-look::shop.product-look-section')
+
     <v-product-associations></v-product-associations>
 
     {!! view_render_event('bagisto.shop.products.view.after', ['product' => $product]) !!}
@@ -383,6 +403,9 @@
                                 @include('shop::products.view.types.downloadable')
 
                                 @include('shop::products.view.types.booking')
+
+                                <!-- Size Guide -->
+                                @include('size-guide::shop.size-guide-modal')
 
                                 <!-- Product Actions and Quantity Box -->
                                 <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">

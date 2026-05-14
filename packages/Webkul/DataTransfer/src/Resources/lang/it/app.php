@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Rettifiche di inventario',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Prodotto con SKU: \'%s\' non trovato nel sistema.',
+                    'invalid-source-code'  => 'Codice sorgente inventario: \'%s\' non valido o non trovato.',
+                    'duplicate-sku-source' => 'Voce duplicata per la combinazione SKU e sorgente.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

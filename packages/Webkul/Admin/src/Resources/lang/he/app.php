@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'הוסף תמונות',
                             'apply-to-all-btn' => 'החל לכל',
+                            'auto-assign-by-color' => 'הקצאה אוטומטית לפי צבע',
+                            'auto-assign-description' => 'העלה תמונות עם שם צבע בשם הקובץ (למשל: שחור.jpg) להקצאה אוטומטית לכל הגרסאות התואמות.',
+                            'auto-assign-no-match' => 'לא נמצא צבע תואם בשם/שמות הקובץ.',
+                            'auto-assign-success' => 'התמונות הוקצו בהצלחה לגרסאות התואמות.',
                             'apply-to-all-name' => 'החל שם לכל ההבחרות.',
                             'apply-to-all-sku' => 'החל מחיר לכל SKU.',
                             'apply-to-all-status' => 'החל סטטוס לכל ההבחרות.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'קודים מותאמים אישית',
                         'title-info' => 'קודים מותאמים אישית הם קטעי קוד אישיים שנוצרו כדי להוסיף פונקציות או תכונות מסוימות לתוכנה, משפרים את יכולותיה באופן ייחודי.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'משפחות מאפיינים',
                 'attributes' => 'מאפיינים',
                 'booking-product' => 'הזמנות',

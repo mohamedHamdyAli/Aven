@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Ajustaments d\'inventari',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Producte amb SKU: \'%s\' no trobat al sistema.',
+                    'invalid-source-code'  => 'Codi font d\'inventari: \'%s\' no vàlid o no trobat.',
+                    'duplicate-sku-source' => 'Entrada duplicada per a la combinació d\'SKU i font.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

@@ -36,4 +36,13 @@ return [
             'xml' => 'data-transfer/samples/xml/tax-rates.xml',
         ],
     ],
+
+    'inventory_adjustments' => [
+        'title' => 'data_transfer::app.importers.inventory-adjustments.title',
+        'importer' => 'Webkul\DataTransfer\Helpers\Importers\Inventory\Importer',
+
+        'sample_paths' => [
+            'csv' => 'data-transfer/samples/csv/inventory-adjustments.csv',
+        ],
+    ],
 ];

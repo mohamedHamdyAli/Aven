@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -154,10 +154,10 @@ return [
             'store-stats' => 'Store Stats',
             'title' => 'Dashboard',
             'to' => 'To',
-            'today-customers' => 'Today’s Customers',
-            'today-details' => 'Today’s Details',
-            'today-orders' => 'Today’s Orders',
-            'today-sales' => 'Today’s Sales',
+            'today-customers' => 'Today\'s Customers',
+            'today-details' => 'Today\'s Details',
+            'today-orders' => 'Today\'s Orders',
+            'today-sales' => 'Today\'s Sales',
             'top-performing-categories' => 'Top Performing Categories',
             'top-selling-products' => 'Top Selling Products',
             'total-customers' => 'Total Customers',
@@ -165,8 +165,35 @@ return [
             'total-sales' => 'Total Sales',
             'total-stock' => ':total_stock Stock',
             'total-unpaid-invoices' => 'Total Unpaid Invoices',
-            'user-info' => 'Quickly Review what’s going on in your store',
+            'user-info' => "Quickly Review what\'s going on in your store",
             'user-name' => 'Hi ! :user_name',
+
+            'channels-stats' => [
+                'title'          => 'Sales Channels',
+                'orders'         => 'Orders',
+                'revenue'        => 'Revenue',
+                'ad-spend'       => 'Ad Spend',
+                'roas'           => 'ROAS',
+                'cost-per-order' => 'Cost / Order',
+                'add-spend'      => 'Add Ad Spend',
+                'edit-spend'     => 'Edit Ad Spend',
+                'no-spend'       => 'No ad spend recorded',
+                'channel'        => 'Channel',
+                'amount'         => 'Amount',
+                'start-date'     => 'Start Date',
+                'end-date'       => 'End Date',
+                'source'         => 'Source',
+                'source-manual'  => 'Manual',
+                'source-auto'    => 'Auto',
+                'notes'          => 'Notes',
+                'save'           => 'Save',
+                'cancel'         => 'Cancel',
+                'delete'         => 'Delete',
+                'confirm-delete' => 'Are you sure you want to delete this record?',
+                'spend-saved'    => 'Ad spend saved successfully.',
+                'spend-deleted'  => 'Ad spend deleted successfully.',
+                'no-roas'        => 'N/A',
+            ],
         ],
     ],
 
@@ -1110,10 +1137,12 @@ return [
                     'attribute-family-value' => 'Attribute Family - :attribute_family',
                     'category' => 'Category',
                     'channel' => 'Channel',
+                    'copy' => 'Copy',
                     'copy-of' => 'Copy Of :value',
                     'copy-of-slug' => 'copy-of-:value',
                     'delete' => 'Delete',
                     'disable' => 'Disable',
+                    'edit' => 'Edit',
                     'id' => 'ID',
                     'id-value' => 'ID - :id',
                     'image' => 'Image',
@@ -1130,6 +1159,7 @@ return [
                     'status' => 'Status',
                     'type' => 'Type',
                     'update-status' => 'Update Status',
+                    'view' => 'View Details',
                 ],
             ],
 
@@ -1345,6 +1375,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Add Images',
                             'apply-to-all-btn' => 'Apply to All',
+                            'auto-assign-by-color' => 'Auto Assign by Color',
+                            'auto-assign-description' => 'Upload images with a color name in their filename (e.g. black.jpg) to automatically assign them to all matching variants.',
+                            'auto-assign-no-match' => 'No matching color found in image filename(s).',
+                            'auto-assign-success' => 'Images successfully assigned to matching variants.',
                             'apply-to-all-name' => 'Apply a name to all variants.',
                             'apply-to-all-sku' => 'Apply a price to all SKU.',
                             'apply-to-all-status' => 'Apply a status to all variants.',
@@ -2617,6 +2651,65 @@ return [
             'index' => [
                 'cart-rule-title' => 'Cart Rules',
                 'catalog-rule-title' => 'Catalog Rules',
+                'bulk-deal-title' => 'Bulk Deals',
+            ],
+
+            'bulk-deals' => [
+                'index' => [
+                    'title'      => 'Bulk Deals',
+                    'create-btn' => 'Create Bulk Deal',
+
+                    'datagrid' => [
+                        'id'        => 'ID',
+                        'name'      => 'Name',
+                        'paid-qty'  => 'Paid Qty',
+                        'deal-qty'  => 'Deal Qty',
+                        'deal-price' => 'Deal Price',
+                        'status'    => 'Status',
+                        'active'    => 'Active',
+                        'inactive'  => 'Inactive',
+                        'start'     => 'Start Date',
+                        'end'       => 'End Date',
+                        'edit'      => 'Edit',
+                        'delete'    => 'Delete',
+                    ],
+                ],
+
+                'create' => [
+                    'title'        => 'Create Bulk Deal',
+                    'save-btn'     => 'Save Deal',
+                    'general'      => 'General',
+                    'deal-settings' => 'Deal Settings',
+                    'settings'     => 'Settings',
+
+                    'name'        => 'Name',
+                    'description' => 'Description',
+
+                    'paid-quantity'      => 'Paid Quantity',
+                    'paid-quantity-hint' => 'Number of items charged at full price (most expensive items).',
+                    'deal-quantity'      => 'Deal Quantity',
+                    'deal-quantity-hint' => 'Number of items (cheapest) included in the deal price.',
+                    'deal-price'         => 'Deal Price (Total)',
+                    'deal-price-hint'    => 'Fixed total price for the deal quantity items.',
+
+                    'status'      => 'Status',
+                    'active'      => 'Active',
+                    'inactive'    => 'Inactive',
+                    'starts-from' => 'Starts From',
+                    'ends-till'   => 'Ends Till',
+                    'sort-order'  => 'Sort Order',
+
+                    'create-success' => 'Bulk deal created successfully.',
+                ],
+
+                'edit' => [
+                    'title'          => 'Edit Bulk Deal',
+                    'save-btn'       => 'Update Deal',
+                    'update-success' => 'Bulk deal updated successfully.',
+                ],
+
+                'delete-success' => 'Bulk deal deleted successfully.',
+                'delete-failed'  => 'Bulk deal could not be deleted.',
             ],
 
             'cart-rules' => [
@@ -3812,6 +3905,9 @@ return [
                     'id' => 'Id',
                     'inactive' => 'Inactive',
                     'name' => 'Name',
+                    'page' => 'Page',
+                    'page-home' => 'Home Page',
+                    'page-all' => 'All Pages',
                     'sort-order' => 'Sort Order',
                     'status' => 'Status',
                     'theme' => 'Theme',
@@ -4145,6 +4241,13 @@ return [
                         'custom-javascript' => 'Custom Javascript',
                         'title' => 'Custom Scripts',
                         'title-info' => 'Custom scripts are personalized pieces of code created to add specific functions or features to software, enhancing its capabilities uniquely.',
+                    ],
+
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
                     ],
                 ],
 
@@ -5216,6 +5319,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Attribute Families',
                 'attributes' => 'Attributes',
                 'booking-product' => 'Bookings',

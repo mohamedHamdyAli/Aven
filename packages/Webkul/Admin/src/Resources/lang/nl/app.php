@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Afbeeldingen Toevoegen',
                             'apply-to-all-btn' => 'Toepassen op Alles',
+                            'auto-assign-by-color' => 'Automatisch toewijzen op kleur',
+                            'auto-assign-description' => 'Upload afbeeldingen met een kleurnaam in de bestandsnaam (bijv. zwart.jpg) om ze automatisch toe te wijzen aan alle overeenkomende varianten.',
+                            'auto-assign-no-match' => 'Geen overeenkomende kleur gevonden in de bestandsnaam/namen.',
+                            'auto-assign-success' => 'Afbeeldingen succesvol toegewezen aan overeenkomende varianten.',
                             'apply-to-all-name' => 'Pas een naam toe op alle varianten.',
                             'apply-to-all-sku' => 'Pas een prijs toe op alle SKU\'s.',
                             'apply-to-all-status' => 'Pas een status toe op alle varianten.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Aangepaste scripts',
                         'title-info' => 'Aangepaste scripts zijn gepersonaliseerde stukjes code die zijn gemaakt om specifieke functies of kenmerken aan software toe te voegen, waardoor de mogelijkheden ervan uniek worden verbeterd.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Attribuut Families',
                 'attributes' => 'Attributen',
                 'booking-product' => 'Boekingen',

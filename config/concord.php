@@ -18,9 +18,11 @@ return [
      */
     'modules' => [
         ModuleServiceProvider::class,
+        Webkul\AbandonedCart\Providers\ModuleServiceProvider::class,
         Webkul\Attribute\Providers\ModuleServiceProvider::class,
         Webkul\BookingProduct\Providers\ModuleServiceProvider::class,
         Webkul\CMS\Providers\ModuleServiceProvider::class,
+        Webkul\BulkDeal\Providers\ModuleServiceProvider::class,
         Webkul\CartRule\Providers\ModuleServiceProvider::class,
         Webkul\CatalogRule\Providers\ModuleServiceProvider::class,
         Webkul\Category\Providers\ModuleServiceProvider::class,
@@ -44,6 +46,7 @@ return [
         Webkul\Shipping\Providers\ModuleServiceProvider::class,
         Webkul\Shop\Providers\ModuleServiceProvider::class,
         Webkul\Sitemap\Providers\ModuleServiceProvider::class,
+        Webkul\SocialCommerce\Providers\ModuleServiceProvider::class,
         Webkul\SocialLogin\Providers\ModuleServiceProvider::class,
         Webkul\Stripe\Providers\ModuleServiceProvider::class,
         Webkul\Tax\Providers\ModuleServiceProvider::class,

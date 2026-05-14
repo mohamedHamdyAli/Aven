@@ -5,9 +5,11 @@ namespace Webkul\Admin\Helpers;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Webkul\Admin\Helpers\Reporting\Customer;
 use Webkul\Admin\Helpers\Reporting\Product;
 use Webkul\Admin\Helpers\Reporting\Sale;
+use Webkul\Admin\Repositories\ChannelAdSpendRepository;
 
 class Dashboard
 {
@@ -19,7 +21,8 @@ class Dashboard
     public function __construct(
         protected Sale $saleReporting,
         protected Product $productReporting,
-        protected Customer $customerReporting
+        protected Customer $customerReporting,
+        protected ChannelAdSpendRepository $channelAdSpendRepository
     ) {}
 
     /**
@@ -148,6 +151,50 @@ class Dashboard
     public function getEndDate(): Carbon
     {
         return $this->saleReporting->getEndDate();
+    }
+
+    /**
+     * Returns per-channel stats: orders, revenue, ad spend, ROAS.
+     */
+    public function getChannelsStats(): array
+    {
+        $startDate = $this->saleReporting->getStartDate();
+        $endDate   = $this->saleReporting->getEndDate();
+
+        $orderStats = DB::table('orders')
+            ->select(
+                'channel_id',
+                DB::raw('COUNT(*) as orders_count'),
+                DB::raw('SUM(base_grand_total_invoiced - base_grand_total_refunded) as revenue')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('channel_id')
+            ->groupBy('channel_id')
+            ->get()
+            ->keyBy('channel_id');
+
+        return core()->getAllChannels()->map(function ($channel) use ($orderStats, $startDate, $endDate) {
+            $stats       = $orderStats->get($channel->id);
+            $ordersCount = $stats ? (int) $stats->orders_count : 0;
+            $revenue     = $stats ? (float) $stats->revenue : 0.0;
+            $adSpend     = $this->channelAdSpendRepository->getSpendForPeriod($channel->id, $startDate, $endDate);
+            $roas        = $adSpend > 0 ? round($revenue / $adSpend, 2) : null;
+            $costPerOrder = ($adSpend > 0 && $ordersCount > 0) ? round($adSpend / $ordersCount, 2) : null;
+
+            return [
+                'id'                   => $channel->id,
+                'name'                 => $channel->name,
+                'code'                 => $channel->code,
+                'orders_count'         => $ordersCount,
+                'revenue'              => $revenue,
+                'formatted_revenue'    => core()->formatBasePrice($revenue),
+                'ad_spend'             => $adSpend,
+                'formatted_ad_spend'   => core()->formatBasePrice($adSpend),
+                'roas'                 => $roas,
+                'cost_per_order'       => $costPerOrder,
+                'formatted_cost_per_order' => $costPerOrder ? core()->formatBasePrice($costPerOrder) : null,
+            ];
+        })->values()->toArray();
     }
 
     /**

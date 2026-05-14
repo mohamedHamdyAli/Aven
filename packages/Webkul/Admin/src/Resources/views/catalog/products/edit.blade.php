@@ -265,6 +265,12 @@
 
                         <!-- Categories View Blade File -->
                         @include('admin::catalog.products.edit.categories')
+
+                        <!-- Size Guide Panel -->
+                        @include('size-guide::admin.product.size-guide-panel')
+
+                        <!-- Shop The Look Panel -->
+                        @include('shop-the-look::admin.product-look-panel')
                     @endif
                 </div>
 
@@ -294,6 +300,12 @@
 
                         <!-- Categories View Blade File -->
                         @include('admin::catalog.products.edit.categories')
+
+                        <!-- Size Guide Panel -->
+                        @include('size-guide::admin.product.size-guide-panel')
+
+                        <!-- Shop The Look Panel -->
+                        @include('shop-the-look::admin.product-look-panel')
                     </div>
                 @endif
 

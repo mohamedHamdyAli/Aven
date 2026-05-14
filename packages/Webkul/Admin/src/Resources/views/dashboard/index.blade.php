@@ -71,6 +71,15 @@
             </div>
             
             {!! view_render_event('bagisto.admin.dashboard.stock_threshold.after') !!}
+
+            {!! view_render_event('bagisto.admin.dashboard.channels_stats.before') !!}
+
+            <!-- Sales Channels Stats -->
+            <div class="flex flex-col gap-2">
+                @include('admin::dashboard.channels-stats')
+            </div>
+
+            {!! view_render_event('bagisto.admin.dashboard.channels_stats.after') !!}
         </div>
 
         <!-- Right Section -->

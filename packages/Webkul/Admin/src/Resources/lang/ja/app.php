@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => '画像を追加',
                             'apply-to-all-btn' => 'すべてに適用',
+                            'auto-assign-by-color' => '色で自動割り当て',
+                            'auto-assign-description' => 'ファイル名に色名を含む画像（例：black.jpg）をアップロードすると、一致する全てのバリエーションに自動的に割り当てられます。',
+                            'auto-assign-no-match' => '画像ファイル名に一致する色が見つかりませんでした。',
+                            'auto-assign-success' => '画像が一致するバリエーションに正常に割り当てられました。',
                             'apply-to-all-name' => 'すべてのバリアントに名前を適用',
                             'apply-to-all-sku' => 'すべてのSKUに価格を適用',
                             'apply-to-all-status' => 'すべてのバリアントにステータスを適用',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'カスタムスクリプト',
                         'title-info' => 'カスタムスクリプトは、特定の機能や機能をソフトウェアに追加するために作成された個別のコードのことであり、その機能をユニークに強化します。',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => '属性ファミリー',
                 'attributes' => '属性',
                 'booking-product' => '予約',

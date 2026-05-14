@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'افزودن تصاویر',
                             'apply-to-all-btn' => 'اعمال به همه',
+                            'auto-assign-by-color' => 'تخصیص خودکار بر اساس رنگ',
+                            'auto-assign-description' => 'تصاویری با نام رنگ در نام فایل (مثلاً black.jpg) آپلود کنید تا به‌طور خودکار به تمام متغیرهای مطابق اختصاص یابند.',
+                            'auto-assign-no-match' => 'رنگ مطابقی در نام فایل‌ها یافت نشد.',
+                            'auto-assign-success' => 'تصاویر با موفقیت به متغیرهای مطابق اختصاص یافتند.',
                             'apply-to-all-name' => 'اعمال یک نام برای تمامی نوع‌ها.',
                             'apply-to-all-sku' => 'اعمال یک قیمت به تمامی SKU.',
                             'apply-to-all-status' => 'اعمال یک وضعیت به تمامی نوع‌ها.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'اسکریپت‌های سفارشی',
                         'title-info' => 'اسکریپت‌های سفارشی قطعات شخصی‌سازی شده از کدی هستند که برای اضافه کردن عملکردها یا ویژگی‌های خاص به نرم‌افزار ساخته شده‌اند و قابلیت‌های آن را به طور منحصر به فرد افزایش می‌دهند.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'خانواده‌های ویژگی',
                 'attributes' => 'ویژگی‌ها',
                 'booking-product' => 'رزروها',

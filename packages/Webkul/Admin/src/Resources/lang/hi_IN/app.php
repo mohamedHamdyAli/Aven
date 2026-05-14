@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'छवियाँ जोड़ें',
                             'apply-to-all-btn' => 'सभी पर लागू करें',
+                            'auto-assign-by-color' => 'रंग के अनुसार स्वतः असाइन करें',
+                            'auto-assign-description' => 'फ़ाइल नाम में रंग का नाम वाली छवियाँ अपलोड करें (जैसे: black.jpg) सभी मिलान वेरिएंट में स्वतः असाइन करने के लिए।',
+                            'auto-assign-no-match' => 'फ़ाइल नाम में कोई मिलान रंग नहीं मिला।',
+                            'auto-assign-success' => 'छवियाँ मिलान वेरिएंट में सफलतापूर्वक असाइन की गईं।',
                             'apply-to-all-name' => 'सभी प्रकारों पर एक नाम लागू करें।',
                             'apply-to-all-sku' => 'सभी SKU पर मूल्य लागू करें।',
                             'apply-to-all-status' => 'सभी प्रकारों पर एक स्थिति लागू करें।',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'कस्टम स्क्रिप्ट',
                         'title-info' => 'कस्टम स्क्रिप्ट व्यक्तिगत कोड के टुकड़े हैं जो सॉफ़्टवेयर में विशेष कार्यों या सुविधाओं को जोड़ने के लिए बनाए जाते हैं, जो इसकी क्षमताओं को अद्वितीय बनाते हैं।',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'गुण-परिवार',
                 'attributes' => 'गुण',
                 'booking-product' => 'बुकिंग',

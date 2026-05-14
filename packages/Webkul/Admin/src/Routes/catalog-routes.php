@@ -94,6 +94,8 @@ Route::prefix('catalog')->group(function () {
 
         Route::post('copy/{id}', 'copy')->name('admin.catalog.products.copy');
 
+        Route::get('{id}/show', 'show')->name('admin.catalog.products.show');
+
         Route::get('edit/{id}', 'edit')->name('admin.catalog.products.edit');
 
         Route::put('edit/{id}', 'update')->name('admin.catalog.products.update');

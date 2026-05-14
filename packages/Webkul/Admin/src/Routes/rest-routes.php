@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Webkul\Admin\Http\Controllers\ChannelAdSpendController;
 use Webkul\Admin\Http\Controllers\DashboardController;
 use Webkul\Admin\Http\Controllers\DataGrid\DataGridController;
 use Webkul\Admin\Http\Controllers\DataGrid\SavedFilterController;
@@ -17,6 +18,19 @@ Route::controller(DashboardController::class)->prefix('dashboard')->group(functi
     Route::get('', 'index')->name('admin.dashboard.index');
 
     Route::get('stats', 'stats')->name('admin.dashboard.stats');
+});
+
+/**
+ * Channel Ad Spend routes.
+ */
+Route::controller(ChannelAdSpendController::class)->prefix('channel-ad-spends')->group(function () {
+    Route::get('', 'index')->name('admin.channel-ad-spends.index');
+
+    Route::post('', 'store')->name('admin.channel-ad-spends.store');
+
+    Route::put('{id}', 'update')->name('admin.channel-ad-spends.update');
+
+    Route::delete('{id}', 'destroy')->name('admin.channel-ad-spends.destroy');
 });
 
 /**

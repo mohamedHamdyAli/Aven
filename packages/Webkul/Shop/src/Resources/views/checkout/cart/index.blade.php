@@ -5,6 +5,17 @@
     <meta name="keywords" content="@lang('shop::app.checkout.cart.index.cart')"/>
 @endPush
 
+@if (core()->getConfigData('general.content.facebook_pixel.enabled') && core()->getConfigData('general.content.facebook_pixel.pixel_id'))
+    @push('scripts')
+        <script>
+            window.addEventListener('load', function () {
+                if (typeof fbq === 'undefined') return;
+                fbq('track', 'InitiateCheckout');
+            });
+        </script>
+    @endpush
+@endif
+
 <x-shop::layouts
     :has-header="false"
     :has-feature="false"

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Webkul\Customer\Repositories\CustomerGroupRepository;
 use Webkul\DataGrid\DataGrid;
 use Webkul\Sales\Models\Order;
-use Webkul\Sales\Repositories\OrderRepository;
 
 class CustomerDataGrid extends DataGrid
 {
@@ -54,6 +53,7 @@ class CustomerDataGrid extends DataGrid
             ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'addresses.id) as address_count'))
             ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'orders.id) as order_count'))
             ->addSelect(DB::raw('CONCAT('.$tablePrefix.'customers.first_name, " ", '.$tablePrefix.'customers.last_name) as full_name'))
+            ->addSelect(DB::raw('COALESCE((SELECT SUM(o2.base_grand_total_invoiced) FROM '.$tablePrefix.'orders o2 WHERE o2.customer_id = '.$tablePrefix.'customers.id AND o2.status NOT IN (\''.Order::STATUS_CANCELED.'\', \''.Order::STATUS_CLOSED.'\')), 0) as revenue'))
             ->groupBy('customers.id');
 
         $this->addFilter('channel_id', 'customers.channel_id');
@@ -171,13 +171,7 @@ class CustomerDataGrid extends DataGrid
             'index' => 'revenue',
             'label' => trans('admin::app.customers.customers.index.datagrid.revenue'),
             'type' => 'integer',
-            'exportable' => false,
-            'closure' => function ($row) {
-                return app(OrderRepository::class)->scopeQuery(function ($q) use ($row) {
-                    return $q->whereNotIn('status', [Order::STATUS_CANCELED, Order::STATUS_CLOSED])
-                        ->where('customer_id', $row->customer_id);
-                })->sum('base_grand_total_invoiced');
-            },
+            'sortable' => true,
         ]);
 
         $this->addColumn([

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Resim Ekle',
                             'apply-to-all-btn' => 'Hepsine Uygula',
+                            'auto-assign-by-color' => 'Renge Göre Otomatik Ata',
+                            'auto-assign-description' => 'Dosya adında renk adı bulunan görseller yükleyin (örn: siyah.jpg) ve eşleşen tüm varyantlara otomatik olarak atansın.',
+                            'auto-assign-no-match' => 'Dosya adında eşleşen renk bulunamadı.',
+                            'auto-assign-success' => 'Görseller başarıyla eşleşen varyantlara atandı.',
                             'apply-to-all-name' => 'Adı tüm varyantlara uygula.',
                             'apply-to-all-sku' => 'Fiyatı tüm SKU\'lara uygula.',
                             'apply-to-all-status' => 'Durumu tüm varyantlara uygula.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Özel Komut Dosyaları',
                         'title-info' => 'Özel komut dosyaları, yazılımın özelliklerini benzersiz bir şekilde geliştiren belirli işlevler veya özellikler eklemek için oluşturulan kişiselleştirilmiş kod parçalarıdır.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Özellik Aileleri',
                 'attributes' => 'Özellikler',
                 'booking-product' => 'Rezervasyonlar',

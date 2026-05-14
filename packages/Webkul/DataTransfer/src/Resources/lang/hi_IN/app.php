@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'इन्वेंटरी समायोजन',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'SKU: \'%s\' वाला उत्पाद सिस्टम में नहीं मिला।',
+                    'invalid-source-code'  => 'इन्वेंटरी स्रोत कोड: \'%s\' अमान्य या नहीं मिला।',
+                    'duplicate-sku-source' => 'SKU और स्रोत संयोजन के लिए डुप्लिकेट प्रविष्टि।',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

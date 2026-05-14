@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Envanter Düzenlemeleri',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'SKU: \'%s\' ile ürün sistemde bulunamadı.',
+                    'invalid-source-code'  => 'Envanter kaynak kodu: \'%s\' geçersiz veya bulunamadı.',
+                    'duplicate-sku-source' => 'SKU ve kaynak kombinasyonu için yinelenen giriş.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Ajouter des images',
                             'apply-to-all-btn' => 'Appliquer à tous',
+                            'auto-assign-by-color' => 'Assigner automatiquement par couleur',
+                            'auto-assign-description' => 'Téléchargez des images avec un nom de couleur dans leur nom de fichier (ex: noir.jpg) pour les assigner automatiquement à toutes les variantes correspondantes.',
+                            'auto-assign-no-match' => 'Aucune couleur correspondante trouvée dans le(s) nom(s) de fichier.',
+                            'auto-assign-success' => 'Images assignées avec succès aux variantes correspondantes.',
                             'apply-to-all-name' => 'Appliquer un nom à toutes les variantes.',
                             'apply-to-all-sku' => 'Appliquer un prix à toutes les références.',
                             'apply-to-all-status' => 'Appliquer un statut à toutes les variantes.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Scripts personnalisés',
                         'title-info' => 'Les scripts personnalisés sont des morceaux de code personnalisés créés pour ajouter des fonctions ou des fonctionnalités spécifiques à un logiciel, améliorant ainsi ses capacités de manière unique.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Familles d\'attributs',
                 'attributes' => 'Attributs',
                 'booking-product' => 'Réservations',

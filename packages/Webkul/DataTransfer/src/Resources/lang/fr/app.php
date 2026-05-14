@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Ajustements d\'inventaire',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Produit avec SKU : \'%s\' introuvable dans le système.',
+                    'invalid-source-code'  => 'Code source d\'inventaire : \'%s\' invalide ou introuvable.',
+                    'duplicate-sku-source' => 'Entrée dupliquée pour la combinaison SKU et source.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

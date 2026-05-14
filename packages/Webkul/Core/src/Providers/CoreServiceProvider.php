@@ -8,6 +8,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Console\DownCommand;
 use Illuminate\Foundation\Console\UpCommand;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Webkul\Core\Console\Commands\BagistoVersion;
@@ -60,6 +61,46 @@ class CoreServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
         $this->app->register(DynamicSmtpServiceProvider::class);
+
+        $this->registerCoreCacheObservers();
+    }
+
+    protected function registerCoreCacheObservers(): void
+    {
+        $clearChannelCache = static function () {
+            Cache::forget('core:channels:all');
+            Cache::forget('core:channels:default');
+            Cache::increment('core:channels:generation');
+        };
+
+        $clearLocaleCache = static function () {
+            Cache::forget('core:locales:all');
+            foreach (Cache::get('core:locales:known_codes', []) as $code) {
+                Cache::forget('core:locales:current:'.$code);
+            }
+        };
+
+        $clearCurrencyCache = static function () {
+            Cache::forget('core:currencies:all');
+            Cache::forget('core:currencies:base');
+        };
+
+        $clearCustomerGroupCache = static function () {
+            Cache::forget('core:customer_groups:guest');
+        };
+
+        try {
+            \Webkul\Core\Models\Channel::saved($clearChannelCache);
+            \Webkul\Core\Models\Channel::deleted($clearChannelCache);
+            \Webkul\Core\Models\Locale::saved($clearLocaleCache);
+            \Webkul\Core\Models\Locale::deleted($clearLocaleCache);
+            \Webkul\Core\Models\Currency::saved($clearCurrencyCache);
+            \Webkul\Core\Models\Currency::deleted($clearCurrencyCache);
+            \Webkul\Customer\Models\CustomerGroup::saved($clearCustomerGroupCache);
+            \Webkul\Customer\Models\CustomerGroup::deleted($clearCustomerGroupCache);
+        } catch (\Exception) {
+            // Skip if models are not yet available (e.g., during installation).
+        }
     }
 
     /**

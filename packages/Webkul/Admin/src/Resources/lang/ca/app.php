@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Afegir Imatges',
                             'apply-to-all-btn' => 'Aplicar a Tots',
+                            'auto-assign-by-color' => 'Assignar Automàticament per Color',
+                            'auto-assign-description' => 'Puja imatges amb un nom de color al nom del fitxer (ex: negre.jpg) per assignar-les automàticament a totes les variants coincidents.',
+                            'auto-assign-no-match' => 'No s\'ha trobat cap color coincident al nom del fitxer.',
+                            'auto-assign-success' => 'Imatges assignades correctament a les variants coincidents.',
                             'apply-to-all-name' => 'Aplicar un nom a totes les variants.',
                             'apply-to-all-sku' => 'Aplicar un preu a tots els SKU.',
                             'apply-to-all-status' => 'Aplicar un estat a totes les variants.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Scripts Personalitzats',
                         'title-info' => 'Els scripts personalitzats són peces de codi creades per afegir funcions o característiques específiques al programari, millorant les seves capacitats de manera única.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Famílies d\'atributs',
                 'attributes' => 'Atributs',
                 'booking-product' => 'Reserves',

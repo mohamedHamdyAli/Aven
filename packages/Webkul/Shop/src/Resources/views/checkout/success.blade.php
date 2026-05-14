@@ -1,3 +1,20 @@
+@if (core()->getConfigData('general.content.facebook_pixel.enabled') && core()->getConfigData('general.content.facebook_pixel.pixel_id'))
+    @push('scripts')
+        <script>
+            window.addEventListener('load', function () {
+                if (typeof fbq === 'undefined') return;
+                fbq('track', 'Purchase', {
+                    value:        {{ (float) $order->grand_total }},
+                    currency:     '{{ $order->order_currency_code }}',
+                    content_type: 'product',
+                    content_ids:  [{{ $order->items->pluck('sku')->map(fn($s) => "'$s'")->implode(',') }}],
+                    num_items:    {{ $order->items->sum('qty_ordered') }},
+                });
+            });
+        </script>
+    @endpush
+@endif
+
 <x-shop::layouts
 	:has-header="true"
 	:has-feature="false"

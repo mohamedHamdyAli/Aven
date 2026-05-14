@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Bestandsanpassungen',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Produkt mit SKU: \'%s\' wurde im System nicht gefunden.',
+                    'invalid-source-code'  => 'Lagerortcode: \'%s\' ist ungültig oder nicht gefunden.',
+                    'duplicate-sku-source' => 'Doppelter Eintrag für SKU- und Lagerort-Kombination.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

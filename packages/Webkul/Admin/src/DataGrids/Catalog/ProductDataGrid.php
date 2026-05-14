@@ -69,6 +69,7 @@ class ProductDataGrid extends DataGrid
             ->addSelect(DB::raw('SUM(DISTINCT '.$tablePrefix.'product_inventories.qty) as quantity'))
             ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'product_images.id) as images_count'))
             ->where('product_flat.locale', app()->getLocale())
+            ->where('product_flat.visible_individually', 1)
             ->groupBy('product_flat.product_id');
 
         $this->addFilter('product_id', 'product_flat.product_id');
@@ -215,6 +216,17 @@ class ProductDataGrid extends DataGrid
      */
     public function prepareActions()
     {
+        if (bouncer()->hasPermission('catalog.products.edit')) {
+            $this->addAction([
+                'icon' => 'icon-eye',
+                'title' => trans('admin::app.catalog.products.index.datagrid.view'),
+                'method' => 'GET',
+                'url' => function ($row) {
+                    return route('admin.catalog.products.show', $row->product_id);
+                },
+            ]);
+        }
+
         if (bouncer()->hasPermission('catalog.products.copy')) {
             $this->addAction([
                 'icon' => 'icon-copy',

@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Voorraadinstellingen',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Product met SKU: \'%s\' niet gevonden in het systeem.',
+                    'invalid-source-code'  => 'Voorraadbroncode: \'%s\' is ongeldig of niet gevonden.',
+                    'duplicate-sku-source' => 'Dubbele invoer voor SKU- en broncombinatie.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

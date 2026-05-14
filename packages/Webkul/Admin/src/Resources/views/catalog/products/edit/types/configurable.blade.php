@@ -92,70 +92,67 @@
             </template>
 
             <!-- Add Variant Form Modal -->
-            <x-admin::form
-                v-slot="{ meta, errors, handleSubmit }"
-                as="div"
-            >
-                <form @submit="handleSubmit($event, addVariant)">
-                    <!-- Customer Create Modal -->
-                    <x-admin::modal ref="variantCreateModal">
-                        <!-- Modal Header -->
-                        <x-slot:header>
-                            <p class="text-lg font-bold text-gray-800 dark:text-white">
-                                @lang('admin::app.catalog.products.edit.types.configurable.create.title')
-                            </p>
-                        </x-slot>
-        
-                        <!-- Modal Content -->
-                        <x-slot:content>
-                            <x-admin::form.control-group
-                                v-for='(attribute, index) in superAttributes'
+            <x-admin::modal ref="variantCreateModal">
+                <!-- Modal Header -->
+                <x-slot:header>
+                    <p class="text-lg font-bold text-gray-800 dark:text-white">
+                        @lang('admin::app.catalog.products.edit.types.configurable.create.title')
+                    </p>
+                </x-slot>
+
+                <!-- Modal Content -->
+                <x-slot:content>
+                    <div
+                        v-for="(attribute, index) in superAttributes"
+                        :key="index"
+                        class="mb-4"
+                    >
+                        <p class="mb-2 text-sm font-semibold text-gray-700 dark:text-white">
+                            @{{ attribute.admin_name }} *
+                        </p>
+
+                        <div class="flex flex-wrap gap-2">
+                            <label
+                                v-for="option in attribute.options"
+                                :key="option.id"
+                                class="flex cursor-pointer select-none items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-all"
+                                :class="isOptionSelected(attribute.code, option.id)
+                                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'"
+                                @click="toggleOption(attribute.code, option.id)"
                             >
-                                <x-admin::form.control-group.label class="required">
-                                    @{{ attribute.admin_name }}
-                                </x-admin::form.control-group.label>
-
-                                <v-field
-                                    as="select"
-                                    :name="attribute.code"
-                                    class="custom-select flex min-h-[39px] w-full rounded-md border bg-white px-3 py-1.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                                    :class="[errors[attribute.code] ? 'border border-red-500' : '']"
-                                    rules="required"
-                                    :label="attribute.admin_name"
+                                <span
+                                    class="flex h-4 w-4 items-center justify-center rounded border text-xs"
+                                    :class="isOptionSelected(attribute.code, option.id)
+                                        ? 'border-blue-500 bg-blue-500 text-white'
+                                        : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'"
                                 >
-                                    <option
-                                        v-for="option in attribute.options"
-                                        :value="option.id"
-                                    >
-                                        @{{ option.admin_name }}
-                                    </option>
-                                </v-field>
+                                    <span v-if="isOptionSelected(attribute.code, option.id)">✓</span>
+                                </span>
+                                @{{ option.admin_name }}
+                            </label>
+                        </div>
 
-                                <v-error-message
-                                    :name="attribute.code"
-                                    v-slot="{ message }"
-                                >
-                                    <p
-                                        class="mt-1 text-xs italic text-red-600"
-                                        v-text="message"
-                                    >
-                                    </p>
-                                </v-error-message>
-                            </x-admin::form.control-group>
-                        </x-slot>
-        
-                        <!-- Modal Footer -->
-                        <x-slot:footer>
-                            <!-- Save Button -->
-                            <x-admin::button
-                                button-type="button"
-                                class="primary-button"
-                                :title="trans('admin::app.catalog.products.edit.types.configurable.create.save-btn')"
-                            />
-                        </x-slot>
-                    </x-admin::modal>
-                </form>
-            </x-admin::form>
+                        <p
+                            v-if="selectionErrors[attribute.code]"
+                            class="mt-1 text-xs italic text-red-600"
+                        >
+                            @{{ selectionErrors[attribute.code] }}
+                        </p>
+                    </div>
+                </x-slot>
+
+                <!-- Modal Footer -->
+                <x-slot:footer>
+                    <button
+                        type="button"
+                        class="primary-button"
+                        @click="addVariants"
+                    >
+                        @lang('admin::app.catalog.products.edit.types.configurable.create.save-btn')
+                    </button>
+                </x-slot>
+            </x-admin::modal>
         </div>
     </script>
 
@@ -229,6 +226,15 @@
                 </x-slot>
             </x-admin::dropdown>
 
+            <!-- Auto Assign Images by Color -->
+            <button
+                type="button"
+                class="flex cursor-pointer items-center rounded-md p-1.5 text-xs font-semibold text-blue-600 transition-all hover:bg-gray-100 focus:bg-gray-100 dark:hover:bg-gray-950"
+                @click="openAutoAssignDrawer()"
+            >
+                @lang('admin::app.catalog.products.edit.types.configurable.mass-edit.auto-assign-by-color')
+            </button>
+
             <!-- Actions Selector -->
             <x-admin::dropdown v-if="selectedVariants.length">
                 <!-- Dropdown Toggler -->
@@ -247,6 +253,7 @@
                 <x-slot:menu>
                     <x-admin::dropdown.menu.item
                         v-for="type in updateTypes"
+                        v-if="!type.hidden"
                         @click="edit(type.key)"
                     >
                         @{{ type.title }}
@@ -376,6 +383,22 @@
                                             <button class="secondary-button">
                                                 @lang('admin::app.catalog.products.edit.types.configurable.mass-edit.apply-to-all-btn')
                                             </button>
+                                        </div>
+                                    </template>
+
+                                    <template v-if="selectedType == 'autoAssignByColor'">
+                                        <div class="border-b pb-2.5 dark:border-gray-800">
+                                            <p class="mb-2.5 text-sm text-gray-500 dark:text-gray-400">
+                                                @lang('admin::app.catalog.products.edit.types.configurable.mass-edit.auto-assign-description')
+                                            </p>
+
+                                            <v-media-images
+                                                name="auto_assign_images"
+                                                class="mb-2.5"
+                                                v-bind:allow-multiple="true"
+                                                :uploaded-images="updateTypes['autoAssignByColor'].images"
+                                            >
+                                            </v-media-images>
                                         </div>
                                     </template>
 
@@ -1111,44 +1134,118 @@
                         inventories: {},
                         images: []
                     },
+
+                    selectedOptions: {},
+
+                    selectionErrors: {},
                 }
             },
 
             methods: {
-                addVariant(params, { resetForm }) {
-                    let filteredVariants = this.variants.filter((variant) => {
-                        let matchCount = 0;
+                toggleOption(code, id) {
+                    if (! this.selectedOptions[code]) {
+                        this.selectedOptions[code] = [];
+                    }
 
-                        for (let key in params) {
-                            if (variant[key] == params[key]) {
-                                matchCount++;
+                    const idx = this.selectedOptions[code].indexOf(id);
+
+                    if (idx === -1) {
+                        this.selectedOptions[code].push(id);
+                    } else {
+                        this.selectedOptions[code].splice(idx, 1);
+                    }
+
+                    const errors = { ...this.selectionErrors };
+                    delete errors[code];
+                    this.selectionErrors = errors;
+                },
+
+                isOptionSelected(code, id) {
+                    return this.selectedOptions[code]?.includes(id) ?? false;
+                },
+
+                cartesianProduct(arrays) {
+                    return arrays.reduce((acc, curr) => {
+                        const result = [];
+
+                        for (const a of acc) {
+                            for (const b of curr) {
+                                result.push([...a, b]);
                             }
                         }
 
-                        return matchCount == this.superAttributes.length;
-                    })
+                        return result;
+                    }, [[]]);
+                },
 
-                    if (filteredVariants.length) {
-                        this.$emitter.emit('add-flash', { type: 'warning', message: "@lang('admin::app.catalog.products.edit.types.configurable.create.variant-already-exists')" });
+                addVariants() {
+                    const errors = {};
+                    let valid = true;
 
+                    for (const attr of this.superAttributes) {
+                        if (! this.selectedOptions[attr.code] || this.selectedOptions[attr.code].length === 0) {
+                            errors[attr.code] = `The ${attr.admin_name} field is required`;
+                            valid = false;
+                        }
+                    }
+
+                    if (! valid) {
+                        this.selectionErrors = errors;
                         return;
                     }
 
-                    const optionIds = Object.values(params);
+                    const combinations = this.cartesianProduct(
+                        this.superAttributes.map(attr =>
+                            this.selectedOptions[attr.code].map(id => ({ code: attr.code, id }))
+                        )
+                    );
 
-                    this.variants.push(Object.assign({
-                        id: 'variant_' + this.variants.length,
-                        sku: '{{ $product->sku }}' + '-variant-' + optionIds.join('-'),
-                        name: '',
-                        price: 0,
-                        status: 1,
-                        weight: 0,
-                        inventories: {},
-                        images: []
-                    }, params));
+                    let addedCount = 0;
+                    let skippedCount = 0;
 
-                    resetForm();
+                    for (const combination of combinations) {
+                        const params = {};
 
+                        for (const { code, id } of combination) {
+                            params[code] = id;
+                        }
+
+                        const exists = this.variants.some(variant =>
+                            this.superAttributes.every(attr => variant[attr.code] == params[attr.code])
+                        );
+
+                        if (exists) {
+                            skippedCount++;
+                            continue;
+                        }
+
+                        const optionIds = Object.values(params);
+
+                        this.variants.push({
+                            id: 'variant_' + this.variants.length,
+                            sku: '{{ $product->sku }}' + '-variant-' + optionIds.join('-'),
+                            name: '',
+                            price: 0,
+                            status: 1,
+                            weight: 0,
+                            inventories: {},
+                            images: [],
+                            ...params
+                        });
+
+                        addedCount++;
+                    }
+
+                    if (skippedCount > 0) {
+                        this.$emitter.emit('add-flash', { type: 'warning', message: `${skippedCount} variant(s) already exist and were skipped.` });
+                    }
+
+                    if (addedCount > 0) {
+                        this.$emitter.emit('add-flash', { type: 'success', message: `${addedCount} variant(s) added successfully.` });
+                    }
+
+                    this.selectedOptions = {};
+                    this.selectionErrors = {};
                     this.$refs.variantCreateModal.close();
                 },
 
@@ -1229,7 +1326,15 @@
                             key: 'removeVariants',
                             value: 'remove-variants',
                             title: "@lang('admin::app.catalog.products.edit.types.configurable.mass-edit.remove-variants')",
-                        }
+                        },
+
+                        autoAssignByColor: {
+                            key: 'autoAssignByColor',
+                            value: 'auto-assign-by-color',
+                            title: "@lang('admin::app.catalog.products.edit.types.configurable.mass-edit.auto-assign-by-color')",
+                            images: [],
+                            hidden: true,
+                        },
                     },
                 };
             },
@@ -1469,6 +1574,59 @@
                             this.variants.splice(index, 1);
                         }
                     });
+                },
+
+                openAutoAssignDrawer() {
+                    this.selectedType = 'autoAssignByColor';
+
+                    this.$refs.updateVariantsDrawer.open();
+                },
+
+                autoAssignByColor(params) {
+                    const images = this.updateTypes.autoAssignByColor.images;
+
+                    if (! images.length) {
+                        return;
+                    }
+
+                    let assignedCount = 0;
+
+                    images.forEach((image) => {
+                        const filename = (image.file?.name || image.url || '').toLowerCase();
+
+                        this.superAttributes.forEach((attribute) => {
+                            const matchedOption = attribute.options.find(
+                                option => filename.includes(option.admin_name.toLowerCase())
+                            );
+
+                            if (matchedOption) {
+                                this.variants.forEach((variant) => {
+                                    if (variant[attribute.code] === matchedOption.id) {
+                                        if (! variant.images) variant.images = [];
+                                        if (! variant.temp_images) variant.temp_images = [];
+
+                                        variant.images = variant.images.concat([image]);
+                                        variant.temp_images.push(image);
+                                        assignedCount++;
+                                    }
+                                });
+                            }
+                        });
+                    });
+
+                    this.updateTypes.autoAssignByColor.images = [];
+
+                    if (assignedCount > 0) {
+                        this.$emitter.emit('add-flash', {
+                            type: 'success',
+                            message: "@lang('admin::app.catalog.products.edit.types.configurable.mass-edit.auto-assign-success')"
+                        });
+                    } else {
+                        this.$emitter.emit('add-flash', {
+                            type: 'warning',
+                            message: "@lang('admin::app.catalog.products.edit.types.configurable.mass-edit.auto-assign-no-match')"
+                        });
+                    }
                 },
 
                 optionName(attribute, optionId) {

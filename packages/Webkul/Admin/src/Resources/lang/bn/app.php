@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'চিত্র যোগ করুন',
                             'apply-to-all-btn' => 'সবকিছুতে প্রয়োগ',
+                            'auto-assign-by-color' => 'রঙ দ্বারা স্বয়ংক্রিয়ভাবে নির্ধারণ করুন',
+                            'auto-assign-description' => 'ফাইলের নামে রঙের নাম আছে এমন ছবি আপলোড করুন (যেমন: black.jpg) সকল মিলনীয় ভেরিয়েন্টে স্বয়ংক্রিয়ভাবে নির্ধারিত করতে।',
+                            'auto-assign-no-match' => 'ফাইলের নামে কোনো মিলনীয় রঙ পাওয়া যায়নি।',
+                            'auto-assign-success' => 'ছবিগুলি সফলভাবে মিলনীয় ভেরিয়েন্টে নির্ধারিত হয়েছে।',
                             'apply-to-all-name' => 'সব প্রকারের জন্য একটি নাম প্রয়োগ করুন।',
                             'apply-to-all-sku' => 'সব স্টক ইউনিটের জন্য একটি মূল্য প্রয়োগ করুন।',
                             'apply-to-all-status' => 'সব প্রকারের জন্য একটি অবস্থা প্রয়োগ করুন।',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'কাস্টম স্ক্রিপ্ট',
                         'title-info' => 'কাস্টম স্ক্রিপ্ট হল ব্যক্তিগতভাবে তৈরি করা কোডের অংশ যা নির্দিষ্ট কার্যাবলী বা বৈশিষ্ট্য যুক্ত সফটওয়্যারে যোগ করতে ব্যবহৃত হয়, যা এর সুযোগ দিয়ে সাধারণত তার সুযোগগুলি উন্নত করে।',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'গুণগুণ পরিবার',
                 'attributes' => 'গুণগুণ',
                 'booking-product' => 'সংরক্ষণ',

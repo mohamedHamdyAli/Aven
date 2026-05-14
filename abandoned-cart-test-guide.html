@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<title>Abandoned Cart Recovery — Test Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #1a1a2e; background: #fff; padding: 32px; }
+  h1 { font-size: 22px; color: #0a3d62; border-bottom: 3px solid #0a3d62; padding-bottom: 10px; margin-bottom: 6px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 28px; }
+  h2 { font-size: 15px; color: #fff; background: #0a3d62; padding: 7px 14px; border-radius: 4px; margin: 24px 0 12px; page-break-after: avoid; }
+  h3 { font-size: 13px; color: #0a3d62; margin: 14px 0 6px; font-weight: 700; }
+  p  { margin-bottom: 8px; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
+  th { background: #eaf0fb; color: #0a3d62; text-align: left; padding: 7px 10px; border: 1px solid #c9d8f0; }
+  td { padding: 6px 10px; border: 1px solid #dde6f5; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f9fe; }
+  code { background: #f0f4ff; border: 1px solid #c9d8f0; border-radius: 3px; padding: 1px 5px; font-family: Consolas, monospace; font-size: 11.5px; color: #c0392b; }
+  pre  { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 14px 16px; margin: 8px 0 14px; font-size: 11.5px; font-family: Consolas, monospace; line-height: 1.65; overflow-x: auto; white-space: pre-wrap; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .pass  { background: #d4edda; color: #155724; }
+  .check { background: #fff3cd; color: #856404; }
+  .fail  { background: #f8d7da; color: #721c24; }
+  .info  { background: #d1ecf1; color: #0c5460; }
+  .step  { counter-increment: step; padding: 10px 14px 10px 44px; margin: 6px 0; border-left: 3px solid #0a3d62; background: #f7f9fe; border-radius: 0 4px 4px 0; position: relative; }
+  .step::before { content: counter(step); position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; background: #0a3d62; color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .steps { counter-reset: step; }
+  .warn  { background: #fff8e1; border-left: 4px solid #f0a500; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .card  { border: 1px solid #c9d8f0; border-radius: 6px; padding: 12px 14px; }
+  .card h4 { color: #0a3d62; font-size: 12px; margin-bottom: 6px; }
+  @media print {
+    body { padding: 20px; font-size: 12px; }
+    h2 { page-break-after: avoid; }
+    pre { page-break-inside: avoid; font-size: 10.5px; }
+    .step { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Abandoned Cart Recovery &amp; Fraud Prevention — Test Guide</h1>
+<p class="subtitle">Bagisto 2.4.x &nbsp;|&nbsp; Branch: 2.4 &nbsp;|&nbsp; Date: 2026-05-08</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>1. Prerequisites — Run Once Before Testing</h2>
+
+<pre>composer dump-autoload
+php artisan migrate
+php artisan optimize:clear
+php artisan serve                   # Terminal 1
+php artisan queue:work              # Terminal 2  (processes email/WhatsApp jobs)</pre>
+
+<p>Verify the new DB columns exist:</p>
+<pre>php artisan tinker
+>>> Schema::hasColumn('cart', 'last_activity_at')   // true
+>>> Schema::hasColumn('cart', 'notification_token') // true
+>>> Schema::hasTable('abandoned_cart_notifications') // true</pre>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>2. Admin Configuration</h2>
+
+<div class="steps">
+<div class="step">Go to <code>http://localhost:8000/admin/configuration</code> → click <strong>Sales</strong></div>
+<div class="step">Click <strong>Abandoned Cart Recovery</strong></div>
+<div class="step">Set values for testing:
+  <table style="margin-top:8px">
+    <tr><th>Setting</th><th>Test Value</th><th>Purpose</th></tr>
+    <tr><td>Enable</td><td><span class="badge pass">ON</span></td><td>Activate the feature</td></tr>
+    <tr><td>Inactivity Threshold (min)</td><td><code>1</code></td><td>1 minute so we don't wait long</td></tr>
+    <tr><td>Max Notification Attempts</td><td><code>3</code></td><td>3 reminders max</td></tr>
+    <tr><td>Attempt 1 Delay (hours)</td><td><code>0</code></td><td>Send immediately</td></tr>
+    <tr><td>Attempt 2 Delay (hours)</td><td><code>0</code></td><td>Send immediately</td></tr>
+    <tr><td>Attempt 3 Delay (hours)</td><td><code>0</code></td><td>Send immediately</td></tr>
+    <tr><td>Auto-Cancel After Max</td><td><span class="badge fail">OFF</span></td><td>Keep cart for inspection</td></tr>
+    <tr><td>Email Notifications</td><td><span class="badge pass">ON</span></td><td>Enable email channel</td></tr>
+    <tr><td>Fraud Detection</td><td><span class="badge pass">ON</span></td><td>Enable scoring</td></tr>
+    <tr><td>Fraud Score Threshold</td><td><code>60</code></td><td>Auto-flag if score ≥ 60</td></tr>
+  </table>
+</div>
+<div class="step">Save and confirm no errors on save.</div>
+</div>
+
+<p><strong>Expected:</strong> <span class="badge pass">PASS</span> Settings saved, no 500 errors.</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>3. Email Setup (Log Driver — No Real SMTP Needed)</h2>
+
+<p>In <code>.env</code>, set:</p>
+<pre>MAIL_MAILER=log</pre>
+<pre>php artisan optimize:clear</pre>
+<p>All emails will now be written to <code>storage/logs/laravel.log</code> instead of being sent.</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>4. Test Scenario A — Authenticated Customer Abandons Cart</h2>
+
+<div class="steps">
+<div class="step">Log in as a customer on the shop front.</div>
+<div class="step">Add 1–2 products to the cart but <strong>do NOT checkout</strong>.</div>
+<div class="step">Verify the cart got a token:
+<pre>php artisan tinker
+>>> DB::table('cart')->where('is_active',1)->latest()->first(['id','customer_email','notification_token','last_activity_at'])</pre>
+<span class="badge check">CHECK</span> <code>notification_token</code> should be a 40-char string, <code>last_activity_at</code> should be recent.
+</div>
+<div class="step">Wait 1 minute (or set system time forward), then run dry-run:
+<pre>php artisan abandoned-cart:process --dry-run</pre>
+<span class="badge check">CHECK</span> Output should list the cart as eligible for attempt #1.
+</div>
+<div class="step">Run the real command:
+<pre>php artisan abandoned-cart:process</pre>
+</div>
+<div class="step">Check the queue job was dispatched and processed:
+<pre>php artisan tinker
+>>> DB::table('abandoned_cart_notifications')->latest()->first()</pre>
+<span class="badge pass">PASS</span> if <code>status = 'sent'</code> and <code>channel = 'email'</code>.
+</div>
+<div class="step">Check the email content in the log:
+<pre>grep -A 30 "abandoned" storage/logs/laravel.log | tail -40</pre>
+<span class="badge check">CHECK</span> Should contain cart items, total, and recovery link.
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>5. Test Scenario B — Guest Cart Recovery via Cookie</h2>
+
+<div class="steps">
+<div class="step">Open a <strong>private/incognito</strong> browser window.</div>
+<div class="step">Browse the shop and add items to cart.</div>
+<div class="step">Go to checkout step 1 and enter an email address — this populates <code>cart.customer_email</code>.</div>
+<div class="step"><strong>Close the browser window</strong> without finishing checkout.</div>
+<div class="step">Check the cookie was set:
+<pre>php artisan tinker
+>>> DB::table('cart')->whereNotNull('notification_token')->where('is_guest',1)->latest()->first(['id','customer_email','notification_token'])</pre>
+</div>
+<div class="step">Reopen the browser and visit the shop homepage. The cookie <code>bagisto_cart_recovery</code> should restore the cart. Check the cart icon shows items.</div>
+<div class="step">Run the recovery command and extract the signed link from the log:
+<pre>php artisan abandoned-cart:process
+grep "recover" storage/logs/laravel.log | tail -5</pre>
+</div>
+<div class="step">Visit the recovery link from the log in the browser.
+<br><span class="badge pass">PASS</span> if redirected to cart page with a success flash message.
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>6. Test Scenario C — Recovery Link (Direct)</h2>
+
+<pre>php artisan tinker
+>>> $cart = \Webkul\Checkout\Models\Cart::whereNotNull('notification_token')->latest()->first();
+>>> echo \URL::signedRoute('shop.abandoned-cart.recover', ['token' => $cart->notification_token], now()->addDays(7));</pre>
+
+<p>Copy the URL output and open it in the browser.</p>
+
+<table>
+  <tr><th>Action</th><th>Expected Result</th><th>Status</th></tr>
+  <tr><td>Valid signed URL</td><td>Redirected to <code>/checkout/cart</code>, cart restored, flash message shown</td><td><span class="badge check">CHECK</span></td></tr>
+  <tr><td>Tampered URL (change last char)</td><td>403 Forbidden / Invalid link message</td><td><span class="badge check">CHECK</span></td></tr>
+  <tr><td>Expired URL (addDays(-1))</td><td>403 Forbidden</td><td><span class="badge check">CHECK</span></td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>7. Test Scenario D — Unsubscribe Link</h2>
+
+<pre>php artisan tinker
+>>> $cart = \Webkul\Checkout\Models\Cart::whereNotNull('notification_token')->latest()->first();
+>>> echo route('shop.abandoned-cart.unsubscribe', ['token' => $cart->notification_token]);</pre>
+
+<p>Open the URL in the browser.</p>
+<p><span class="badge pass">PASS</span> if redirected to home with "You have been unsubscribed" message.</p>
+<pre>>>> DB::table('cart')->where('id', $cart->id)->value('notification_opt_in') // should be 0</pre>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>8. Test Scenario E — Fraud Detection</h2>
+
+<h3>E1 — Disposable Email (score +25)</h3>
+<pre>php artisan tinker
+>>> $service = app(\Webkul\AbandonedCart\Services\FraudScoringService::class);
+>>> $cart = (object)['customer_email'=>'test@mailinator.com','base_grand_total'=>100,'id'=>999];
+>>> echo $service->score($cart);   // Expected: 25+</pre>
+
+<h3>E2 — Multiple Disposable Signals (score ≥ 60 → auto-flag)</h3>
+<pre>>>> $cart2 = (object)['customer_email'=>'hacker@yopmail.com','base_grand_total'=>5000,'id'=>998];
+>>> echo $service->score($cart2);  // Expected: 30+</pre>
+
+<h3>E3 — Order Gets fraud Status</h3>
+<p>Place an order from an account whose email is in the disposable domain list. Check:</p>
+<pre>>>> DB::table('orders')->latest()->first(['id','status','customer_email'])
+// status should be 'fraud' if score ≥ 60</pre>
+
+<table>
+  <tr><th>Signal</th><th>Points</th><th>How to Trigger</th></tr>
+  <tr><td>Disposable email</td><td>+25</td><td>Use <code>@mailinator.com</code></td></tr>
+  <tr><td>5+ orders same email/60 min</td><td>+20</td><td>Place 5 orders with same email</td></tr>
+  <tr><td>5+ carts same IP/60 min</td><td>+15</td><td>Create 5 carts from same IP</td></tr>
+  <tr><td>Billing country ≠ IP country</td><td>+10</td><td>Set billing country to different country + use CF-IPCountry header</td></tr>
+  <tr><td>Cart value &gt; 3× avg order</td><td>+10</td><td>Large cart for customer with small order history</td></tr>
+  <tr><td>2+ failed payment attempts</td><td>+15</td><td>2 pending_payment orders on same cart</td></tr>
+  <tr><td>No prior orders</td><td>+5</td><td>New customer email with no order history</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>9. Test Scenario F — Admin Abandoned Carts DataGrid</h2>
+
+<div class="steps">
+<div class="step">Go to <code>http://localhost:8000/admin/abandoned-carts</code></div>
+<div class="step">Verify the grid loads with columns: ID, Customer, Email, Channel, Items, Total, Status, Notifications Sent, Last Activity, Created At</div>
+<div class="step">Click <strong>Send Now</strong> on a cart → notification should be queued</div>
+<div class="step">Click <strong>Mark Recovered</strong> → status changes to <code>recovered</code></div>
+<div class="step">Click <strong>Expire Cart</strong> → status changes to <code>expired</code> and <code>is_active = 0</code></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>10. Test Scenario G — Retry Logic (Max Attempts)</h2>
+
+<pre># Run the command 3 times (with 0-hour delays configured)
+php artisan abandoned-cart:process
+php artisan abandoned-cart:process
+php artisan abandoned-cart:process
+
+# Check notification count
+php artisan tinker
+>>> DB::table('cart')->where('is_active',1)->latest()->first(['id','notification_count','recovery_status'])
+# notification_count should be 3, recovery_status = 'recovering'
+
+# Run once more — should NOT dispatch new job (max reached)
+php artisan abandoned-cart:process
+>>> DB::table('abandoned_cart_notifications')->where('cart_id', $cartId)->count()
+# Still 3, no new record</pre>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>11. Test Scenario H — Cart Recovered on Order</h2>
+
+<div class="steps">
+<div class="step">Have a cart in <code>recovery_status = 'recovering'</code></div>
+<div class="step">Complete the checkout and place an order.</div>
+<div class="step">Check the cart status:
+<pre>php artisan tinker
+>>> DB::table('cart')->where('id', $cartId)->value('recovery_status')
+// Expected: 'recovered'</pre>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2>12. Quick Checklist Summary</h2>
+
+<table>
+  <tr><th>#</th><th>Test</th><th>Expected</th><th>Result</th></tr>
+  <tr><td>1</td><td>Migrations ran successfully</td><td>New columns on <code>cart</code>, new table created</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>2</td><td>Admin config page loads</td><td>Abandoned Cart Recovery section visible under Sales</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>3</td><td>CartActivityTracker fires</td><td><code>last_activity_at</code> &amp; <code>notification_token</code> set on cart</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>4</td><td>Dry-run command</td><td>Lists eligible carts without sending</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>5</td><td>Process command dispatches job</td><td>Record in <code>abandoned_cart_notifications</code> with <code>status=sent</code></td><td><span class="badge check">□</span></td></tr>
+  <tr><td>6</td><td>Email rendered in log</td><td>HTML email with cart items in <code>laravel.log</code></td><td><span class="badge check">□</span></td></tr>
+  <tr><td>7</td><td>Guest recovery cookie</td><td>Cookie set, cart restored on return visit</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>8</td><td>Signed recovery link</td><td>Valid URL → cart restored; tampered → 403</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>9</td><td>Unsubscribe link</td><td><code>notification_opt_in = 0</code> in DB</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>10</td><td>Fraud scoring (disposable email)</td><td>Score ≥ 25 for <code>@mailinator.com</code></td><td><span class="badge check">□</span></td></tr>
+  <tr><td>11</td><td>Fraud auto-flag on order</td><td>Order status = <code>fraud</code> if score ≥ threshold</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>12</td><td>Admin DataGrid loads</td><td><code>/admin/abandoned-carts</code> shows grid</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>13</td><td>Send Now action</td><td>Job queued, notification count increases</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>14</td><td>Max attempts respected</td><td>No more jobs after notification_count = max</td><td><span class="badge check">□</span></td></tr>
+  <tr><td>15</td><td>Order created → cart recovered</td><td><code>recovery_status = 'recovered'</code> on cart</td><td><span class="badge check">□</span></td></tr>
+</table>
+
+<div class="warn">
+  <strong>Tip:</strong> Always run <code>php artisan queue:work</code> in a separate terminal — without it, jobs stay queued and emails won't appear in the log.
+</div>
+
+<br>
+<p style="text-align:center;color:#aaa;font-size:11px;border-top:1px solid #eee;padding-top:12px">
+  Webkul\AbandonedCart v1.0 &nbsp;·&nbsp; Bagisto 2.4.x &nbsp;·&nbsp; Generated 2026-05-08
+</p>
+
+</body>
+</html>

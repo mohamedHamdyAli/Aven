@@ -131,3 +131,38 @@ Or use: `php artisan package:make Webkul/<Name>` (requires `bagisto/bagisto-pack
 - **pint_tests.yml**: Code style checks with Laravel Pint
 - **admin_playwright_tests.yml / shop_playwright_tests.yml**: E2E tests (6 parallel shards)
 - **translation_tests.yml**: Translation file validation
+
+
+## Changelog Policy (MANDATORY)
+
+`Changelog.md` must exist at the repo root. After **any** task, append under the current date:
+
+```
+## YYYY-MM-DD
+
+### Feature | Fix | Refactor | Improvement | Migration
+- Concise description of what changed and why.
+```
+
+Rules: never delete previous entries, never skip a date entry, append under existing date if present.
+
+---
+
+## Workflow
+
+### Plan First
+Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Write plan to `tasks/todo.md`.
+
+### Lessons
+After any correction: update `tasks/lessons.md` with the pattern to prevent recurrence.
+
+### Verification
+Never mark a task complete without proving it works. Ask: "Would a staff engineer approve this?"
+
+---
+
+## Core Principles
+
+- **Simplicity First**: Impact minimal code. Avoid adding abstractions, error handling, or features beyond the task.
+- **No Laziness**: Find root causes. No temporary fixes.
+- **Minimal Impact**: Only touch what's necessary.

@@ -108,6 +108,24 @@ class ThemeDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
+            'index' => 'type',
+            'label' => trans('admin::app.settings.themes.index.datagrid.page'),
+            'type' => 'string',
+            'closure' => function ($row) {
+                $pageMap = [
+                    'footer_links' => trans('admin::app.settings.themes.index.datagrid.page-all'),
+                    'image_carousel' => trans('admin::app.settings.themes.index.datagrid.page-home'),
+                    'product_carousel' => trans('admin::app.settings.themes.index.datagrid.page-home'),
+                    'category_carousel' => trans('admin::app.settings.themes.index.datagrid.page-home'),
+                    'static_content' => trans('admin::app.settings.themes.index.datagrid.page-home'),
+                    'services_content' => trans('admin::app.settings.themes.index.datagrid.page-home'),
+                ];
+
+                return $pageMap[$row->type] ?? trans('admin::app.settings.themes.index.datagrid.page-home');
+            },
+        ]);
+
+        $this->addColumn([
             'index' => 'sort_order',
             'label' => trans('admin::app.settings.themes.index.datagrid.sort-order'),
             'type' => 'string',

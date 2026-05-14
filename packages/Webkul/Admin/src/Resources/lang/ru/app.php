@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Добавить изображения',
                             'apply-to-all-btn' => 'Применить ко всем',
+                            'auto-assign-by-color' => 'Автоматическое назначение по цвету',
+                            'auto-assign-description' => 'Загрузите изображения с названием цвета в имени файла (например, чёрный.jpg), чтобы автоматически назначить их всем соответствующим вариантам.',
+                            'auto-assign-no-match' => 'Соответствующий цвет не найден в имени файла.',
+                            'auto-assign-success' => 'Изображения успешно назначены соответствующим вариантам.',
                             'apply-to-all-name' => 'Применить имя ко всем вариантам.',
                             'apply-to-all-sku' => 'Применить цену ко всем SKU.',
                             'apply-to-all-status' => 'Применить статус ко всем вариантам.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Пользовательские скрипты',
                         'title-info' => 'Пользовательские скрипты - это индивидуальные фрагменты кода, созданные для добавления определенных функций или возможностей в программное обеспечение, уникально расширяющие его возможности.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Семейства атрибутов',
                 'attributes' => 'Атрибуты',
                 'booking-product' => 'Бронирования',

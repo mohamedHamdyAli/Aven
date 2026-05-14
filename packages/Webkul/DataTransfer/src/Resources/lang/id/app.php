@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Penyesuaian Inventaris',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Produk dengan SKU: \'%s\' tidak ditemukan dalam sistem.',
+                    'invalid-source-code'  => 'Kode sumber inventaris: \'%s\' tidak valid atau tidak ditemukan.',
+                    'duplicate-sku-source' => 'Entri duplikat untuk kombinasi SKU dan sumber.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

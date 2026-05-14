@@ -1,9 +1,11 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use Webkul\AbandonedCart\Providers\AbandonedCartServiceProvider;
 use Webkul\Admin\Providers\AdminServiceProvider;
 use Webkul\Attribute\Providers\AttributeServiceProvider;
 use Webkul\BookingProduct\Providers\BookingProductServiceProvider;
+use Webkul\BulkDeal\Providers\BulkDealServiceProvider;
 use Webkul\CartRule\Providers\CartRuleServiceProvider;
 use Webkul\CatalogRule\Providers\CatalogRuleServiceProvider;
 use Webkul\Category\Providers\CategoryServiceProvider;
@@ -34,6 +36,10 @@ use Webkul\Sales\Providers\SalesServiceProvider;
 use Webkul\Shipping\Providers\ShippingServiceProvider;
 use Webkul\Shop\Providers\ShopServiceProvider;
 use Webkul\Sitemap\Providers\SitemapServiceProvider;
+use Webkul\EgyptShipping\Providers\EgyptShippingServiceProvider;
+use Webkul\ShopTheLook\Providers\ShopTheLookServiceProvider;
+use Webkul\SizeGuide\Providers\SizeGuideServiceProvider;
+use Webkul\SocialCommerce\Providers\SocialCommerceServiceProvider;
 use Webkul\SocialLogin\Providers\SocialLoginServiceProvider;
 use Webkul\SocialShare\Providers\SocialShareServiceProvider;
 use Webkul\Stripe\Providers\StripeServiceProvider;
@@ -50,9 +56,11 @@ return [
     /**
      * Webkul's service providers.
      */
+    AbandonedCartServiceProvider::class,
     AdminServiceProvider::class,
     AttributeServiceProvider::class,
     BookingProductServiceProvider::class,
+    BulkDealServiceProvider::class,
     CMSServiceProvider::class,
     CartRuleServiceProvider::class,
     CatalogRuleServiceProvider::class,
@@ -83,6 +91,10 @@ return [
     ShippingServiceProvider::class,
     ShopServiceProvider::class,
     SitemapServiceProvider::class,
+    EgyptShippingServiceProvider::class,
+    ShopTheLookServiceProvider::class,
+    SizeGuideServiceProvider::class,
+    SocialCommerceServiceProvider::class,
     SocialLoginServiceProvider::class,
     SocialShareServiceProvider::class,
     StripeServiceProvider::class,

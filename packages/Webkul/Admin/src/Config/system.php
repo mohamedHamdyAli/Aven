@@ -210,6 +210,27 @@ return [
             ],
         ],
     ], [
+        'key' => 'general.content.facebook_pixel',
+        'name' => 'admin::app.configuration.index.general.content.facebook-pixel.title',
+        'info' => 'admin::app.configuration.index.general.content.facebook-pixel.title-info',
+        'sort' => 3,
+        'fields' => [
+            [
+                'name' => 'enabled',
+                'title' => 'admin::app.configuration.index.general.content.facebook-pixel.status',
+                'type' => 'boolean',
+                'channel_based' => true,
+                'locale_based' => false,
+            ], [
+                'name' => 'pixel_id',
+                'title' => 'admin::app.configuration.index.general.content.facebook-pixel.pixel-id',
+                'type' => 'text',
+                'channel_based' => true,
+                'locale_based' => false,
+                'depends' => 'enabled:1',
+            ],
+        ],
+    ], [
         'key' => 'general.design',
         'name' => 'admin::app.configuration.index.general.design.title',
         'info' => 'admin::app.configuration.index.general.design.info',

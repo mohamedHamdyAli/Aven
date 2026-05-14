@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Ajustări de inventar',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Produsul cu SKU: \'%s\' nu a fost găsit în sistem.',
+                    'invalid-source-code'  => 'Codul sursă de inventar: \'%s\' este invalid sau negăsit.',
+                    'duplicate-sku-source' => 'Intrare duplicată pentru combinația SKU și sursă.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

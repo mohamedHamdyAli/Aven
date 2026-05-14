@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'Додати зображення',
                             'apply-to-all-btn' => 'Застосувати до всіх',
+                            'auto-assign-by-color' => 'Автоматичне призначення за кольором',
+                            'auto-assign-description' => 'Завантажте зображення з назвою кольору у назві файлу (напр. чорний.jpg), щоб автоматично призначити їх до всіх відповідних варіантів.',
+                            'auto-assign-no-match' => 'Відповідний колір не знайдено в назві файлу/файлів.',
+                            'auto-assign-success' => 'Зображення успішно призначено відповідним варіантам.',
                             'apply-to-all-name' => 'Застосувати ім\'я до всіх варіантів.',
                             'apply-to-all-sku' => 'Застосувати ціну до всіх SKU.',
                             'apply-to-all-status' => 'Застосувати статус до всіх варіантів.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'Користувацькі скрипти',
                         'title-info' => 'Користувацькі скрипти - це персоналізовані фрагменти коду, створені для додавання конкретних функцій або можливостей до програмного забезпечення, покращуючи його унікальні можливості.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'Сімейства атрибутів',
                 'attributes' => 'Атрибути',
                 'booking-product' => 'Бронювання',

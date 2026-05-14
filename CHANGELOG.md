@@ -2,6 +2,48 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## 2026-05-13
+
+### Feature
+- Shop The Look: added `Webkul\ShopTheLook` package. Admin can assign "look products" (e.g. matching outfit items) to any product from the product edit page sidebar. Shop product page shows a "Complete The Look" section with item images, prices, and checkboxes; clicking "Add Selected to Cart" adds all checked items in one shot. Routes, migration (`product_look_items`), model, service provider, admin AJAX panel, and shop section all included.
+
+### Feature
+- Ads & Tracking Health: added automatic health-check dashboard under Marketing → Ads & Tracking Health. Checks 18 items across Tracking Pixels, Meta Tags, Structured Data, and Technical SEO. Shows overall score, per-category breakdown, priority badges, and direct fix links.
+
+
+### Feature
+- Size Guide: admins can now rename every column header in the size chart table. Added `column_headers` JSON column to `size_charts`; admin form renders each `<th>` as an editable input; shop size-guide page uses stored headers with sensible defaults.
+
+## 2026-05-09
+
+### Improvement
+- Size Guide modal: added three missing translation keys (`disclaimer`, `body-charts`, `product-chart`) to English and Arabic lang files. Fixed `sg-content` flex layout — removed Tailwind `hidden` class and replaced classList toggling with `style.display='flex'/'none'` so the flexbox column layout renders correctly when chart data loads.
+
+### Feature
+- Added `Webkul\SizeGuide` package: complete size guide system. Admin dashboard (Catalog → Size Guide) to create/edit/delete size charts with per-size measurement rows (EU/UK/US labels, chest/waist/hips/height min-max ranges, product garment measurements). Product edit page sidebar shows a "Size Guide" panel to assign a chart to any product. Shop-side: a "Size Guide" link appears on product detail pages that have an assigned chart; clicking it opens a modal with a Size Guide tab (filterable by EU/UK/US system, CM/IN toggle, full measurements table) and a "Find My Size" tab (customer enters chest/waist/hips, system recommends best-fit size by closest-midpoint scoring).
+
+### Fix
+- Fixed "Select All" checkbox and all interactive controls on Egypt Shipping admin page not responding. Root cause: Bagisto's admin layout calls `app.mount('#app')` on the same `load` event as the pushed scripts, so Vue's mount replaced the DOM nodes after event listeners were bound. Rewrote all JS to use event delegation on `document` so listeners survive Vue's mount.
+
+## 2026-05-08
+
+### Feature
+- Added new `Webkul\EgyptShipping` package providing Egypt-specific shipping by governorate. Includes: `egypt_shipping_governorates` table seeded with all 27 Egyptian governorates, an `Egypt` shipping carrier that reads `state` from the cart address and returns the configured rate (or `false` when governorate is inactive or has no rate), an Admin dashboard under Settings → Egypt Shipping with per-governorate rate inputs and active toggles saved via AJAX, and a public customer order-tracking page at `/track-order` (no login required) where customers enter order number + email to see a status badge, 4-step timeline, order items, shipping info, and order totals.
+
+### Feature
+- Added Inventory Adjustments importer in DataTransfer: upload a CSV/XLSX with columns `sku`, `source_code`, `qty` to set or reset product inventory quantities per source. Registers as `inventory_adjustments` importer type, validates SKU existence and source code, dispatches inventory reindex job after import.
+
+### Feature
+- Added Sales Channels dashboard section: per-channel orders count, revenue, ad spend, ROAS, and cost-per-order. Includes `channel_ad_spends` table, `ChannelAdSpend` model/repository, CRUD API (`/admin/channel-ad-spends`), and inline modal to add/edit/delete ad spend entries directly from the dashboard.
+
+### Feature
+- Added new `Webkul\SocialCommerce` package with full social commerce integration for Facebook, Instagram, TikTok, YouTube, and WhatsApp. Includes: per-channel platform configuration with encrypted API credentials (App ID, App Secret, Access Token), pixel injection via event listeners (TikTok Pixel + Google Analytics 4 / YouTube), product catalog sync to Meta Catalog API (Facebook/Instagram/WhatsApp), TikTok for Business Catalog API, and Google Merchant Center API, queued `SyncProductsToPlatform` and `ProcessIncomingOrder` jobs, webhook endpoints for all 5 platforms with CSRF exemption and verification token support, and an Admin UI under Settings → Social Commerce with DataGrid + create/edit forms.
+
+### Feature
+- Added new `Webkul\AbandonedCart` package implementing a complete abandoned cart recovery and fraud prevention system. Includes: real-time cart activity tracking (`last_activity_at`, `notification_token`, `recovery_status`), multi-channel outreach (email, WhatsApp Cloud API, Facebook Messenger), configurable retry logic with per-attempt delays, guest cart session restoration via signed URLs and a long-lived `bagisto_cart_recovery` cookie, heuristic fraud scoring (`FraudScoringService`) that auto-flags high-risk orders to `status=fraud` before save, an Admin DataGrid under Sales → Abandoned Carts, and a `php artisan abandoned-cart:process` command scheduled every 15 minutes. All settings configurable from Admin → Configuration → Sales → Abandoned Cart Recovery.
+- Added "Auto Assign by Color" feature to configurable product variants: uploading images with a color name in the filename (e.g. `black.jpg`) automatically distributes them to all variants matching that color across all sizes, without manual variant selection.
+- Added new standalone `Webkul\BulkDeal` package implementing a "Paid Qty + Deal Qty for Fixed Price" promotion type. The most expensive `paid_quantity` items in the cart are charged at full price; the cheapest `deal_quantity` items are discounted to a fixed `deal_price` total. Managed via Admin → Marketing → Promotions → Bulk Deals with full CRUD UI.
+
 ## **v2.4.4 (5th of May 2026)** - *Release*
 
 * Fixed wrong "From" and "To" dates on the admin Bookings data grid and calendar view caused by the Carbon 3 timezone behavior change in the Laravel 12 upgrade. `Carbon::createFromTimestamp()` now returns UTC by default instead of the app timezone, so the booking timestamps are explicitly converted via `->timezone(config('app.timezone'))` in `BookingDataGrid` and `BookingController`.

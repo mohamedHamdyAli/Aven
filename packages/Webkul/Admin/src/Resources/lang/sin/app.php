@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => 'පින්තූර එකතු කරන්න',
                             'apply-to-all-btn' => 'සිව්කරන්න සියල්ලට',
+                            'auto-assign-by-color' => 'වර්ණය අනුව ස්වයංක්‍රීය පැවරීම',
+                            'auto-assign-description' => 'ගොනු නාමයේ වර්ණ නාමයක් ඇති රූප උඩුගත කරන්න (උදා: black.jpg) ගැලපෙන සියලු ප‍්‍රභේදවලට ස්වයංක්‍රීයව පැවරීමට.',
+                            'auto-assign-no-match' => 'ගොනු නාමයේ ගැලපෙන වර්ණයක් සොයා ගත නොහැකි විය.',
+                            'auto-assign-success' => 'ගැලපෙන ප‍්‍රභේදවලට රූප සාර්ථකව පවරා ඇත.',
                             'apply-to-all-name' => 'සියලු වැරදි සම්බන්දතා සඳහා නමක් සහාය කරන්න.',
                             'apply-to-all-sku' => 'සියලු SKU සඳහා වර්ගයක් සහාය කරන්න.',
                             'apply-to-all-status' => 'සියලු වැරදි සම්බන්දතා සඳහා තත්ත්වය සහාය කරන්න.',
@@ -4146,6 +4150,12 @@ return [
                         'title' => 'අභිරුචි ස්ක්‍රිප්ට්ස්',
                         'title-info' => 'අභිරුචි ස්ක්‍රිප්ට්ස් යනු අභිරුචි කේතයක් හෝ විවිධ සේවාවක් එකතු කිරීමට නියමිත කේතයක් විකල්පයක් සහාය සඳහා නියමිත කේතයක් විකල්පයක් සැකසීම් සහාය සක්‍රිය කිරීම.',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => 'සෘක්කු පවුලේ',
                 'attributes' => 'සෘක්කු',
                 'booking-product' => 'මුදල් ඇණවුම්',

@@ -137,6 +137,18 @@ class ProductController extends Controller
      *
      * @return View
      */
+    public function show(int $id): View
+    {
+        $product = $this->productRepository->with([
+            'images',
+            'variants.images',
+            'variants.inventories',
+            'categories.translations',
+        ])->findOrFail($id);
+
+        return view('admin::catalog.products.show', compact('product'));
+    }
+
     public function edit(int $id)
     {
         $product = $this->productRepository->findOrFail($id);

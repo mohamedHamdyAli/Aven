@@ -93,6 +93,12 @@ return [
         'route' => 'admin.sales.rma.custom-fields.index',
         'sort' => 5,
         'icon' => '',
+    ], [
+        'key'   => 'sales.abandoned-carts',
+        'name'  => 'admin::app.components.layouts.sidebar.abandoned-carts',
+        'route' => 'admin.sales.abandoned-carts.index',
+        'sort'  => 8,
+        'icon'  => '',
     ],
 
     /**
@@ -128,6 +134,12 @@ return [
         'route' => 'admin.catalog.families.index',
         'sort' => 4,
         'icon' => '',
+    ], [
+        'key'   => 'catalog.size-guide',
+        'name'  => 'size-guide::app.admin.size-guide.title',
+        'route' => 'admin.size-guide.index',
+        'sort'  => 5,
+        'icon'  => '',
     ],
 
     /**
@@ -205,6 +217,12 @@ return [
         'sort' => 2,
         'icon' => '',
     ], [
+        'key'   => 'marketing.promotions.bulk_deals',
+        'name'  => 'admin::app.marketing.promotions.index.bulk-deal-title',
+        'route' => 'admin.marketing.promotions.bulk_deals.index',
+        'sort'  => 3,
+        'icon'  => '',
+    ], [
         'key' => 'marketing.communications',
         'name' => 'admin::app.components.layouts.sidebar.communications',
         'route' => 'admin.marketing.communications.email_templates.index',
@@ -264,6 +282,12 @@ return [
         'route' => 'admin.marketing.search_seo.sitemaps.index',
         'sort' => 4,
         'icon' => '',
+    ], [
+        'key'   => 'marketing.ad-health',
+        'name'  => 'Ads & Tracking Health',
+        'route' => 'admin.marketing.ad-health.index',
+        'sort'  => 9,
+        'icon'  => '',
     ],
 
     /**
@@ -337,10 +361,22 @@ return [
         'sort' => 5,
         'icon' => '',
     ], [
+        'key'   => 'settings.egypt-shipping',
+        'name'  => 'egypt-shipping::app.admin.egypt-shipping.title',
+        'route' => 'admin.egypt-shipping.index',
+        'sort'  => 11,
+        'icon'  => '',
+    ], [
+        'key'   => 'settings.social-commerce',
+        'name'  => 'social-commerce::app.admin.layouts.sidebar.social-commerce',
+        'route' => 'admin.social-commerce.channels.index',
+        'sort'  => 6,
+        'icon'  => '',
+    ], [
         'key' => 'settings.users',
         'name' => 'admin::app.components.layouts.sidebar.users',
         'route' => 'admin.settings.users.index',
-        'sort' => 6,
+        'sort' => 7,
         'icon' => '',
     ], [
         'key' => 'settings.roles',

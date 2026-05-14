@@ -39,6 +39,18 @@ return [
                 ],
             ],
         ],
+
+        'inventory-adjustments' => [
+            'title' => 'Korekty inwentarza',
+
+            'validation' => [
+                'errors' => [
+                    'sku-not-found'        => 'Produkt z SKU: \'%s\' nie został znaleziony w systemie.',
+                    'invalid-source-code'  => 'Kod źródła inwentarza: \'%s\' jest nieprawidłowy lub nie został znaleziony.',
+                    'duplicate-sku-source' => 'Zduplikowany wpis dla kombinacji SKU i źródła.',
+                ],
+            ],
+        ],
     ],
 
     'validation' => [

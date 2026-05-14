@@ -1,0 +1,24 @@
+{
+    "name": "bagisto/laravel-store-locator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bagisto",
+            "email": "support@bagisto.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\StoreLocator\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\StoreLocator\\Providers\\StoreLocatorServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

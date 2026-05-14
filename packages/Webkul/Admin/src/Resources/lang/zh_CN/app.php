@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'users' => [
@@ -1345,6 +1345,10 @@ return [
                         'mass-edit' => [
                             'add-images' => '添加图片',
                             'apply-to-all-btn' => '应用于所有',
+                            'auto-assign-by-color' => '按颜色自动分配',
+                            'auto-assign-description' => '上传文件名中包含颜色名称的图片（例如：black.jpg），系统将自动分配给所有匹配的变体。',
+                            'auto-assign-no-match' => '在图片文件名中未找到匹配的颜色。',
+                            'auto-assign-success' => '图片已成功分配给匹配的变体。',
                             'apply-to-all-name' => '将名称应用于所有变体。',
                             'apply-to-all-sku' => '将价格应用于所有 SKU。',
                             'apply-to-all-status' => '将状态应用于所有变体。',
@@ -4146,6 +4150,12 @@ return [
                         'title' => '自定义脚本',
                         'title-info' => '自定义脚本是为软件添加特定功能或特性的个性化代码片段，独特地增强其功能。',
                     ],
+                    'facebook-pixel' => [
+                        'title'      => 'Facebook Pixel',
+                        'title-info' => 'Facebook Pixel tracks visitor actions on your store and connects them to your Meta ad campaigns for retargeting and conversion optimization.',
+                        'status'     => 'Enable Facebook Pixel',
+                        'pixel-id'   => 'Pixel ID',
+                    ],
                 ],
 
                 'design' => [
@@ -5216,6 +5226,7 @@ return [
             ],
 
             'sidebar' => [
+                'abandoned-carts' => 'Abandoned Carts',
                 'attribute-families' => '属性族',
                 'attributes' => '属性',
                 'booking-product' => '预订',
