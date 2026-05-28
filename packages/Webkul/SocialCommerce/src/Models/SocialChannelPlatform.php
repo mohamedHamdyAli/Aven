@@ -2,6 +2,7 @@
 
 namespace Webkul\SocialCommerce\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,13 @@ use Webkul\SocialCommerce\Contracts\SocialChannelPlatform as SocialChannelPlatfo
 
 class SocialChannelPlatform extends Model implements SocialChannelPlatformContract
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\SocialCommerce\Database\Factories\SocialChannelPlatformFactory::new();
+    }
+
     protected $fillable = [
         'channel_id',
         'platform',

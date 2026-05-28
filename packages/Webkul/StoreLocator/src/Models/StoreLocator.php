@@ -9,6 +9,12 @@ use Webkul\StoreLocator\Contracts\StoreLocator as StoreLocatorContract;
 class StoreLocator extends Model implements StoreLocatorContract
 {
     use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\StoreLocator\Database\Factories\StoreLocatorFactory::new();
+    }
+
     protected $table = 'store_locators';
 
     protected $fillable = [

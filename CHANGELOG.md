@@ -2,6 +2,11 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## 2026-05-28
+
+### Feature
+- **Complete model unit test suite (Phase 1 + 2 + 3)** — 434 Pest 3 unit tests across all 163 Eloquent models in the codebase (both Aven custom packages and core Bagisto packages). Each model has tests covering fillable mass assignment, casts, relationships (BelongsTo/HasMany/BelongsToMany type verification), scopes, and factory states. Created 52 factories, 36 TestCase classes, 90+ test files. All 434 tests pass (1 pre-existing CoreTest failure unrelated to this work). Infrastructure: registered 36 new test namespaces in `composer.json`, 36 `uses()` bindings in `tests/Pest.php`, and 36 `<testsuite>` entries in `phpunit.xml`.
+
 ## 2026-05-27
 
 ### Improvement

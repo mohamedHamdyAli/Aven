@@ -2,10 +2,18 @@
 
 namespace Webkul\FlashSale\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FlashSale extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\FlashSale\Database\Factories\FlashSaleFactory::new();
+    }
+
     protected $fillable = ['name', 'discount_percent', 'starts_at', 'ends_at', 'active'];
 
     protected $casts = [

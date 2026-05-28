@@ -9,6 +9,12 @@ use Illuminate\Support\Str;
 class BlogPost extends Model
 {
     use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\Blog\Database\Factories\BlogPostFactory::new();
+    }
+
     protected $table = 'blog_posts';
 
     protected $fillable = [

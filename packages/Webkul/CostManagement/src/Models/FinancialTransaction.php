@@ -2,10 +2,18 @@
 
 namespace Webkul\CostManagement\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FinancialTransaction extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\CostManagement\Database\Factories\FinancialTransactionFactory::new();
+    }
+
     protected $fillable = [
         'type',
         'amount',

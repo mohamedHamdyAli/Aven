@@ -2,10 +2,18 @@
 
 namespace Webkul\Loyalty\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CustomerLoyaltyPoints extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\Loyalty\Database\Factories\CustomerLoyaltyPointsFactory::new();
+    }
+
     protected $table = 'customer_loyalty_points';
 
     protected $fillable = ['customer_id', 'balance'];

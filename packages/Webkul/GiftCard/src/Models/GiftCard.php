@@ -9,6 +9,11 @@ class GiftCard extends Model
 {
     use HasFactory;
 
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\GiftCard\Database\Factories\GiftCardFactory::new();
+    }
+
     protected $fillable = [
         'code', 'initial_balance', 'used_amount', 'is_active',
         'recipient_email', 'recipient_name', 'expires_at', 'message',

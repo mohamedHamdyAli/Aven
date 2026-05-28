@@ -62,6 +62,168 @@
         <testsuite name="Stripe Feature Test">
             <directory suffix="Test.php">packages/Webkul/Stripe/tests/Feature</directory>
         </testsuite>
+
+        <!-- Aven custom package testsuites. -->
+        <testsuite name="AbandonedCart Unit Test">
+            <directory suffix="Test.php">packages/Webkul/AbandonedCart/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Affiliate Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Affiliate/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="AiSupport Unit Test">
+            <directory suffix="Test.php">packages/Webkul/AiSupport/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Blog Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Blog/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="BulkDeal Unit Test">
+            <directory suffix="Test.php">packages/Webkul/BulkDeal/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="CostManagement Unit Test">
+            <directory suffix="Test.php">packages/Webkul/CostManagement/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="EgyptShipping Unit Test">
+            <directory suffix="Test.php">packages/Webkul/EgyptShipping/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="FlashSale Unit Test">
+            <directory suffix="Test.php">packages/Webkul/FlashSale/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="GiftCard Unit Test">
+            <directory suffix="Test.php">packages/Webkul/GiftCard/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Loyalty Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Loyalty/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="ProductQA Unit Test">
+            <directory suffix="Test.php">packages/Webkul/ProductQA/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="PushNotification Unit Test">
+            <directory suffix="Test.php">packages/Webkul/PushNotification/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Referral Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Referral/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="ShopTheLook Unit Test">
+            <directory suffix="Test.php">packages/Webkul/ShopTheLook/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="SizeGuide Unit Test">
+            <directory suffix="Test.php">packages/Webkul/SizeGuide/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="SocialCommerce Unit Test">
+            <directory suffix="Test.php">packages/Webkul/SocialCommerce/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="StoreLocator Unit Test">
+            <directory suffix="Test.php">packages/Webkul/StoreLocator/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Wallet Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Wallet/tests/Unit</directory>
+        </testsuite>
+
+        <!-- Core Bagisto package unit testsuites. -->
+        <testsuite name="Admin Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Admin/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Attribute Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Attribute/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="BookingProduct Unit Test">
+            <directory suffix="Test.php">packages/Webkul/BookingProduct/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="CartRule Unit Test">
+            <directory suffix="Test.php">packages/Webkul/CartRule/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="CatalogRule Unit Test">
+            <directory suffix="Test.php">packages/Webkul/CatalogRule/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Category Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Category/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Checkout Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Checkout/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="CMS Unit Test">
+            <directory suffix="Test.php">packages/Webkul/CMS/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Core Model Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Core/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Customer Model Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Customer/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="DataGrid Model Unit Test">
+            <directory suffix="Test.php">packages/Webkul/DataGrid/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="DataTransfer Unit Test">
+            <directory suffix="Test.php">packages/Webkul/DataTransfer/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="GDPR Unit Test">
+            <directory suffix="Test.php">packages/Webkul/GDPR/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Inventory Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Inventory/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Marketing Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Marketing/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Notification Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Notification/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Product Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Product/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="RMA Unit Test">
+            <directory suffix="Test.php">packages/Webkul/RMA/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Sales Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Sales/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="SocialLogin Unit Test">
+            <directory suffix="Test.php">packages/Webkul/SocialLogin/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="Tax Unit Test">
+            <directory suffix="Test.php">packages/Webkul/Tax/tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="User Unit Test">
+            <directory suffix="Test.php">packages/Webkul/User/tests/Unit</directory>
+        </testsuite>
     </testsuites>
 
     <source>

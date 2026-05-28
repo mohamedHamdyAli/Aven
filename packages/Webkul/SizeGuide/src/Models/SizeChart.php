@@ -2,10 +2,18 @@
 
 namespace Webkul\SizeGuide\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SizeChart extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\SizeGuide\Database\Factories\SizeChartFactory::new();
+    }
+
     protected $fillable = ['name', 'gender', 'type', 'image', 'image_overlays', 'column_headers'];
 
     protected $casts = [

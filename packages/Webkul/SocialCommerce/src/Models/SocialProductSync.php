@@ -2,6 +2,7 @@
 
 namespace Webkul\SocialCommerce\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Product\Models\ProductProxy;
@@ -9,6 +10,13 @@ use Webkul\SocialCommerce\Contracts\SocialProductSync as SocialProductSyncContra
 
 class SocialProductSync extends Model implements SocialProductSyncContract
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\SocialCommerce\Database\Factories\SocialProductSyncFactory::new();
+    }
+
     protected $fillable = [
         'social_channel_platform_id',
         'product_id',

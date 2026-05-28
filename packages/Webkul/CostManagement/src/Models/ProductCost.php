@@ -2,11 +2,19 @@
 
 namespace Webkul\CostManagement\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Product\Models\Product;
 
 class ProductCost extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\CostManagement\Database\Factories\ProductCostFactory::new();
+    }
+
     protected $fillable = [
         'product_id',
         'cost_price',

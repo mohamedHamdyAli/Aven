@@ -2,10 +2,18 @@
 
 namespace Webkul\ProductQA\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductQuestion extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\ProductQA\Database\Factories\ProductQuestionFactory::new();
+    }
+
     protected $table = 'product_questions';
 
     protected $fillable = [

@@ -2,11 +2,19 @@
 
 namespace Webkul\Affiliate\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Affiliate extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\Affiliate\Database\Factories\AffiliateFactory::new();
+    }
+
     protected $fillable = [
         'customer_id', 'name', 'email', 'code',
         'status', 'commission_rate', 'total_earned', 'total_paid', 'notes',

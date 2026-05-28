@@ -9,6 +9,12 @@ use Webkul\BulkDeal\Contracts\BulkDeal as BulkDealContract;
 class BulkDeal extends Model implements BulkDealContract
 {
     use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\BulkDeal\Database\Factories\BulkDealFactory::new();
+    }
+
     protected $table = 'bulk_deals';
 
     protected $fillable = [

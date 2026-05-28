@@ -2,10 +2,18 @@
 
 namespace Webkul\SizeGuide\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SizeChartRow extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\SizeGuide\Database\Factories\SizeChartRowFactory::new();
+    }
+
     protected $fillable = [
         'size_chart_id', 'label', 'sort_order',
         'eu_size', 'uk_size', 'us_size',

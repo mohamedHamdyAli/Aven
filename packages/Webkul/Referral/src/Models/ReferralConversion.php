@@ -2,10 +2,18 @@
 
 namespace Webkul\Referral\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ReferralConversion extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\Referral\Database\Factories\ReferralConversionFactory::new();
+    }
+
     protected $fillable = [
         'referral_code',
         'referrer_customer_id',

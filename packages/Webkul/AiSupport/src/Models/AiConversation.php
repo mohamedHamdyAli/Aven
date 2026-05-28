@@ -2,6 +2,7 @@
 
 namespace Webkul\AiSupport\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,13 @@ use Webkul\User\Models\AdminProxy;
 
 class AiConversation extends Model implements AiConversationContract
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\AiSupport\Database\Factories\AiConversationFactory::new();
+    }
+
     protected $table = 'ai_support_conversations';
 
     protected $fillable = [

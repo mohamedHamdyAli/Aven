@@ -11,6 +11,11 @@ class AbandonedCartNotification extends Model implements AbandonedCartNotificati
 {
     use HasFactory;
 
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\AbandonedCart\Database\Factories\AbandonedCartNotificationFactory::new();
+    }
+
     public $timestamps = false;
 
     protected $fillable = [

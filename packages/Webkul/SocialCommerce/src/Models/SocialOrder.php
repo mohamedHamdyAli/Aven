@@ -2,6 +2,7 @@
 
 namespace Webkul\SocialCommerce\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Sales\Models\OrderProxy;
@@ -9,6 +10,13 @@ use Webkul\SocialCommerce\Contracts\SocialOrder as SocialOrderContract;
 
 class SocialOrder extends Model implements SocialOrderContract
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Illuminate\Database\Eloquent\Factories\Factory
+    {
+        return \Webkul\SocialCommerce\Database\Factories\SocialOrderFactory::new();
+    }
+
     protected $fillable = [
         'social_channel_platform_id',
         'order_id',
