@@ -140,6 +140,12 @@ return [
         'route' => 'admin.size-guide.index',
         'sort'  => 5,
         'icon'  => '',
+    ], [
+        'key'   => 'catalog.stock-notifications',
+        'name'  => 'admin::app.catalog.stock-notifications.title',
+        'route' => 'admin.catalog.stock_notifications.index',
+        'sort'  => 6,
+        'icon'  => '',
     ],
 
     /**
@@ -223,6 +229,18 @@ return [
         'sort'  => 3,
         'icon'  => '',
     ], [
+        'key'   => 'marketing.promotions.coupon_assignments',
+        'name'  => 'admin::app.marketing.promotions.coupon-assignments.title',
+        'route' => 'admin.marketing.promotions.coupon_assignments.index',
+        'sort'  => 4,
+        'icon'  => '',
+    ], [
+        'key'   => 'marketing.promotions.flash_sales',
+        'name'  => 'Flash Sales',
+        'route' => 'admin.marketing.flash-sales.index',
+        'sort'  => 5,
+        'icon'  => '',
+    ], [
         'key' => 'marketing.communications',
         'name' => 'admin::app.components.layouts.sidebar.communications',
         'route' => 'admin.marketing.communications.email_templates.index',
@@ -283,11 +301,29 @@ return [
         'sort' => 4,
         'icon' => '',
     ], [
+        'key'   => 'marketing.gift-cards',
+        'name'  => 'Gift Cards',
+        'route' => 'admin.gift-cards.index',
+        'sort'  => 10,
+        'icon'  => '',
+    ], [
+        'key'   => 'marketing.loyalty',
+        'name'  => 'Loyalty Points',
+        'route' => 'admin.loyalty.index',
+        'sort'  => 11,
+        'icon'  => 'icon-marketing',
+    ], [
         'key'   => 'marketing.ad-health',
         'name'  => 'Ads & Tracking Health',
         'route' => 'admin.marketing.ad-health.index',
         'sort'  => 9,
         'icon'  => '',
+    ], [
+        'key'   => 'marketing.referral',
+        'name'  => 'Referral Program',
+        'route' => 'admin.marketing.referral.index',
+        'sort'  => 12,
+        'icon'  => 'icon-marketing',
     ],
 
     /**
@@ -361,17 +397,23 @@ return [
         'sort' => 5,
         'icon' => '',
     ], [
-        'key'   => 'settings.egypt-shipping',
-        'name'  => 'egypt-shipping::app.admin.egypt-shipping.title',
-        'route' => 'admin.egypt-shipping.index',
-        'sort'  => 11,
-        'icon'  => '',
+        'key'   => 'settings.social',
+        'name'  => 'Social & Integrations',
+        'route' => 'admin.settings.social.index',
+        'sort'  => 15,
+        'icon'  => 'icon-share',
     ], [
-        'key'   => 'settings.social-commerce',
-        'name'  => 'social-commerce::app.admin.layouts.sidebar.social-commerce',
-        'route' => 'admin.social-commerce.channels.index',
-        'sort'  => 6,
-        'icon'  => '',
+        'key'   => 'settings.payment-methods',
+        'name'  => 'Payment Methods',
+        'route' => 'admin.settings.payment_methods.index',
+        'sort'  => 14,
+        'icon'  => 'icon-credit-card',
+    ], [
+        'key'   => 'settings.shipping',
+        'name'  => 'Shipping',
+        'route' => 'admin.settings.shipping.index',
+        'sort'  => 16,
+        'icon'  => 'icon-ship',
     ], [
         'key' => 'settings.users',
         'name' => 'admin::app.components.layouts.sidebar.users',

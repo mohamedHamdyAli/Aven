@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    @if (core()->getConfigData('sales.checkout.shopping_cart.cross_sell'))
+    @if (core()->getConfigData('sales.checkout.shopping_cart.cross_sell') !== '0')
         {!! view_render_event('bagisto.shop.checkout.cart.cross_sell_carousel.before') !!}
 
         <!-- Cross-sell Product Carousal -->
@@ -118,6 +118,50 @@
                         v-if="cart?.items?.length"
                     >
                         <div class="flex flex-1 flex-col gap-6 max-md:gap-5">
+
+                            @if (core()->getConfigData('general.design.free_shipping_bar.enabled'))
+                                @php
+                                    $freeShipThreshold = (float) (core()->getConfigData('general.design.free_shipping_bar.threshold') ?? 500);
+                                    $currencyCode      = core()->getCurrentCurrencyCode();
+                                @endphp
+
+                                <div class="rounded-xl border border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-4 max-md:mx-0">
+                                    <template v-if="cart">
+                                        {{-- Unlocked --}}
+                                        <div
+                                            v-if="cart.sub_total >= {{ $freeShipThreshold }}"
+                                            class="flex items-center gap-2.5 text-sm font-semibold text-green-600"
+                                        >
+                                            <span class="text-xl">🎉</span>
+                                            <span>@lang('shop::app.checkout.cart.free-shipping-unlocked')</span>
+                                        </div>
+
+                                        {{-- Progress --}}
+                                        <div v-else>
+                                            <div class="mb-3 flex items-center justify-between text-sm">
+                                                <span class="text-gray-700">
+                                                    @lang('shop::app.checkout.cart.free-shipping-prefix')
+                                                    <strong class="text-gray-900">
+                                                        {{ $currencyCode }}
+                                                        <span v-text="({{ $freeShipThreshold }} - cart.sub_total).toFixed(2)"></span>
+                                                    </strong>
+                                                    @lang('shop::app.checkout.cart.free-shipping-suffix')
+                                                </span>
+                                                <span class="text-xs text-gray-400">
+                                                    <span v-text="Math.round((cart.sub_total / {{ $freeShipThreshold }}) * 100)"></span>%
+                                                </span>
+                                            </div>
+
+                                            <div class="h-2.5 w-full overflow-hidden rounded-full bg-white/70">
+                                                <div
+                                                    class="h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700"
+                                                    :style="{ width: Math.min((cart.sub_total / {{ $freeShipThreshold }}) * 100, 100) + '%' }"
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            @endif
 
                             {!! view_render_event('bagisto.shop.checkout.cart.cart_mass_actions.before') !!}
 
@@ -230,6 +274,16 @@
                                                     @{{ item.name }}
                                                 </p>
                                             </a>
+
+                                            <!-- Urgency: low stock badge -->
+                                            <p
+                                                v-if="item.stock_qty !== null && item.stock_qty <= 10 && item.stock_qty > 0"
+                                                class="mt-1 text-xs font-semibold"
+                                                :class="item.stock_qty <= 3 ? 'text-red-600' : 'text-orange-500'"
+                                            >
+                                                <template v-if="item.stock_qty <= 3">&#9888; @lang('shop::app.components.products.urgency-prefix') @{{ item.stock_qty }} @lang('shop::app.components.products.urgency-order-soon')</template>
+                                                <template v-else>@lang('shop::app.components.products.urgency-prefix') @{{ item.stock_qty }} @lang('shop::app.components.products.urgency-in-stock')</template>
+                                            </p>
 
                                             {!! view_render_event('bagisto.shop.checkout.cart.item_name.after') !!}
 
@@ -645,4 +699,62 @@
             });
         </script>
     @endpushOnce
+
+    @auth('customer')
+        @if (core()->getConfigData('general.loyalty.settings.enabled'))
+            @push('scripts')
+            <script>
+            (function () {
+                fetch('{{ route('shop.api.loyalty.balance') }}')
+                    .then(r => r.json())
+                    .then(function (data) {
+                        var txt = document.getElementById('loyalty-balance-text');
+                        var btn = document.getElementById('loyalty-redeem-btn');
+                        if (!txt) return;
+                        if (data.balance >= data.min_redeem) {
+                            txt.textContent = '@lang('shop::app.checkout.cart.summary.loyalty.balance-prefix') ' + data.balance + ' @lang('shop::app.checkout.cart.summary.loyalty.points-suffix') (' + data.value + ')';
+                            btn.classList.remove('hidden');
+                            btn.dataset.points = data.balance;
+                        } else {
+                            txt.textContent = '@lang('shop::app.checkout.cart.summary.loyalty.balance-prefix') ' + data.balance + ' @lang('shop::app.checkout.cart.summary.loyalty.points-suffix')';
+                        }
+                    });
+
+                window.redeemLoyaltyPoints = function () {
+                    var btn    = document.getElementById('loyalty-redeem-btn');
+                    var points = parseInt(btn.dataset.points);
+                    btn.disabled = true;
+                    btn.textContent = '...';
+
+                    fetch('{{ route('shop.api.loyalty.redeem') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        },
+                        body: JSON.stringify({ points: points }),
+                    })
+                    .then(r => r.json())
+                    .then(function (data) {
+                        if (data.success) {
+                            return fetch('{{ route('shop.api.checkout.cart.coupon.store') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                },
+                                body: JSON.stringify({ code: data.coupon_code }),
+                            }).then(function () { window.location.reload(); });
+                        } else {
+                            alert(data.message || 'Could not redeem points.');
+                            btn.disabled = false;
+                            btn.textContent = '@lang('shop::app.checkout.cart.summary.loyalty.redeem')';
+                        }
+                    });
+                };
+            })();
+            </script>
+            @endpush
+        @endif
+    @endauth
 </x-shop::layouts>

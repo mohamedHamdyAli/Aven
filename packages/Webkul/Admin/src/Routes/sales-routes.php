@@ -55,6 +55,12 @@ Route::prefix('sales')->group(function () {
         Route::post('comment/{order_id}', 'comment')->name('admin.sales.orders.comment');
 
         Route::get('search', 'search')->name('admin.sales.orders.search');
+
+        Route::post('auto-invoice/{id}', 'autoInvoice')->name('admin.sales.orders.auto_invoice');
+
+        Route::get('{id}/packing-slip', 'packingSlip')->name('admin.sales.orders.packing_slip');
+
+        Route::get('picking-list', 'pickingList')->name('admin.sales.orders.picking_list');
     });
 
     /**

@@ -244,8 +244,12 @@
                 },
 
                 watch: {
-                    queryParams() {
-                        this.getProducts();
+                    queryParams: {
+                        handler() {
+                            this.getProducts();
+                        },
+
+                        immediate: true,
                     },
 
                     queryString() {

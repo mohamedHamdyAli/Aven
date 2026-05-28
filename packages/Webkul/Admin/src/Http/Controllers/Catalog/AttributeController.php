@@ -12,6 +12,7 @@ use Webkul\Admin\Http\Requests\MassDestroyRequest;
 use Webkul\Attribute\Enums\AttributeTypeEnum;
 use Webkul\Attribute\Enums\SwatchTypeEnum;
 use Webkul\Attribute\Enums\ValidationEnum;
+use Webkul\Attribute\Repositories\AttributeOptionRepository;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Core\Rules\Code;
 use Webkul\Product\Repositories\ProductRepository;
@@ -25,6 +26,7 @@ class AttributeController extends Controller
      */
     public function __construct(
         protected AttributeRepository $attributeRepository,
+        protected AttributeOptionRepository $attributeOptionRepository,
         protected ProductRepository $productRepository
     ) {}
 
@@ -124,6 +126,32 @@ class AttributeController extends Controller
         $attribute = $this->attributeRepository->findOrFail($id);
 
         return $attribute->options()->orderBy('sort_order')->get();
+    }
+
+    /**
+     * Create a new option for an attribute inline (used from product edit modal).
+     */
+    public function storeOption(int $id): JsonResponse
+    {
+        $attribute = $this->attributeRepository->findOrFail($id);
+
+        $this->validate(request(), [
+            'admin_name'  => 'required|string|max:255',
+            'swatch_value' => 'nullable|string|max:255',
+        ]);
+
+        $maxSort = $attribute->options()->max('sort_order') ?? 0;
+
+        $option = $this->attributeOptionRepository->create([
+            'attribute_id' => $id,
+            'admin_name'   => request('admin_name'),
+            'swatch_value' => request('swatch_value') ?: null,
+            'sort_order'   => $maxSort + 1,
+        ]);
+
+        $option->load('translations');
+
+        return new JsonResponse($option);
     }
 
     /**

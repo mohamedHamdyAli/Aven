@@ -64,6 +64,10 @@ class CartController extends APIController
             $response = [];
 
             if (request()->get('is_buy_now')) {
+                if (Cart::getCart()) {
+                    session()->put('buy_now_previous_cart_id', Cart::getCart()->id);
+                }
+
                 Cart::deActivateCart();
 
                 $response['redirect'] = route('shop.checkout.onepage.index');

@@ -43,6 +43,7 @@ class ProductResource extends JsonResource
             'is_featured' => (bool) $this->featured,
             'on_sale' => (bool) $productTypeInstance->haveDiscount(),
             'is_saleable' => (bool) $productTypeInstance->isSaleable(),
+            'stock_qty' => (int) $this->totalQuantity(),
             'is_wishlist' => (bool) auth()->guard()->user()?->wishlist_items
                 ->where('channel_id', core()->getCurrentChannel()->id)
                 ->where('product_id', $this->id)->count(),
@@ -56,6 +57,10 @@ class ProductResource extends JsonResource
             'reviews' => [
                 'total' => $this->reviewHelper->getTotalReviews($this),
             ],
+            'flash_sale_ends_at' => optional(
+                app(\Webkul\FlashSale\Services\FlashSaleService::class)
+                    ->getActiveForProduct($this->id)
+            )->ends_at?->toIso8601String(),
         ];
     }
 }

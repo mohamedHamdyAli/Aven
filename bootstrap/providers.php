@@ -1,7 +1,26 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use Webkul\AiSupport\Providers\AiSupportServiceProvider;
+use Webkul\OrderNotification\Providers\OrderNotificationServiceProvider;
+use Webkul\ProductQA\Providers\ProductQAServiceProvider;
+use Webkul\Blog\Providers\BlogServiceProvider;
+use Webkul\Wallet\Providers\WalletServiceProvider;
+use Webkul\PushNotification\Providers\PushNotificationServiceProvider;
+use Webkul\Fawry\Providers\FawryServiceProvider;
+use Webkul\Paymob\Providers\PaymobServiceProvider;
+use Webkul\Valu\Providers\ValuServiceProvider;
+use Webkul\Affiliate\Providers\AffiliateServiceProvider;
+use Webkul\Bosta\Providers\BostaServiceProvider;
+use Webkul\Aramex\Providers\AramexServiceProvider;
+use Webkul\GiftCard\Providers\GiftCardServiceProvider;
+use Webkul\FlashSale\Providers\FlashSaleServiceProvider;
+use Webkul\Loyalty\Providers\LoyaltyServiceProvider;
+use Webkul\GoogleShopping\Providers\GoogleShoppingServiceProvider;
+use Webkul\Referral\Providers\ReferralServiceProvider;
+use Webkul\SmsNotification\Providers\SmsNotificationServiceProvider;
 use Webkul\AbandonedCart\Providers\AbandonedCartServiceProvider;
+use Webkul\CostManagement\Providers\CostManagementServiceProvider;
 use Webkul\Admin\Providers\AdminServiceProvider;
 use Webkul\Attribute\Providers\AttributeServiceProvider;
 use Webkul\BookingProduct\Providers\BookingProductServiceProvider;
@@ -57,6 +76,7 @@ return [
      * Webkul's service providers.
      */
     AbandonedCartServiceProvider::class,
+    CostManagementServiceProvider::class,
     AdminServiceProvider::class,
     AttributeServiceProvider::class,
     BookingProductServiceProvider::class,
@@ -101,4 +121,22 @@ return [
     TaxServiceProvider::class,
     ThemeServiceProvider::class,
     UserServiceProvider::class,
+    AiSupportServiceProvider::class,
+    OrderNotificationServiceProvider::class,
+    ProductQAServiceProvider::class,
+    BlogServiceProvider::class,
+    WalletServiceProvider::class,
+    PushNotificationServiceProvider::class,
+    FawryServiceProvider::class,
+    PaymobServiceProvider::class,
+    AffiliateServiceProvider::class,
+    BostaServiceProvider::class,
+    AramexServiceProvider::class,
+    GiftCardServiceProvider::class,
+    FlashSaleServiceProvider::class,
+    GoogleShoppingServiceProvider::class,
+    ReferralServiceProvider::class,
+    SmsNotificationServiceProvider::class,
+    LoyaltyServiceProvider::class,
+    ValuServiceProvider::class,
 ];

@@ -48,6 +48,10 @@
                     activeIndex: 0,
 
                     containerOffset: 110,
+
+                    zoom: 1,
+
+                    zoomOrigin: { x: 50, y: 50 },
                 };
             },
 
@@ -89,13 +93,42 @@
                 attachments() {
                     return [...this.media.images, ...this.media.videos].map(media => ({
                         url: media.type === 'videos' ? media.video_url : media.original_image_url,
-                        
+
                         type: media.type === 'videos' ? 'video' : 'image',
                     }));
+                },
+
+                zoomStyle() {
+                    return {
+                        transform: `scale(${this.zoom})`,
+                        transformOrigin: `${this.zoomOrigin.x}% ${this.zoomOrigin.y}%`,
+                        transition: this.zoom === 1 ? 'transform 0.25s ease' : 'none',
+                        willChange: 'transform',
+                    };
                 },
             },
 
             methods: {
+                scrollZoom(event) {
+                    if (this.baseFile.type !== 'image') return;
+                    const step = 0.4;
+                    const maxZoom = 4;
+                    this.zoom = event.deltaY < 0
+                        ? Math.min(maxZoom, this.zoom + step)
+                        : Math.max(1, this.zoom - step);
+                },
+
+                updateZoomOrigin(event) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    this.zoomOrigin.x = ((event.clientX - rect.left) / rect.width) * 100;
+                    this.zoomOrigin.y = ((event.clientY - rect.top) / rect.height) * 100;
+                },
+
+                resetZoom() {
+                    this.zoom = 1;
+                    this.zoomOrigin = { x: 50, y: 50 };
+                },
+
                 isActiveMedia(index) {
                     return index === this.activeIndex;
                 },

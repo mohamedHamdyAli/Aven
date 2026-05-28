@@ -69,6 +69,8 @@ return [
             'verification-sent' => 'Verification email sent',
             'verified' => 'Your account has been verified, try to login now.',
             'verify-failed' => 'We cannot verify your mail account.',
+            'referral-code' => 'Referral Code (Optional)',
+            'referral-code-placeholder' => 'Enter referral code',
         ],
 
         'account' => [
@@ -480,6 +482,36 @@ return [
                 ],
             ],
 
+            'loyalty' => [
+                'title'           => 'Loyalty Points',
+                'current-balance' => 'Current Balance',
+                'points'          => 'Points',
+                'equivalent'      => 'Equivalent',
+                'how-it-works'    => 'How It Works',
+                'earn-info'       => 'Earn :rate points for every order.',
+                'redeem-info'     => 'Each point is worth :value.',
+                'min-info'        => 'Minimum :min points needed to redeem.',
+                'go-shop'         => 'Start Shopping',
+                'history'         => 'Points History',
+                'no-transactions' => 'No transactions yet.',
+                'date'            => 'Date',
+                'description'     => 'Description',
+                'points-col'      => 'Points',
+            ],
+
+            'referral' => [
+                'title'              => 'Refer a Friend',
+                'friends-joined'     => 'Friends Joined',
+                'rewards-earned'     => 'Rewards Earned',
+                'reward-per-referral' => 'Reward Per Referral',
+                'your-link'          => 'Your Referral Link',
+                'share-desc'         => 'Share this link with friends. When they register and place their first order, you both get rewarded!',
+                'copy-link'          => 'Copy Link',
+                'copied'             => 'Copied!',
+                'share-whatsapp'     => 'Share on WhatsApp',
+                'share-facebook'     => 'Share on Facebook',
+            ],
+
             'rma' => [
                 'index' => [
                     'title' => 'RMA',
@@ -711,8 +743,12 @@ return [
                 'add-to-wishlist' => 'Add To Wishlist',
                 'already-in-compare' => 'Item is already added to compare list.',
                 'new' => 'New',
+                'low-stock' => 'Low Stock',
+                'popular' => 'Popular',
                 'review-description' => 'Be the first to review this product',
                 'sale' => 'Sale',
+                'quick-view' => 'Quick View',
+                'view-full-details' => 'View Full Details',
             ],
 
             'carousel' => [
@@ -751,7 +787,7 @@ return [
             ],
 
             'configurable' => [
-                'as-low-as' => 'As low as',
+                'as-low-as' => 'Price',
             ],
         ],
 
@@ -908,12 +944,26 @@ return [
                 'title' => 'Contact Us',
             ],
 
-            'add-to-cart' => 'Add To Cart',
-            'add-to-compare' => 'Product added in compare.',
-            'add-to-wishlist' => 'Add To Wishlist',
+            'add-to-cart'                => 'Add To Cart',
+            'only-left'                  => 'Only :qty left in stock',
+            'order-soon'                 => 'Order soon',
+            'urgency-prefix'             => 'Only',
+            'urgency-in-stock'           => 'left in stock',
+            'urgency-order-soon'         => 'left — order soon!',
+            'recently-viewed'            => 'Recently Viewed',
+            'sold-today'                 => ':count sold in last 24h',
+            'viewing-now'                => 'people viewing now',
+            'frequently-bought-together' => 'Frequently Bought Together',
+            'buy-all-together'           => 'Add All to Cart',
+            'add-each-separately'        => 'Or add each item separately',
+            'add-to-compare'         => 'Product added in compare.',
+            'add-to-wishlist'        => 'Add To Wishlist',
             'additional-information' => 'Additional Information',
             'already-in-compare' => 'Product is already added in compare.',
             'buy-now' => 'Buy Now',
+            'out-of-stock-notify'      => 'This product is out of stock. Get notified when it\'s back!',
+            'notify-email-placeholder' => 'Enter your email address',
+            'notify-me'                => 'Notify Me',
             'compare' => 'Compare',
             'description' => 'Description',
             'related-product-title' => 'Related Products',
@@ -1038,9 +1088,30 @@ return [
             'order-id-info' => 'Your order id is #:order_id',
             'thanks' => 'Thank you for your order!',
             'title' => 'Order successfully placed',
+            'you-may-also-like' => 'You May Also Like',
         ],
 
         'cart' => [
+            'free-shipping-unlocked' => 'You\'ve unlocked FREE shipping!',
+            'free-shipping-prefix'   => 'Add',
+            'free-shipping-suffix'   => 'more to get FREE shipping',
+
+            'trust' => [
+                'secure'    => 'Secure Checkout',
+                'returns'   => 'Easy Returns',
+                'guarantee' => 'Quality Guaranteed',
+                'delivery'  => 'Fast Delivery',
+            ],
+
+            'summary' => [
+                'trust' => [
+                    'secure'    => 'Secure Checkout',
+                    'returns'   => 'Easy Returns',
+                    'guarantee' => 'Quality Guaranteed',
+                    'delivery'  => 'Fast Delivery',
+                ],
+            ],
+
             'continue-to-checkout' => 'Continue to Checkout',
             'illegal' => 'Quantity cannot be lesser than one.',
             'inactive' => 'The item has been deactivated and subsequently removed from the cart.',
@@ -1127,6 +1198,16 @@ return [
                     'select-state' => 'Select State',
                     'state' => 'State',
                     'title' => 'Estimate Shipping and Tax',
+                ],
+
+                'loyalty' => [
+                    'title'          => 'Loyalty Points',
+                    'loading'        => 'Loading your points...',
+                    'balance-prefix' => 'You have',
+                    'points-suffix'  => 'points',
+                    'value-prefix'   => '(worth',
+                    'value-suffix'   => ')',
+                    'redeem'         => 'Redeem',
                 ],
             ],
         ],
@@ -1287,9 +1368,11 @@ return [
         'address' => 'Address',
         'downloadable-products' => 'Downloadable Products',
         'gdpr-request' => 'GDPR Requests',
+        'loyalty' => 'Loyalty Points',
         'my-account' => 'My Account',
         'orders' => 'Orders',
         'profile' => 'Profile',
+        'referral' => 'Refer a Friend',
         'reviews' => 'Reviews',
         'rma' => 'RMA',
         'wishlist' => 'Wishlist',

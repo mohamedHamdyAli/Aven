@@ -2,12 +2,15 @@
 
 namespace Webkul\AbandonedCart\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\AbandonedCart\Contracts\AbandonedCartNotification as AbandonedCartNotificationContract;
 use Webkul\Checkout\Models\CartProxy;
 
 class AbandonedCartNotification extends Model implements AbandonedCartNotificationContract
 {
+    use HasFactory;
+
     public $timestamps = false;
 
     protected $fillable = [

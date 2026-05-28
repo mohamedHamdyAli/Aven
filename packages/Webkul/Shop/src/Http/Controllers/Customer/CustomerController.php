@@ -135,6 +135,10 @@ class CustomerController extends Controller
 
             session()->flash('success', trans('shop::app.customers.account.profile.index.edit-success'));
 
+            if ($intended = session()->pull('social_login_intended')) {
+                return redirect($intended);
+            }
+
             return redirect()->route('shop.customers.account.profile.index');
         }
 

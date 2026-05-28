@@ -3,12 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Webkul\Shop\Http\Controllers\BookingProductController;
 use Webkul\Shop\Http\Controllers\CompareController;
+use Webkul\Shop\Http\Controllers\ComparisonController;
 use Webkul\Shop\Http\Controllers\HomeController;
 use Webkul\Shop\Http\Controllers\PageController;
 use Webkul\Shop\Http\Controllers\ProductController;
 use Webkul\Shop\Http\Controllers\ProductsCategoriesProxyController;
 use Webkul\Shop\Http\Controllers\SearchController;
+use Webkul\Shop\Http\Controllers\StockNotificationController;
 use Webkul\Shop\Http\Controllers\SubscriptionController;
+use Webkul\Shop\Http\Controllers\WishlistShareController;
 
 /**
  * CMS pages.
@@ -58,11 +61,30 @@ Route::controller(SubscriptionController::class)->group(function () {
 });
 
 /**
+ * Stock notifications (back in stock alerts)
+ */
+Route::post('stock-notify', [StockNotificationController::class, 'store'])
+    ->name('shop.stock_notification.store');
+
+/**
  * Compare products
  */
 Route::get('compare', [CompareController::class, 'index'])
     ->name('shop.compare.index')
     ->middleware('cache.response');
+
+/**
+ * Session-based product comparison.
+ */
+Route::get('comparison', [ComparisonController::class, 'index'])->name('shop.comparison.index');
+Route::post('comparison/add', [ComparisonController::class, 'add'])->name('shop.comparison.add');
+Route::post('comparison/remove', [ComparisonController::class, 'remove'])->name('shop.comparison.remove');
+Route::post('comparison/clear', [ComparisonController::class, 'clear'])->name('shop.comparison.clear');
+
+/**
+ * Wishlist sharing.
+ */
+Route::get('wishlist/shared/{token}', [WishlistShareController::class, 'view'])->name('shop.wishlist.share.view');
 
 /**
  * Downloadable products

@@ -2,11 +2,13 @@
 
 namespace Webkul\BulkDeal\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\BulkDeal\Contracts\BulkDeal as BulkDealContract;
 
 class BulkDeal extends Model implements BulkDealContract
 {
+    use HasFactory;
     protected $table = 'bulk_deals';
 
     protected $fillable = [

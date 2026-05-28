@@ -61,12 +61,22 @@ class ProductDataGrid extends DataGrid
                 'product_flat.name',
                 'product_flat.type',
                 'product_flat.status',
-                'product_flat.price',
                 'product_flat.url_key',
                 'product_flat.visible_individually',
                 'af.name as attribute_family',
             )
-            ->addSelect(DB::raw('SUM(DISTINCT '.$tablePrefix.'product_inventories.qty) as quantity'))
+            ->addSelect(DB::raw('COALESCE(
+                '.$tablePrefix.'product_flat.price,
+                (SELECT MIN(ppi.min_price) FROM '.$tablePrefix.'product_price_indices ppi WHERE ppi.product_id = '.$tablePrefix.'product_flat.product_id)
+            ) as price'))
+            ->addSelect(DB::raw('(
+                SELECT COALESCE(SUM(pi2.qty), 0)
+                FROM '.$tablePrefix.'product_inventories pi2
+                WHERE pi2.product_id = '.$tablePrefix.'product_flat.product_id
+                   OR pi2.product_id IN (
+                       SELECT id FROM '.$tablePrefix.'products WHERE parent_id = '.$tablePrefix.'product_flat.product_id
+                   )
+            ) as quantity'))
             ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'product_images.id) as images_count'))
             ->where('product_flat.locale', app()->getLocale())
             ->where('product_flat.visible_individually', 1)

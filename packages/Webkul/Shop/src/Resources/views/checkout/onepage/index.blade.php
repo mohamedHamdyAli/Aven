@@ -16,6 +16,17 @@
     @endpush
 @endif
 
+@if (core()->getConfigData('general.content.google_analytics.enabled') && core()->getConfigData('general.content.google_analytics.measurement_id'))
+    @push('scripts')
+        <script>
+            window.addEventListener('load', function () {
+                if (typeof gtag === 'undefined') return;
+                gtag('event', 'begin_checkout', { currency: '{{ core()->getCurrentCurrencyCode() }}' });
+            });
+        </script>
+    @endpush
+@endif
+
 <x-shop::layouts
     :has-header="false"
     :has-feature="false"
@@ -227,6 +238,19 @@
                             behavior: 'smooth',
                             block: 'end'
                         });
+                    },
+
+                    updateCartItemQty(itemId, newQty) {
+                        if (newQty < 1) return;
+                        this.$axios.put("{{ route('shop.api.checkout.cart.update') }}", { qty: { [itemId]: newQty } })
+                            .then(() => this.getCart())
+                            .catch(() => {});
+                    },
+
+                    removeCartItem(itemId) {
+                        this.$axios.delete("{{ route('shop.api.checkout.cart.destroy') }}", { data: { cart_item_id: itemId } })
+                            .then(() => this.getCart())
+                            .catch(() => {});
                     },
 
                     placeOrder() {

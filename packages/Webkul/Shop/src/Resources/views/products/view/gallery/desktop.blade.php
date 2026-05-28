@@ -66,12 +66,17 @@
     </div>
 
     <div
-        class="max-h-[610px] max-w-[560px]"
+        class="max-h-[610px] max-w-[560px] overflow-hidden rounded-xl"
         v-show="! isMediaLoading"
+        :style="{ cursor: zoom > 1 ? 'zoom-in' : 'zoom-in' }"
+        @wheel.prevent="scrollZoom($event)"
+        @mousemove="updateZoomOrigin($event)"
+        @mouseleave="resetZoom"
     >
         <img
-            class="min-w-[450px] cursor-pointer rounded-xl"
+            class="min-w-[450px] rounded-xl"
             :src="baseFile.path"
+            :style="zoomStyle"
             v-if="baseFile.type == 'image'"
             alt="{{ $product->name }}"
             width="560"

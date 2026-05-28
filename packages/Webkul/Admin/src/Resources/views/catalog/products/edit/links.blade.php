@@ -88,7 +88,7 @@
                         <!-- Actions -->
                         <div class="grid place-content-start gap-1 text-right">
                             <p class="font-semibold text-gray-800 dark:text-white">
-                                @{{ $admin.formatPrice(product.price) }}
+                                @{{ $admin.formatPrice(getProductPrice(product)) }}
                             </p>
 
                             <p
@@ -164,11 +164,11 @@
                     ],
 
                     addedProducts: {
-                        'up_sells': @json($product->up_sells()->with('images')->get()),
+                        'up_sells': @json($product->up_sells()->with(['images', 'price_indices'])->get()),
 
-                        'cross_sells': @json($product->cross_sells()->with('images')->get()),
+                        'cross_sells': @json($product->cross_sells()->with(['images', 'price_indices'])->get()),
 
-                        'related_products': @json($product->related_products()->with('images')->get())
+                        'related_products': @json($product->related_products()->with(['images', 'price_indices'])->get())
                     },
                 }
             },
@@ -204,7 +204,19 @@
                     });
 
                     return qty;
-                }
+                },
+
+                getProductPrice(product) {
+                    if (product.price !== null && product.price !== undefined && parseFloat(product.price) > 0) {
+                        return product.price;
+                    }
+
+                    if (product.price_indices && product.price_indices.length) {
+                        return product.price_indices[0].min_price ?? 0;
+                    }
+
+                    return 0;
+                },
             }
         });
     </script>

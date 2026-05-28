@@ -55,5 +55,17 @@ return [
         'route' => 'shop.customers.account.rma.index',
         'icon' => 'icon-compare-1',
         'sort' => 8,
+    ], [
+        'key' => 'account.loyalty',
+        'name' => 'shop::app.layouts.loyalty',
+        'route' => 'shop.customers.account.loyalty.index',
+        'icon' => 'icon-star',
+        'sort' => 9,
+    ], [
+        'key' => 'account.referral',
+        'name' => 'shop::app.layouts.referral',
+        'route' => 'shop.customers.account.referral.index',
+        'icon' => 'icon-users',
+        'sort' => 10,
     ],
 ];

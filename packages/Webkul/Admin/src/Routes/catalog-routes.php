@@ -11,6 +11,7 @@ use Webkul\Admin\Http\Controllers\Catalog\Product\GroupedController;
 use Webkul\Admin\Http\Controllers\Catalog\Product\SimpleController;
 use Webkul\Admin\Http\Controllers\Catalog\Product\VirtualController;
 use Webkul\Admin\Http\Controllers\Catalog\ProductController;
+use Webkul\Admin\Http\Controllers\Catalog\StockNotificationController;
 
 /**
  * Catalog routes.
@@ -23,6 +24,8 @@ Route::prefix('catalog')->group(function () {
         Route::get('', 'index')->name('admin.catalog.attributes.index');
 
         Route::get('{id}/options', 'getAttributeOptions')->name('admin.catalog.attributes.options');
+
+        Route::post('{id}/options', 'storeOption')->name('admin.catalog.attributes.options.store');
 
         Route::get('create', 'create')->name('admin.catalog.attributes.create');
 
@@ -139,5 +142,14 @@ Route::prefix('catalog')->group(function () {
         Route::get('search', 'search')->name('admin.catalog.products.search');
 
         Route::get('{id}/{attribute_id}', 'download')->name('admin.catalog.products.file.download');
+    });
+
+    /**
+     * Stock notification subscriptions.
+     */
+    Route::controller(StockNotificationController::class)->prefix('stock-notifications')->group(function () {
+        Route::get('', 'index')->name('admin.catalog.stock_notifications.index');
+        Route::delete('{id}', 'destroy')->name('admin.catalog.stock_notifications.destroy');
+        Route::post('mass-destroy', 'massDestroy')->name('admin.catalog.stock_notifications.mass_destroy');
     });
 });

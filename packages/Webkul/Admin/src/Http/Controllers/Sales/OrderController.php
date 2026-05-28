@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\View\View;
 use Webkul\Admin\DataGrids\Sales\OrderDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Admin\Http\Resources\AddressResource;
 use Webkul\Admin\Http\Resources\CartResource;
 use Webkul\Checkout\Facades\Cart;
@@ -31,6 +32,7 @@ class OrderController extends Controller
         protected OrderCommentRepository $orderCommentRepository,
         protected CartRepository $cartRepository,
         protected CustomerGroupRepository $customerGroupRepository,
+        protected InvoiceRepository $invoiceRepository,
     ) {}
 
     /**
@@ -242,6 +244,79 @@ class OrderController extends Controller
         }
 
         return response()->json($orders);
+    }
+
+    /**
+     * Auto-create invoice for all items → marks order as Processing.
+     */
+    public function autoInvoice(int $id): Response
+    {
+        $order = $this->orderRepository->findOrFail($id);
+
+        if (! $order->canInvoice()) {
+            session()->flash('info', trans('admin::app.sales.invoices.create.creation-error'));
+
+            return redirect()->route('admin.sales.orders.view', $id);
+        }
+
+        $items = [];
+
+        foreach ($order->items as $item) {
+            $qty = $item->qty_ordered - $item->qty_invoiced;
+
+            if ($qty > 0) {
+                $items[$item->id] = $qty;
+            }
+        }
+
+        $this->invoiceRepository->create([
+            'order_id' => $id,
+            'invoice'  => ['items' => $items],
+        ]);
+
+        session()->flash('success', 'Invoice created — order is now Processing.');
+
+        return redirect()->route('admin.sales.orders.view', $id);
+    }
+
+    /**
+     * Printable packing slip for an order.
+     */
+    public function packingSlip(int $id): View
+    {
+        $order = $this->orderRepository->findOrFail($id);
+
+        return view('admin::sales.orders.packing-slip', compact('order'));
+    }
+
+    /**
+     * Picking list — all items from pending/processing orders.
+     */
+    public function pickingList(): View
+    {
+        $orders = $this->orderRepository->scopeQuery(function ($query) {
+            return $query->whereIn('status', ['pending', 'processing'])->orderBy('created_at');
+        })->get();
+
+        $lines = collect();
+
+        foreach ($orders as $order) {
+            foreach ($order->items as $item) {
+                $lines->push([
+                    'order_id'      => $order->increment_id,
+                    'order_db_id'   => $order->id,
+                    'product_name'  => $item->name,
+                    'sku'           => $item->sku,
+                    'qty'           => (int) ($item->qty_ordered - $item->qty_shipped),
+                    'options'       => $item->additional['attributes'] ?? [],
+                    'status'        => $order->status,
+                ]);
+            }
+        }
+
+        $grouped = $lines->groupBy('sku')->sortKeys();
+
+        return view('admin::sales.orders.picking-list', compact('grouped', 'orders'));
     }
 
     /**

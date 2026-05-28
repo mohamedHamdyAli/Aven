@@ -207,6 +207,23 @@
 
                     {!! view_render_event('bagisto.shop.customers.signup_form.newsletter_subscription.after') !!}
 
+                    @if (core()->getConfigData('general.referral.settings.enabled'))
+                        <!-- Referral Code -->
+                        <x-shop::form.control-group class="mb-4">
+                            <x-shop::form.control-group.label>
+                                @lang('shop::app.customers.signup-form.referral-code')
+                            </x-shop::form.control-group.label>
+
+                            <x-shop::form.control-group.control
+                                type="text"
+                                class="px-6 py-4 max-md:py-3 max-sm:py-2"
+                                name="referral_code"
+                                :value="request('ref', old('referral_code'))"
+                                :placeholder="trans('shop::app.customers.signup-form.referral-code-placeholder')"
+                            />
+                        </x-shop::form.control-group>
+                    @endif
+
                     @if(
                         core()->getConfigData('general.gdpr.settings.enabled')
                         && core()->getConfigData('general.gdpr.agreement.enabled')

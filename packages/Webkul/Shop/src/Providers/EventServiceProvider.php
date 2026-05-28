@@ -4,8 +4,10 @@ namespace Webkul\Shop\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Webkul\Shop\Listeners\Customer;
+use Webkul\Shop\Listeners\FacebookConversionsListener;
 use Webkul\Shop\Listeners\GDPR;
 use Webkul\Shop\Listeners\Invoice;
+use Webkul\Shop\Listeners\LoyaltyAndReferral;
 use Webkul\Shop\Listeners\Order;
 use Webkul\Shop\Listeners\Refund;
 use Webkul\Shop\Listeners\Shipment;
@@ -23,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
          */
         'customer.registration.after' => [
             [Customer::class, 'afterCreated'],
+            [LoyaltyAndReferral::class, 'afterCustomerRegistered'],
         ],
 
         'customer.password.update.after' => [
@@ -53,6 +56,8 @@ class EventServiceProvider extends ServiceProvider
          */
         'checkout.order.save.after' => [
             [Order::class, 'afterCreated'],
+            [LoyaltyAndReferral::class, 'afterOrderCreated'],
+            [FacebookConversionsListener::class, 'onOrderSaved'],
         ],
 
         'sales.order.cancel.after' => [

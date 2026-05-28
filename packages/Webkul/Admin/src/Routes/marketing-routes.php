@@ -10,6 +10,7 @@ use Webkul\Admin\Http\Controllers\Marketing\Promotions\BulkDealController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CartRuleController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CartRuleCouponController;
 use Webkul\Admin\Http\Controllers\Marketing\Promotions\CatalogRuleController;
+use Webkul\Admin\Http\Controllers\Marketing\Promotions\CouponAssignmentController;
 use Webkul\Admin\Http\Controllers\Marketing\SearchSEO\SearchSynonymController;
 use Webkul\Admin\Http\Controllers\Marketing\SearchSEO\SearchTermController;
 use Webkul\Admin\Http\Controllers\Marketing\SearchSEO\SitemapController;
@@ -19,6 +20,16 @@ use Webkul\Admin\Http\Controllers\Marketing\SearchSEO\URLRewriteController;
  * Marketing routes.
  */
 Route::prefix('marketing')->group(function () {
+    /**
+     * Loyalty Points routes.
+     */
+    Route::controller(\Webkul\Admin\Http\Controllers\Marketing\LoyaltyController::class)
+        ->prefix('loyalty')
+        ->group(function () {
+            Route::get('', 'index')->name('admin.loyalty.index');
+            Route::post('{customer}/adjust', 'adjust')->name('admin.loyalty.adjust');
+        });
+
     /**
      * Ads & Tracking Health Check.
      */
@@ -89,6 +100,18 @@ Route::prefix('marketing')->group(function () {
             Route::put('edit/{id}', 'update')->name('admin.marketing.promotions.catalog_rules.update');
 
             Route::delete('edit/{id}', 'destroy')->name('admin.marketing.promotions.catalog_rules.delete');
+        });
+
+        /**
+         * Coupon assignment routes.
+         */
+        Route::controller(CouponAssignmentController::class)->prefix('coupon-assignments')->group(function () {
+            Route::get('', 'index')->name('admin.marketing.promotions.coupon_assignments.index');
+            Route::get('create', 'create')->name('admin.marketing.promotions.coupon_assignments.create');
+            Route::post('', 'store')->name('admin.marketing.promotions.coupon_assignments.store');
+            Route::get('{id}', 'show')->name('admin.marketing.promotions.coupon_assignments.show');
+            Route::delete('{id}', 'destroy')->name('admin.marketing.promotions.coupon_assignments.destroy');
+            Route::post('mass-destroy', 'massDestroy')->name('admin.marketing.promotions.coupon_assignments.mass_destroy');
         });
     });
 
@@ -221,4 +244,10 @@ Route::prefix('marketing')->group(function () {
             Route::delete('edit/{id}', 'destroy')->name('admin.marketing.search_seo.sitemaps.delete');
         });
     });
+
+    /**
+     * Referral Program routes.
+     */
+    Route::get('referral', [\Webkul\Admin\Http\Controllers\Marketing\ReferralController::class, 'index'])
+        ->name('admin.marketing.referral.index');
 });

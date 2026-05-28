@@ -11,12 +11,23 @@ use Webkul\Admin\Http\Controllers\Settings\RoleController;
 use Webkul\Admin\Http\Controllers\Settings\Tax\TaxCategoryController;
 use Webkul\Admin\Http\Controllers\Settings\Tax\TaxRateController;
 use Webkul\Admin\Http\Controllers\Settings\ThemeController;
+use Webkul\Admin\Http\Controllers\Settings\PaymentMethodsController;
+use Webkul\Admin\Http\Controllers\Settings\ShippingController;
+use Webkul\Admin\Http\Controllers\Settings\SocialController;
 use Webkul\Admin\Http\Controllers\Settings\UserController;
 
 /**
  * Settings routes.
  */
 Route::prefix('settings')->group(function () {
+    Route::get('payment-methods', [PaymentMethodsController::class, 'index'])
+        ->name('admin.settings.payment_methods.index');
+
+    Route::get('social', [SocialController::class, 'index'])
+        ->name('admin.settings.social.index');
+
+    Route::get('shipping', [ShippingController::class, 'index'])
+        ->name('admin.settings.shipping.index');
     /**
      * Channels routes.
      */

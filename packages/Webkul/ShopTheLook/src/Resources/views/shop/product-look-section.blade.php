@@ -1,14 +1,17 @@
 @php
-    $lookItems = \Webkul\ShopTheLook\Models\ProductLookItem::with('lookProduct.productFlat')
+    $locale = app()->getLocale();
+    $lookItems = \Webkul\ShopTheLook\Models\ProductLookItem::with('lookProduct.product_flats')
         ->where('product_id', $product->id)
         ->orderBy('sort_order')
         ->get()
         ->map(fn($item) => [
             'id'    => $item->look_product_id,
-            'name'  => $item->lookProduct?->productFlat?->name ?? $item->lookProduct?->sku ?? '',
+            'name'  => $item->lookProduct?->product_flats?->firstWhere('locale', $locale)?->name
+                       ?? $item->lookProduct?->product_flats?->first()?->name
+                       ?? $item->lookProduct?->sku ?? '',
             'sku'   => $item->lookProduct?->sku ?? '',
             'price' => $item->lookProduct?->getTypeInstance()?->getMinimalPrice() ?? 0,
-            'image' => $item->lookProduct?->base_image?->url ?? null,
+            'image' => $item->lookProduct ? (product_image()->getProductBaseImage($item->lookProduct)['small_image_url'] ?? null) : null,
             'url'   => $item->lookProduct?->url_key
                         ? route('shop.product_or_category.index', $item->lookProduct->url_key)
                         : null,
@@ -18,14 +21,14 @@
 @endphp
 
 @if ($lookItems->isNotEmpty())
-<div class="container mt-10 px-[60px] max-1180:px-5 max-sm:px-4" id="stl-section">
-    <h2 class="mb-5 text-2xl font-semibold text-gray-800 dark:text-white max-sm:text-xl">
+<div id="stl-section">
+    <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
         Complete The Look
     </h2>
 
-    <div class="flex flex-wrap gap-4">
+    <div class="flex flex-wrap gap-3">
         @foreach ($lookItems as $item)
-        <div class="flex w-[160px] flex-col gap-2 max-sm:w-[calc(50%-8px)]"
+        <div class="flex w-[130px] flex-col gap-2 max-sm:w-[calc(50%-6px)]"
              data-stl-id="{{ $item['id'] }}"
              data-stl-saleable="{{ $item['saleable'] ? '1' : '0' }}">
 
@@ -35,10 +38,10 @@
                     <a href="{{ $item['url'] ?? '#' }}" target="_blank">
                         <img src="{{ $item['image'] }}"
                              alt="{{ $item['name'] }}"
-                             class="h-[160px] w-full object-cover transition hover:scale-105 max-sm:h-[130px]">
+                             class="h-[130px] w-full object-cover transition hover:scale-105 max-sm:h-[110px]">
                     </a>
                 @else
-                    <div class="h-[160px] w-full bg-gray-100 dark:bg-gray-800 max-sm:h-[130px]"></div>
+                    <div class="h-[130px] w-full bg-gray-100 dark:bg-gray-800 max-sm:h-[110px]"></div>
                 @endif
 
                 @if ($item['saleable'])

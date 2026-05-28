@@ -10,6 +10,7 @@ use Webkul\Shop\Http\Controllers\API\CustomerController;
 use Webkul\Shop\Http\Controllers\API\OnepageController;
 use Webkul\Shop\Http\Controllers\API\ProductController;
 use Webkul\Shop\Http\Controllers\API\ReviewController;
+use Webkul\Shop\Http\Controllers\API\LoyaltyController;
 use Webkul\Shop\Http\Controllers\API\WishlistController;
 
 Route::group(['prefix' => 'api'], function () {
@@ -96,6 +97,12 @@ Route::group(['prefix' => 'api'], function () {
      */
     Route::controller(CustomerController::class)->prefix('customer')->group(function () {
         Route::post('login', 'login')->name('shop.api.customers.session.create');
+    });
+
+    Route::controller(LoyaltyController::class)->prefix('loyalty')->group(function () {
+        Route::get('balance', 'balance')->name('shop.api.loyalty.balance');
+        Route::post('redeem', 'redeem')->name('shop.api.loyalty.redeem')->middleware('customer');
+        Route::get('transactions', 'transactions')->name('shop.api.loyalty.transactions')->middleware('customer');
     });
 
     Route::group(['middleware' => ['customer'], 'prefix' => 'customer'], function () {

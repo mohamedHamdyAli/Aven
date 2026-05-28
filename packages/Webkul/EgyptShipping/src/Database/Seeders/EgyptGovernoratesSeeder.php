@@ -42,10 +42,20 @@ class EgyptGovernoratesSeeder extends Seeder
         $now = now();
 
         foreach ($governorates as $gov) {
-            DB::table('egypt_shipping_governorates')->updateOrInsert(
-                ['code' => $gov['code']],
-                array_merge($gov, ['is_active' => true, 'rate' => null, 'created_at' => $now, 'updated_at' => $now])
-            );
+            $exists = DB::table('egypt_shipping_governorates')->where('code', $gov['code'])->exists();
+
+            if ($exists) {
+                // Only update names — never overwrite rates set via admin
+                DB::table('egypt_shipping_governorates')->where('code', $gov['code'])->update([
+                    'name_ar'    => $gov['name_ar'],
+                    'name_en'    => $gov['name_en'],
+                    'updated_at' => $now,
+                ]);
+            } else {
+                DB::table('egypt_shipping_governorates')->insert(
+                    array_merge($gov, ['is_active' => true, 'rate' => null, 'created_at' => $now, 'updated_at' => $now])
+                );
+            }
         }
     }
 }

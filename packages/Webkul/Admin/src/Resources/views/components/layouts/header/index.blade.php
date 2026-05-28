@@ -19,6 +19,12 @@
                     src="{{ Storage::url($logo) }}"
                     alt="{{ config('app.name') }}"
                 />
+            @elseif ($channelLogo = core()->getCurrentChannel()->logo_url)
+                <img
+                    class="h-8 w-auto sm:h-10"
+                    src="{{ $channelLogo }}"
+                    alt="{{ config('app.name') }}"
+                />
             @else
                 <img
                     src="{{ request()->cookie('dark_mode') ? bagisto_asset('images/dark-logo.svg') : bagisto_asset('images/logo.svg') }}"
@@ -152,6 +158,12 @@
                 <img
                     src="{{ Storage::url($logo) }}"
                     class="h-8 w-auto sm:h-10"
+                    alt="{{ config('app.name') }}"
+                />
+            @elseif ($channelLogo = core()->getCurrentChannel()->logo_url)
+                <img
+                    class="h-8 w-auto sm:h-10"
+                    src="{{ $channelLogo }}"
                     alt="{{ config('app.name') }}"
                 />
             @else

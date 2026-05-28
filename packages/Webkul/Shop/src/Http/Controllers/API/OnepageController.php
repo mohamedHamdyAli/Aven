@@ -190,6 +190,10 @@ class OnepageController extends APIController
 
         Cart::deActivateCart();
 
+        if ($previousCartId = session()->pull('buy_now_previous_cart_id')) {
+            Cart::activateCart((int) $previousCartId);
+        }
+
         session()->flash('order_id', $order->id);
 
         return new JsonResource([

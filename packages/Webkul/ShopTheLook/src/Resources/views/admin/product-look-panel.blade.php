@@ -14,13 +14,13 @@
     </p>
 
     {{-- Search --}}
-    <div class="relative mb-3">
+    <div class="mb-3">
         <input type="text" id="stl-search"
                placeholder="ابحث عن منتج..."
                autocomplete="off"
                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white">
         <ul id="stl-results"
-            class="absolute z-50 mt-1 hidden max-h-56 w-full overflow-y-auto rounded-md border border-gray-200 bg-white text-sm shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            class="mt-1 hidden max-h-56 w-full overflow-y-auto rounded-md border border-gray-200 bg-white text-sm shadow-lg dark:border-gray-700 dark:bg-gray-900">
         </ul>
     </div>
 
@@ -39,31 +39,41 @@
 @pushOnce('scripts')
 <script>
 (function () {
-    var panel      = document.getElementById('stl-panel');
-    if (!panel) return;
+    /* URLs come from the panel's data attributes — re-read on each use so
+       Vue re-renders don't break us. */
+    function panel()       { return document.getElementById('stl-panel'); }
+    function searchEl()    { return document.getElementById('stl-search'); }
+    function resultsList() { return document.getElementById('stl-results'); }
+    function itemsEl()     { return document.getElementById('stl-items'); }
+    function saveBtn()     { return document.getElementById('stl-save'); }
+    function msgEl()       { return document.getElementById('stl-msg'); }
 
-    var productId  = panel.dataset.productId;
-    var itemsUrl   = panel.dataset.itemsUrl;
-    var searchUrl  = panel.dataset.searchUrl;
-    var syncUrl    = panel.dataset.syncUrl;
-    var searchEl   = document.getElementById('stl-search');
-    var resultsList= document.getElementById('stl-results');
-    var itemsEl    = document.getElementById('stl-items');
-    var saveBtn    = document.getElementById('stl-save');
-    var msgEl      = document.getElementById('stl-msg');
+    function getUrl(key) {
+        var p = panel();
+        return p ? p.dataset[key] : null;
+    }
 
     var selected = {}; // id => {id, name, sku, image}
+    var searchTimer = null;
 
-    /* ── Load existing items ── */
-    fetch(itemsUrl, { headers: { Accept: 'application/json' } })
-        .then(function (r) { return r.json(); })
-        .then(function (items) {
-            items.forEach(function (p) { selected[p.id] = p; renderItems(); });
-        });
+    /* ── Load existing items on first paint ── */
+    function loadItems() {
+        var url = getUrl('itemsUrl');
+        if (!url) return;
+        fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (items) {
+                items.forEach(function (p) { selected[p.id] = p; });
+                renderItems();
+            })
+            .catch(function () {});
+    }
 
     /* ── Render selected list ── */
     function renderItems() {
-        itemsEl.innerHTML = '';
+        var el = itemsEl();
+        if (!el) return;
+        el.innerHTML = '';
         Object.values(selected).forEach(function (p) {
             var row = document.createElement('div');
             row.className = 'flex items-center gap-2 rounded-md border border-gray-100 p-1.5 dark:border-gray-700';
@@ -74,33 +84,23 @@
                 + '<div class="min-w-0 flex-1"><p class="truncate text-xs font-semibold text-gray-800 dark:text-white">'+(p.name||p.sku)+'</p>'
                 + '<p class="text-[10px] text-gray-400">'+p.sku+'</p></div>'
                 + '<button type="button" data-id="'+p.id+'" class="stl-remove ml-auto text-red-400 hover:text-red-600 text-lg leading-none font-bold">×</button>';
-            itemsEl.appendChild(row);
+            el.appendChild(row);
         });
     }
 
-    /* ── Remove ── */
-    document.addEventListener('click', function (e) {
-        if (!e.target.classList.contains('stl-remove')) return;
-        delete selected[e.target.dataset.id];
-        renderItems();
-    });
-
     /* ── Search ── */
-    var timer = null;
-    searchEl.addEventListener('input', function () {
-        clearTimeout(timer);
-        var q = searchEl.value.trim();
-        timer = setTimeout(function () { doSearch(q); }, 250);
-    });
-
     function doSearch(q) {
-        fetch(searchUrl + '?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })
+        var url = getUrl('searchUrl');
+        if (!url) return;
+        fetch(url + '?q=' + encodeURIComponent(q), { credentials: 'same-origin', headers: { Accept: 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (items) {
-                resultsList.innerHTML = '';
+                var list = resultsList();
+                if (!list) return;
+                list.innerHTML = '';
                 if (!items.length) {
-                    resultsList.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400">مفيش نتايج</li>';
-                    resultsList.classList.remove('hidden');
+                    list.innerHTML = '<li class="px-3 py-2 text-xs text-gray-400">مفيش نتايج</li>';
+                    list.classList.remove('hidden');
                     return;
                 }
                 items.forEach(function (p) {
@@ -113,39 +113,82 @@
                         ev.preventDefault();
                         selected[p.id] = { id: p.id, name: p.name, sku: p.sku, image: null };
                         renderItems();
-                        resultsList.classList.add('hidden');
-                        searchEl.value = '';
+                        var list2 = resultsList(); if (list2) list2.classList.add('hidden');
+                        var s = searchEl(); if (s) s.value = '';
                     });
-                    resultsList.appendChild(li);
+                    list.appendChild(li);
                 });
-                resultsList.classList.remove('hidden');
-            });
+                list.classList.remove('hidden');
+            })
+            .catch(function () {});
     }
 
-    document.addEventListener('click', function (e) {
-        if (!resultsList.contains(e.target) && e.target !== searchEl) resultsList.classList.add('hidden');
-    });
-    searchEl.addEventListener('focus', function () { if (searchEl.value.trim()) doSearch(searchEl.value.trim()); }, true);
-
     /* ── Save ── */
-    saveBtn.addEventListener('click', function () {
+    function saveItems() {
+        var url = getUrl('syncUrl');
+        var btn = saveBtn();
+        var msg = msgEl();
+        if (!url || !btn) return;
+
         var ids = Object.keys(selected);
         var xsrf = (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/) || [])[1];
         xsrf = xsrf ? decodeURIComponent(xsrf) : '';
 
-        saveBtn.disabled = true;
-        fetch(syncUrl, {
+        btn.disabled = true;
+        fetch(url, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': xsrf },
             body: JSON.stringify({ product_ids: ids }),
         })
         .then(function (r) { return r.json(); })
         .then(function () {
-            msgEl.classList.remove('hidden');
-            setTimeout(function () { msgEl.classList.add('hidden'); }, 2500);
+            if (msg) { msg.classList.remove('hidden'); setTimeout(function () { msg.classList.add('hidden'); }, 2500); }
         })
-        .finally(function () { saveBtn.disabled = false; });
+        .catch(function () {})
+        .finally(function () { btn.disabled = false; });
+    }
+
+    /* ── Event delegation — works even after Vue re-renders ── */
+    document.addEventListener('input', function (e) {
+        if (e.target.id !== 'stl-search') return;
+        clearTimeout(searchTimer);
+        var q = e.target.value.trim();
+        searchTimer = setTimeout(function () { doSearch(q); }, 250);
     });
+
+    document.addEventListener('focus', function (e) {
+        if (e.target.id !== 'stl-search') return;
+        var q = e.target.value.trim();
+        if (q) doSearch(q);
+    }, true);
+
+    document.addEventListener('click', function (e) {
+        /* Remove item */
+        if (e.target.classList.contains('stl-remove')) {
+            delete selected[e.target.dataset.id];
+            renderItems();
+            return;
+        }
+        /* Save */
+        if (e.target.id === 'stl-save') {
+            saveItems();
+            return;
+        }
+        /* Hide results when clicking outside */
+        var list = resultsList();
+        var s = searchEl();
+        if (list && !list.contains(e.target) && e.target !== s) {
+            list.classList.add('hidden');
+        }
+    });
+
+    /* ── Init ── */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadItems);
+    } else {
+        loadItems();
+    }
 })();
 </script>
 @endPushOnce

@@ -72,7 +72,7 @@
 
             <!-- Email -->
             <x-shop::form.control-group>
-                <x-shop::form.control-group.label class="required !mt-0">
+                <x-shop::form.control-group.label class="!mt-0">
                     @lang('shop::app.checkout.onepage.address.email')
                 </x-shop::form.control-group.label>
 
@@ -80,7 +80,7 @@
                     type="email"
                     ::name="controlName + '.email'"
                     ::value="address.email"
-                    rules="required|email"
+                    rules="email"
                     :label="trans('shop::app.checkout.onepage.address.email')"
                     placeholder="email@example.com"
                 />
@@ -154,7 +154,7 @@
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <!-- Country -->
                 <x-shop::form.control-group class="!mb-4">
-                    <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }} !mt-0">
+                    <x-shop::form.control-group.label class="!mt-0">
                         @lang('shop::app.checkout.onepage.address.country')
                     </x-shop::form.control-group.label>
 
@@ -163,7 +163,7 @@
                         ::name="controlName + '.country'"
                         ::value="address.country"
                         v-model="selectedCountry"
-                        rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
+                        rules=""
                         :label="trans('shop::app.checkout.onepage.address.country')"
                         :placeholder="trans('shop::app.checkout.onepage.address.country')"
                     >
@@ -186,7 +186,7 @@
 
                 <!-- State -->
                 <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }} !mt-0">
+                    <x-shop::form.control-group.label class="!mt-0">
                         @lang('shop::app.checkout.onepage.address.state')
                     </x-shop::form.control-group.label>
 
@@ -195,7 +195,7 @@
                             <x-shop::form.control-group.control
                                 type="select"
                                 ::name="controlName + '.state'"
-                                rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                                rules=""
                                 ::value="address.state"
                                 :label="trans('shop::app.checkout.onepage.address.state')"
                                 :placeholder="trans('shop::app.checkout.onepage.address.state')"
@@ -218,7 +218,7 @@
                                 type="text"
                                 ::name="controlName + '.state'"
                                 ::value="address.state"
-                                rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                                rules=""
                                 :label="trans('shop::app.checkout.onepage.address.state')"
                                 :placeholder="trans('shop::app.checkout.onepage.address.state')"
                             />
@@ -234,7 +234,7 @@
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <!-- City -->
                 <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
+                    <x-shop::form.control-group.label class="!mt-0">
                         @lang('shop::app.checkout.onepage.address.city')
                     </x-shop::form.control-group.label>
 
@@ -242,7 +242,7 @@
                         type="text"
                         ::name="controlName + '.city'"
                         ::value="address.city"
-                        rules="required"
+                        rules=""
                         :label="trans('shop::app.checkout.onepage.address.city')"
                         :placeholder="trans('shop::app.checkout.onepage.address.city')"
                     />
@@ -254,7 +254,7 @@
 
                 <!-- Postcode -->
                 <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="{{ core()->isPostCodeRequired() ? 'required' : '' }} !mt-0">
+                    <x-shop::form.control-group.label class="!mt-0">
                         @lang('shop::app.checkout.onepage.address.postcode')
                     </x-shop::form.control-group.label>
 
@@ -262,7 +262,7 @@
                         type="text"
                         ::name="controlName + '.postcode'"
                         ::value="address.postcode"
-                        rules="{{ core()->isPostCodeRequired() ? 'required' : '' }}|postcode"
+                        rules="postcode"
                         :label="trans('shop::app.checkout.onepage.address.postcode')"
                         :placeholder="trans('shop::app.checkout.onepage.address.postcode')"
                     />

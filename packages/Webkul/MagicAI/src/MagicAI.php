@@ -35,6 +35,22 @@ class MagicAI
     {
         $provider = $this->prepareProvider($model);
 
+        // When no model is given, the SDK falls back to config('ai.default_for_images').
+        // We must still inject the stored API key for that default provider.
+        if (! $provider) {
+            $defaultProvider = config('ai.default_for_images');
+
+            if ($defaultProvider) {
+                $apiKey = core()->getConfigData("magic_ai.providers.{$defaultProvider}.api_key");
+
+                if ($apiKey) {
+                    config(["ai.providers.{$defaultProvider}.key" => $apiKey]);
+                }
+
+                $provider = $defaultProvider;
+            }
+        }
+
         return $this->executeImages($prompt, $options, $provider, $model);
     }
 

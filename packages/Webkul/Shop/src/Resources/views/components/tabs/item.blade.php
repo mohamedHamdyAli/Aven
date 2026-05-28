@@ -34,11 +34,13 @@
 
             data() {
                 return {
-                    isActive: false
+                    isActive: false,
+                    tabId: '',
                 }
             },
 
             mounted() {
+                this.tabId = this.$attrs?.id ?? '';
                 this.isActive = this.isSelected;
 
                 /**

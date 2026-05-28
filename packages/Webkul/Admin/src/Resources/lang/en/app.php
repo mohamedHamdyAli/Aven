@@ -1114,6 +1114,10 @@ return [
     ],
 
     'catalog' => [
+        'stock-notifications' => [
+            'title' => 'Stock Alert Subscriptions',
+        ],
+
         'products' => [
             'index' => [
                 'already-taken' => 'The :name has already been taken.',
@@ -1121,6 +1125,7 @@ return [
                 'title' => 'Products',
 
                 'create' => [
+                    'add-option' => 'Add',
                     'back-btn' => 'Back',
                     'configurable-attributes' => 'Configurable Attributes',
                     'create-btn' => 'Create Product',
@@ -1349,6 +1354,8 @@ return [
                         'title' => 'Variations',
 
                         'create' => [
+                            'add-option'   => 'Add',
+                            'deselect-all' => 'Deselect All',
                             'description' => 'Description',
                             'name' => 'Name',
                             'save-btn' => 'Add',
@@ -2649,9 +2656,55 @@ return [
 
         'promotions' => [
             'index' => [
-                'cart-rule-title' => 'Cart Rules',
+                'cart-rule-title'    => 'Cart Rules',
                 'catalog-rule-title' => 'Catalog Rules',
-                'bulk-deal-title' => 'Bulk Deals',
+                'bulk-deal-title'    => 'Bulk Deals',
+            ],
+
+            'coupon-assignments' => [
+                'title'                => 'Coupon Campaigns',
+                'create-title'         => 'New Coupon Campaign',
+                'create-btn'           => 'New Campaign',
+                'campaign-name'        => 'Campaign Name',
+                'campaign-placeholder' => 'e.g. Ramadan Sale 2026',
+                'select-rule'          => 'Select Cart Rule',
+                'cart-rule'            => 'Cart Rule',
+                'tab-csv'              => 'Upload CSV',
+                'tab-manual'           => 'Enter Manually',
+                'csv-label'            => 'CSV File (one phone/ID per row)',
+                'csv-hint'             => 'One number per row. Header row is auto-skipped.',
+                'paste-label'          => 'Paste Phone Numbers',
+                'paste-hint'           => 'One per line or comma-separated.',
+                'phones-label'         => 'Phone Numbers',
+                'add-phone'            => 'Add Phone',
+                'generate-btn'         => 'Generate & Send',
+                'back'                 => 'Back',
+
+                'show' => [
+                    'off'          => 'Off',
+                    'total'        => 'Total Coupons',
+                    'coupons-list' => 'Coupons',
+                    'search'       => 'Search...',
+                    'empty'        => 'No coupons in this campaign.',
+                ],
+
+                'datagrid' => [
+                    'id'          => '#',
+                    'campaign'    => 'Campaign Name',
+                    'phone'       => 'Phone / ID',
+                    'coupon-code' => 'Coupon Code',
+                    'cart-rule'   => 'Cart Rule',
+                    'discount'    => 'Discount',
+                    'total'       => 'Total',
+                    'used-count'  => 'Used',
+                    'used'        => 'Status',
+                    'used-yes'    => 'Used',
+                    'used-no'     => 'Not Used',
+                    'created-at'  => 'Date',
+                    'view'        => 'View Campaign',
+                    'delete'      => 'Delete',
+                    'mass-delete' => 'Delete Selected',
+                ],
             ],
 
             'bulk-deals' => [
@@ -4269,6 +4322,97 @@ return [
                         'preview-sidebar' => 'Preview Sidebar Menu',
                         'sidebar' => 'Sidebar Menu',
                         'title' => 'Menu Category View',
+                    ],
+
+                    'shop-header' => [
+                        'title'         => 'Header, Logo & Favicon',
+                        'title-info'    => 'Control the logo width, header height, and favicon size displayed in the shop front.',
+                        'logo-width'    => 'Logo Width (px)',
+                        'header-height' => 'Header Height (px)',
+                        'favicon-size'  => 'Favicon Size',
+                    ],
+
+                    'shop-fonts' => [
+                        'title'          => 'Font Sizes & Families',
+                        'title-info'     => 'Set font sizes and font families for body text, navigation links, and headings in the shop front.',
+                        'body-size'       => 'Body Font Size (px)',
+                        'nav-size'        => 'Navigation Font Size (px)',
+                        'heading-size'    => 'Heading Font Size (px)',
+                        'body-family'     => 'Body Font Family',
+                        'body-weight'     => 'Body Font Weight',
+                        'heading-family'  => 'Heading Font Family',
+                        'heading-weight'  => 'Heading Font Weight',
+                        'nav-family'      => 'Navigation Font Family',
+                        'nav-weight'      => 'Navigation Font Weight',
+                    ],
+
+                    'shop-products' => [
+                        'title'      => 'Product Card Sizes',
+                        'title-info' => 'Control the maximum dimensions of product card images in listing pages.',
+                        'card-height' => 'Card Image Height (px)',
+                        'card-width'  => 'Card Image Width (px)',
+                    ],
+
+                    'free-shipping-bar' => [
+                        'title'      => 'Free Shipping Bar',
+                        'title-info' => 'Show a progress bar in the cart motivating customers to reach the free shipping threshold.',
+                        'enabled'    => 'Enable Free Shipping Bar',
+                        'threshold'  => 'Free Shipping Threshold (cart subtotal)',
+                    ],
+
+                    'exit-intent' => [
+                        'title'          => 'Exit Intent Popup',
+                        'title-info'     => 'Show a discount popup when the visitor is about to leave the site.',
+                        'enabled'        => 'Enable Exit Intent Popup',
+                        'popup-title'    => 'Popup Title',
+                        'popup-subtitle' => 'Popup Subtitle',
+                        'coupon-code'    => 'Coupon Code to Display',
+                        'button-text'    => 'Button Text',
+                    ],
+
+                    'whatsapp-button' => [
+                        'title'      => 'WhatsApp Floating Button',
+                        'title-info' => 'Show a floating WhatsApp chat button on every shop page.',
+                        'enabled'    => 'Enable WhatsApp Button',
+                        'phone'      => 'WhatsApp Phone Number (with country code, e.g. 201012345678)',
+                        'message'    => 'Pre-filled Message',
+                    ],
+
+                    'newsletter-popup' => [
+                        'title'          => 'Newsletter Popup',
+                        'title-info'     => 'Show an email subscription popup to capture visitor leads.',
+                        'enabled'        => 'Enable Newsletter Popup',
+                        'delay'          => 'Delay Before Showing (seconds)',
+                        'popup-title'    => 'Popup Title',
+                        'popup-subtitle' => 'Popup Subtitle',
+                        'button-text'    => 'Subscribe Button Text',
+                    ],
+                ],
+
+                'loyalty' => [
+                    'title' => 'Loyalty Points',
+                    'info'  => 'Loyalty Points Reward System',
+
+                    'settings' => [
+                        'title'      => 'Loyalty Points Settings',
+                        'title-info' => 'Configure how customers earn and redeem loyalty points.',
+                        'enabled'    => 'Enable Loyalty Points',
+                        'earn-rate'  => 'Points per Currency Unit (e.g. 10 = 1 point per 10 EGP)',
+                        'redeem-rate' => 'Currency Value per Point (e.g. 0.10 = 1 point = 0.10 EGP)',
+                        'min-redeem' => 'Minimum Points Required to Redeem',
+                    ],
+                ],
+
+                'referral' => [
+                    'title' => 'Referral Program',
+                    'info'  => 'Customer Referral Reward Program',
+
+                    'settings' => [
+                        'title'        => 'Referral Program Settings',
+                        'title-info'   => 'Reward customers who refer friends to your store.',
+                        'enabled'      => 'Enable Referral Program',
+                        'reward-type'  => 'Reward Type',
+                        'reward-amount' => 'Reward Amount',
                     ],
                 ],
 

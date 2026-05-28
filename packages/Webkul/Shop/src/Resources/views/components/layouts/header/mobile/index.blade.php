@@ -27,11 +27,9 @@
                 aria-label="@lang('shop::app.components.layouts.header.mobile.bagisto')"
             >
                 <img
-                    class="block"
+                    class="block shop-logo-img"
                     src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
-                    width="131"
-                    height="29"
                 >
             </a>
 

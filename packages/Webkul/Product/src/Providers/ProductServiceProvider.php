@@ -5,6 +5,7 @@ namespace Webkul\Product\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Webkul\Product\Console\Commands\Indexer;
+use Webkul\Product\Console\Commands\SendBackInStockNotifications;
 use Webkul\Product\Models\ProductProxy;
 use Webkul\Product\Observers\ProductObserver;
 
@@ -31,10 +32,13 @@ class ProductServiceProvider extends ServiceProvider
 
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'product');
 
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'product');
+
         ProductProxy::observe(ProductObserver::class);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command('indexer:index --type=price')->dailyAt('00:01');
+            $schedule->command('stock:notify')->everyThirtyMinutes();
         });
 
         $this->app->register(EventServiceProvider::class);
@@ -54,7 +58,7 @@ class ProductServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([Indexer::class]);
+            $this->commands([Indexer::class, SendBackInStockNotifications::class]);
         }
     }
 }

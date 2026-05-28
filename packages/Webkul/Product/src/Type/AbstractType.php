@@ -149,6 +149,22 @@ abstract class AbstractType
 
         $product->channels()->sync(core()->getDefaultChannel()->id);
 
+        if (! isset($data['parent_id'])) {
+            $defaults = [];
+
+            foreach ($product->attribute_family->custom_attributes as $attribute) {
+                if (! is_null($attribute->default_value)) {
+                    $defaults[$attribute->code] = $attribute->default_value;
+                }
+            }
+
+            if (! empty($defaults)) {
+                $this->attributeValueRepository->saveValues($defaults, $product, $product->attribute_family->custom_attributes);
+
+                $product->load('attribute_values');
+            }
+        }
+
         return $product;
     }
 

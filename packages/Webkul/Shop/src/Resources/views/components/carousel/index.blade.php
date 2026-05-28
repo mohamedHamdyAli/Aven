@@ -1,8 +1,8 @@
 @props(['options'])
 
-<v-carousel :images="{{ json_encode($options['images'] ?? []) }}">
+<v-carousel style="display:block;width:100%" :images="{{ json_encode($options['images'] ?? []) }}">
     <div class="overflow-hidden">
-        <div class="shimmer aspect-[2.743/1] max-h-screen w-screen"></div>
+        <div class="shimmer w-full" style="aspect-ratio:1920/700"></div>
     </div>
 </v-carousel>
 
@@ -11,30 +11,24 @@
         type="text/x-template"
         id="v-carousel-template"
     >
-        <div class="relative m-auto flex w-full overflow-hidden">
+        <div class="relative flex w-full overflow-hidden">
             <!-- Slider -->
             <div
                 class="inline-flex translate-x-0 cursor-pointer transition-transform duration-700 ease-out will-change-transform"
                 ref="sliderContainer"
             >
                 <div
-                    class="max-h-screen w-screen bg-cover bg-no-repeat"
+                    class="w-screen overflow-hidden"
+                    style="aspect-ratio:1920/700"
                     v-for="(image, index) in images"
                     :key="index"
                     @click="visitLink(image)"
                     ref="slide"
                 >
                     <x-shop::media.images.lazy
-                        class="aspect-[2.743/1] max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out will-change-transform"
+                        class="h-full w-full select-none object-cover transition-transform duration-300 ease-in-out will-change-transform"
                         ::lazy="index === 0 ? false : true"
                         ::src="image.image"
-                        ::srcset="image.image + ' 1920w, ' + image.image.replace('storage', 'cache/large') + ' 1280w,' + image.image.replace('storage', 'cache/medium') + ' 1024w, ' + image.image.replace('storage', 'cache/small') + ' 525w'"
-                        ::sizes="
-                            '(max-width: 525px) 525px, ' +
-                            '(max-width: 1024px) 1024px, ' +
-                            '(max-width: 1600px) 1280px, ' +
-                            '1920px'
-                        "
                         ::alt="image?.title || 'Carousel Image ' + (index + 1)"
                         tabindex="0"
                         ::fetchpriority="index === 0 ? 'high' : 'low'"
@@ -314,11 +308,9 @@
                 },
 
                 cleanup() {
-                    // Clear intervals and animation frames
                     clearInterval(this.autoPlayInterval);
                     cancelAnimationFrame(this.animationID);
 
-                    // Remove event listeners
                     if (this.slides) {
                         this.slides.forEach(slide => {
                             slide.removeEventListener('mousedown', this.handleDragStart);

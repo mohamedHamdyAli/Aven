@@ -21,34 +21,66 @@
 
         {!! view_render_event('bagisto.shop.checkout.onepage.summary.item_image.after') !!}
 
-        <div>
+        <div class="flex flex-1 flex-col justify-between">
             {!! view_render_event('bagisto.shop.checkout.onepage.summary.item_name.before') !!}
 
-            <p class="text-base text-navyBlue max-md:text-sm max-md:font-medium">
-                @{{ item.name }}
-            </p>
+            <div class="flex items-start justify-between gap-2">
+                <p class="text-base text-navyBlue max-md:text-sm max-md:font-medium">
+                    @{{ item.name }}
+                </p>
+
+                <!-- Remove button -->
+                <button
+                    type="button"
+                    class="shrink-0 text-gray-400 transition hover:text-red-500"
+                    title="Remove"
+                    @click="removeCartItem(item.id)"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
             {!! view_render_event('bagisto.shop.checkout.onepage.summary.item_name.after') !!}
 
-            <p class="mt-2.5 flex flex-col text-lg font-medium max-md:mt-1 max-md:text-base max-md:font-normal max-sm:text-sm">
-                <template v-if="displayTax.prices == 'including_tax'">
-                    @lang('shop::app.checkout.onepage.summary.price_and_qty', ['price' => '@{{ item.formatted_price_incl_tax }}', 'qty' => '@{{ item.quantity }}'])
-                </template>
+            <!-- Variant options (Color, Size, etc.) -->
+            <div v-if="item.options && item.options.length" class="mt-1.5 flex flex-wrap gap-1.5">
+                <span
+                    v-for="opt in item.options"
+                    :key="opt.attribute_name"
+                    class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-600"
+                >
+                    <span class="text-gray-400">@{{ opt.attribute_name }}</span>
+                    <span class="font-semibold text-gray-800">@{{ opt.option_label }}</span>
+                </span>
+            </div>
 
-                <template v-else-if="displayTax.prices == 'both'">
-                    @lang('shop::app.checkout.onepage.summary.price_and_qty', ['price' => '@{{ item.formatted_price_incl_tax }}', 'qty' => '@{{ item.quantity }}'])
+            <div class="mt-2 flex items-center justify-between gap-3">
+                <!-- Price -->
+                <p class="text-base font-medium max-sm:text-sm">
+                    <template v-if="displayTax.prices == 'including_tax'">@{{ item.formatted_price_incl_tax }}</template>
+                    <template v-else>@{{ item.formatted_price }}</template>
+                </p>
 
-                    <span class="text-xs font-normal">
-                        @lang('shop::app.checkout.onepage.summary.excl-tax')
+                <!-- Qty stepper -->
+                <div class="flex items-center gap-1 rounded-lg border border-gray-200 px-1 py-0.5">
+                    <button
+                        type="button"
+                        class="flex h-6 w-6 items-center justify-center rounded text-gray-500 transition hover:bg-gray-100 disabled:opacity-40"
+                        :disabled="item.quantity <= 1"
+                        @click="updateCartItemQty(item.id, item.quantity - 1)"
+                    >−</button>
 
-                        <span class="font-medium">@{{ item.formatted_total }}</span>
-                    </span>
-                </template>
+                    <span class="min-w-[20px] text-center text-sm font-medium">@{{ item.quantity }}</span>
 
-                <template v-else>
-                    @lang('shop::app.checkout.onepage.summary.price_and_qty', ['price' => '@{{ item.formatted_price }}', 'qty' => '@{{ item.quantity }}'])
-                </template>
-            </p>
+                    <button
+                        type="button"
+                        class="flex h-6 w-6 items-center justify-center rounded text-gray-500 transition hover:bg-gray-100"
+                        @click="updateCartItemQty(item.id, item.quantity + 1)"
+                    >+</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -297,6 +329,126 @@
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.tax.after') !!}
 
     <!-- Cart Grand Total -->
+    <!-- COD Handling Fee -->
+    @php $codFee = (float) core()->getConfigData('sales.payment_methods.cashondelivery.extra_charge'); @endphp
+    @if ($codFee > 0)
+        <div class="flex justify-between text-right" v-if="cart.payment?.method === 'cashondelivery'">
+            <p class="text-base max-sm:text-sm">Cash on Delivery Fee</p>
+            <p class="text-base font-medium max-sm:text-sm">+ {{ core()->formatPrice($codFee) }}</p>
+        </div>
+    @endif
+
+    @auth('customer')
+    <div x-data="walletWidget()" class="mt-3 rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-semibold text-indigo-700">Store Credit</p>
+                <p class="text-xs text-indigo-500">Available: <span x-text="formattedBalance"></span></p>
+            </div>
+            <template x-if="!applied">
+                <button @click="apply()" class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">
+                    Use Credit
+                </button>
+            </template>
+            <template x-if="applied">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-green-600">-<span x-text="formattedApplied"></span></span>
+                    <button @click="remove()" class="text-xs text-red-500 hover:text-red-700">Remove</button>
+                </div>
+            </template>
+        </div>
+    </div>
+    @endauth
+
+    {{-- Gift Card --}}
+    <div
+        x-data="giftCardWidget()"
+        x-init="init()"
+        class="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3"
+    >
+        <p class="text-sm font-semibold text-amber-700 mb-2">🎁 Gift Card</p>
+        <template x-if="!applied">
+            <div class="flex gap-2">
+                <input
+                    type="text"
+                    x-model="code"
+                    placeholder="Enter gift card code"
+                    class="flex-1 rounded-lg border border-amber-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-amber-400"
+                />
+                <button
+                    @click="apply()"
+                    class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600"
+                >Apply</button>
+            </div>
+        </template>
+        <template x-if="applied">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-amber-600 font-mono" x-text="appliedCode"></span>
+                    <span class="ml-2 text-sm font-semibold text-green-600">-<span x-text="formattedDiscount"></span></span>
+                </div>
+                <button @click="remove()" class="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+        </template>
+        <p x-show="message" x-text="message" class="mt-1 text-xs text-red-600"></p>
+    </div>
+
+    {{-- Loyalty Points --}}
+    @auth('customer')
+        @php
+            $loyaltyEnabled = (bool) core()->getConfigData('general.loyalty.settings.enabled');
+            $loyaltyBalance = 0;
+            if ($loyaltyEnabled) {
+                try {
+                    $loyaltyBalance = app(\Webkul\Loyalty\Services\LoyaltyService::class)
+                        ->getBalance(auth()->guard('customer')->id());
+                } catch (\Throwable $e) {}
+            }
+        @endphp
+        @if ($loyaltyEnabled && $loyaltyBalance >= (float)(core()->getConfigData('general.loyalty.settings.min_redeem') ?? 100))
+            <div
+                x-data="loyaltyWidget()"
+                class="mt-4 border-t border-zinc-200 pt-4"
+            >
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-navyBlue">&#11088; Loyalty Points</span>
+                    <span class="text-sm text-gray-500">{{ number_format($loyaltyBalance) }} pts available</span>
+                </div>
+
+                <template x-if="! applied">
+                    <div class="mt-2 flex gap-2">
+                        <input
+                            x-model="points"
+                            type="number"
+                            min="{{ (int)(core()->getConfigData('general.loyalty.settings.min_redeem') ?? 100) }}"
+                            max="{{ (int)$loyaltyBalance }}"
+                            placeholder="Points to redeem"
+                            class="flex-1 rounded border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-navyBlue"
+                        />
+                        <button
+                            @click="applyPoints()"
+                            class="rounded bg-navyBlue px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+                        >
+                            Apply
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="applied">
+                    <div class="mt-2 flex items-center justify-between rounded-md bg-green-50 px-3 py-2">
+                        <span class="text-sm text-green-700">- <span x-text="formattedDiscount"></span></span>
+                        <button
+                            @click="removePoints()"
+                            class="text-xs text-red-500 hover:underline"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </template>
+            </div>
+        @endif
+    @endauth
+
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.grand_total.before') !!}
 
     <div class="flex justify-between text-right">
@@ -310,4 +462,158 @@
     </div>
 
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.grand_total.after') !!}
+
+    <!-- Checkout Trust Badges -->
+    <div class="mt-5 grid grid-cols-2 gap-2.5 border-t border-gray-100 pt-5">
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="h-5 w-5 shrink-0 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <span>@lang('shop::app.checkout.cart.summary.trust.secure')</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="h-5 w-5 shrink-0 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>@lang('shop::app.checkout.cart.summary.trust.returns')</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="h-5 w-5 shrink-0 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+            </svg>
+            <span>@lang('shop::app.checkout.cart.summary.trust.guarantee')</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="h-5 w-5 shrink-0 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <span>@lang('shop::app.checkout.cart.summary.trust.delivery')</span>
+        </div>
+    </div>
 </div>
+
+@pushOnce('scripts')
+<script>
+function giftCardWidget() {
+    return {
+        code: '',
+        applied: false,
+        appliedCode: '',
+        discount: 0,
+        message: '',
+        get formattedDiscount() { return parseFloat(this.discount).toFixed(2); },
+        init() {
+            const stored = sessionStorage.getItem('gc_applied');
+            if (stored) {
+                const d = JSON.parse(stored);
+                this.applied = true; this.appliedCode = d.code; this.discount = d.discount;
+            }
+        },
+        apply() {
+            this.message = '';
+            fetch('{{ route("shop.gift-card.apply") }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+                body: JSON.stringify({code: this.code})
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    this.applied = true; this.appliedCode = this.code; this.discount = d.discount;
+                    sessionStorage.setItem('gc_applied', JSON.stringify({code: this.code, discount: d.discount}));
+                    location.reload();
+                } else {
+                    this.message = d.message;
+                }
+            }).catch(() => { this.message = 'Something went wrong.'; });
+        },
+        remove() {
+            fetch('{{ route("shop.gift-card.remove") }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+            }).then(() => { this.applied = false; this.appliedCode = ''; this.discount = 0; sessionStorage.removeItem('gc_applied'); location.reload(); });
+        }
+    };
+}
+</script>
+@endPushOnce
+
+@auth('customer')
+@pushOnce('scripts')
+<script>
+function loyaltyWidget() {
+    return {
+        points: '',
+        applied: sessionStorage.getItem('loyalty_applied') === 'true',
+        formattedDiscount: sessionStorage.getItem('loyalty_formatted') || '',
+        applyPoints() {
+            fetch('{{ route("shop.loyalty.apply") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ points: this.points })
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    sessionStorage.setItem('loyalty_applied', 'true');
+                    sessionStorage.setItem('loyalty_formatted', d.formatted_discount);
+                    location.reload();
+                } else {
+                    alert(d.message || 'Could not apply points.');
+                }
+            });
+        },
+        removePoints() {
+            fetch('{{ route("shop.loyalty.remove") }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => {
+                sessionStorage.removeItem('loyalty_applied');
+                sessionStorage.removeItem('loyalty_formatted');
+                location.reload();
+            });
+        }
+    };
+}
+</script>
+@endPushOnce
+@endauth
+
+@auth('customer')
+@pushOnce('scripts')
+<script>
+function walletWidget() {
+    return {
+        balance: 0,
+        applied: 0,
+        get formattedBalance() { return parseFloat(this.balance).toFixed(2); },
+        get formattedApplied()  { return parseFloat(this.applied).toFixed(2); },
+        init() {
+            fetch('{{ route("shop.wallet.apply") }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+                body: JSON.stringify({amount: 0})
+            }).then(r => r.json()).then(d => {
+                if (d.balance !== undefined) this.balance = parseFloat(d.balance);
+                if (d.applied  !== undefined) this.applied = parseFloat(d.applied);
+            }).catch(() => {});
+        },
+        apply() {
+            fetch('{{ route("shop.wallet.apply") }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+                body: JSON.stringify({amount: this.balance})
+            }).then(r => r.json()).then(d => {
+                if (d.applied > 0) { this.applied = parseFloat(d.applied); location.reload(); }
+            });
+        },
+        remove() {
+            fetch('{{ route("shop.wallet.remove") }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'}
+            }).then(() => { this.applied = 0; location.reload(); });
+        }
+    };
+}
+</script>
+@endPushOnce
+@endauth

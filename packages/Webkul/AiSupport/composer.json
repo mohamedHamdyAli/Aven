@@ -1,0 +1,18 @@
+{
+    "name": "webkul/ai-support",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\AiSupport\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\AiSupport\\Providers\\AiSupportServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

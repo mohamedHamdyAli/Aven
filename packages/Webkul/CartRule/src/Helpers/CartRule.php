@@ -594,6 +594,17 @@ class CartRule
                         return false;
                     }
                 }
+                $assignment = \Illuminate\Support\Facades\DB::table('cart_rule_coupon_assignments')
+                    ->where('cart_rule_coupon_id', $coupon->id)
+                    ->first();
+
+                if ($assignment) {
+                    $customerPhone = auth()->guard('customer')->user()?->phone;
+
+                    if (! $customerPhone || $customerPhone !== $assignment->phone) {
+                        return false;
+                    }
+                }
             } else {
                 return false;
             }

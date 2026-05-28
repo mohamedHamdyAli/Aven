@@ -321,7 +321,7 @@ class Configurable extends AbstractType
                 new ConfigurableUniqueSku($this->getChildrenIds()),
             ],
             'variants.*.price' => 'required',
-            'variants.*.weight' => 'required',
+            'variants.*.weight' => 'nullable',
         ];
     }
 
@@ -414,9 +414,9 @@ class Configurable extends AbstractType
                 'total_incl_tax' => $convertedPrice * $data['quantity'],
                 'base_total' => $price * $data['quantity'],
                 'base_total_incl_tax' => $price * $data['quantity'],
-                'weight' => $childProduct->weight,
-                'total_weight' => $childProduct->weight * $data['quantity'],
-                'base_total_weight' => $childProduct->weight * $data['quantity'],
+                'weight' => (float) ($childProduct->weight ?? 0),
+                'total_weight' => (float) ($childProduct->weight ?? 0) * $data['quantity'],
+                'base_total_weight' => (float) ($childProduct->weight ?? 0) * $data['quantity'],
                 'additional' => $this->getAdditionalOptions($data),
             ], [
                 'parent_id' => $this->product->id,
@@ -602,9 +602,7 @@ class Configurable extends AbstractType
         $total = 0;
 
         foreach ($this->product->variants as $variant) {
-            $inventoryIndex = $variant->totalQuantity();
-
-            $total += $inventoryIndex->qty;
+            $total += $variant->totalQuantity();
         }
 
         return $total;

@@ -14,7 +14,7 @@
             class="1180:transtion-all group w-full rounded-md 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:duration-300 1180:hover:shadow-[0_5px_10px_rgba(0,0,0,0.1)]"
             v-if="mode != 'list'"
         >
-            <div class="relative max-h-[300px] max-w-[291px] overflow-hidden max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
+            <div class="shop-card-img-wrap relative max-h-[300px] max-w-[291px] overflow-hidden max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
                 {!! view_render_event('bagisto.shop.components.products.card.image.before') !!}
 
                 <!-- Product Image -->
@@ -24,10 +24,10 @@
                 >
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
-                        ::src="product.base_image.medium_image_url"
+                        ::src="product.base_image?.medium_image_url"
                         ::srcset="`
-                            ${product.base_image.small_image_url} 150w,
-                            ${product.base_image.medium_image_url} 300w,
+                            ${product.base_image?.small_image_url} 150w,
+                            ${product.base_image?.medium_image_url} 300w,
                         `"
                         sizes="(max-width: 768px) 150px, (max-width: 1200px) 300px, 600px"
                         ::key="product.id"
@@ -64,21 +64,48 @@
                 {!! view_render_event('bagisto.shop.components.products.card.average_ratings.after') !!}
 
                 <div class="action-items bg-black">
-                    <!-- Product Sale Badge -->
-                    <p
-                        class="absolute top-1.5 inline-block rounded-[44px] bg-red-600 px-2.5 text-sm text-white max-sm:rounded-l-none max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 rtl:right-5 max-sm:rtl:right-0"
-                        v-if="product.on_sale"
-                    >
-                        @lang('shop::app.components.products.card.sale')
-                    </p>
+                    <!-- Product Badges Stack -->
+                    <div class="absolute top-1.5 flex flex-col gap-1 ltr:left-1.5 rtl:right-1.5">
+                        <!-- Sale Badge -->
+                        <p
+                            class="inline-block self-start rounded-[44px] bg-red-600 px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
+                            v-if="product.on_sale"
+                        >
+                            @lang('shop::app.components.products.card.sale')
+                        </p>
 
-                    <!-- Product New Badge -->
-                    <p
-                        class="absolute top-1.5 inline-block rounded-[44px] bg-navyBlue px-2.5 text-sm text-white max-sm:rounded-l-none max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 rtl:right-1.5 max-sm:rtl:right-0"
-                        v-else-if="product.is_new"
-                    >
-                        @lang('shop::app.components.products.card.new')
-                    </p>
+                        <!-- New Badge -->
+                        <p
+                            class="inline-block self-start rounded-[44px] bg-navyBlue px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
+                            v-if="product.is_new && ! product.on_sale"
+                        >
+                            @lang('shop::app.components.products.card.new')
+                        </p>
+
+                        <!-- Low Stock Badge -->
+                        <p
+                            class="inline-block self-start rounded-[44px] bg-orange-500 px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
+                            v-if="product.stock_qty > 0 && product.stock_qty <= 5"
+                        >
+                            @lang('shop::app.components.products.card.low-stock')
+                        </p>
+
+                        <!-- Popular Badge -->
+                        <p
+                            class="inline-block self-start rounded-[44px] bg-emerald-600 px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
+                            v-if="product.ratings.total >= 10"
+                        >
+                            @lang('shop::app.components.products.card.popular')
+                        </p>
+
+                        <!-- Flash Sale Badge -->
+                        <p
+                            class="inline-block self-start rounded-[44px] bg-red-600 px-2.5 text-xs text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5"
+                            v-if="product.flash_sale_ends_at && !product.on_sale"
+                        >
+                            ⚡ Flash Sale
+                        </p>
+                    </div>
 
                     <div class="opacity-0 transition-all duration-300 group-hover:bottom-0 group-hover:opacity-100 max-lg:opacity-100 max-sm:opacity-100">
 
@@ -114,6 +141,14 @@
                         {!! view_render_event('bagisto.shop.components.products.card.compare_option.after') !!}
 
                     </div>
+
+                    <!-- Quick View Button -->
+                    <button
+                        class="absolute bottom-0 left-0 right-0 bg-black/70 py-2 text-sm font-medium text-white opacity-0 transition-all duration-300 group-hover:opacity-100 max-md:hidden"
+                        @click.prevent="showQuickView = true"
+                    >
+                        @lang('shop::app.components.products.card.quick-view')
+                    </button>
                 </div>
             </div>
 
@@ -201,7 +236,7 @@
                 <a :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)">
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative min-w-[250px] bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
-                        ::src="product.base_image.medium_image_url"
+                        ::src="product.base_image?.medium_image_url"
                         ::key="product.id"
                         ::index="product.id"
                         width="291"
@@ -337,6 +372,65 @@
                 @endif
             </div>
         </div>
+
+        <!-- Quick View Modal (Vue 3 Teleport) -->
+        <teleport to="body">
+            <div
+                v-if="showQuickView"
+                class="fixed inset-0 z-[180] flex items-center justify-center bg-black/60 p-4"
+                @click.self="showQuickView = false"
+            >
+                <div class="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+                    <button
+                        class="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-xl text-gray-500 hover:text-gray-800"
+                        @click="showQuickView = false"
+                    >&times;</button>
+
+                    <div class="flex flex-col sm:flex-row">
+                        <!-- Image -->
+                        <div class="flex items-center justify-center bg-zinc-100 sm:w-1/2">
+                            <img
+                                :src="product.base_image?.large_image_url || product.base_image?.medium_image_url"
+                                :alt="product.name"
+                                class="h-full max-h-[350px] w-full object-contain"
+                            />
+                        </div>
+
+                        <!-- Info -->
+                        <div class="flex flex-col justify-center gap-4 p-6 sm:w-1/2">
+                            <h2
+                                class="text-xl font-semibold text-gray-900"
+                                v-text="product.name"
+                            ></h2>
+
+                            <div
+                                class="text-lg font-bold"
+                                v-html="product.price_html"
+                            ></div>
+
+                            <div class="flex flex-wrap gap-3">
+                                @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
+                                    <button
+                                        class="primary-button flex-1 justify-center"
+                                        :disabled="! product.is_saleable || isAddingToCart"
+                                        @click="addToCart(); showQuickView = false"
+                                    >
+                                        @lang('shop::app.components.products.card.add-to-cart')
+                                    </button>
+                                @endif
+
+                                <a
+                                    :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)"
+                                    class="secondary-button whitespace-nowrap"
+                                >
+                                    @lang('shop::app.components.products.card.view-full-details')
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </teleport>
     </script>
 
     <script type="module">
@@ -350,6 +444,8 @@
                     isCustomer: '{{ auth()->guard('customer')->check() }}',
 
                     isAddingToCart: false,
+
+                    showQuickView: false,
                 }
             },
 

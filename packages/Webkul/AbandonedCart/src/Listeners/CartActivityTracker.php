@@ -12,6 +12,16 @@ class CartActivityTracker
      */
     public function onCartActivity(CartContract $cart): void
     {
+        // Debounce: skip if updated within the last 2 minutes to avoid a DB write on every page load
+        if (
+            $cart->last_activity_at
+            && $cart->last_activity_at instanceof \Carbon\Carbon
+            && $cart->last_activity_at->diffInMinutes(now()) < 2
+            && ! empty($cart->notification_token)
+        ) {
+            return;
+        }
+
         $updates = ['last_activity_at' => now()];
 
         if (empty($cart->notification_token)) {

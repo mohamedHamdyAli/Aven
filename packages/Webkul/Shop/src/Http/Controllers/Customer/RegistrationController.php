@@ -95,6 +95,10 @@ class RegistrationController extends Controller
 
         Event::dispatch('customer.create.after', $customer);
 
+        if ($refCode = request('referral_code')) {
+            session()->put('referral_code', strtoupper(trim($refCode)));
+        }
+
         Event::dispatch('customer.registration.after', $customer);
 
         if (core()->getConfigData('customer.settings.email.verification')) {

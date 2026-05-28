@@ -10,6 +10,15 @@
         </p>
 
         <div class="flex items-center gap-x-2.5">
+            <a
+                href="{{ route('admin.sales.orders.picking_list') }}"
+                target="_blank"
+                class="transparent-button px-3 py-1.5 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800 text-sm"
+            >
+                <span class="icon-list text-lg"></span>
+                Picking List
+            </a>
+
             <x-admin::datagrid.export src="{{ route('admin.sales.orders.index') }}" />
 
             {!! view_render_event('bagisto.admin.sales.orders.create.before') !!}

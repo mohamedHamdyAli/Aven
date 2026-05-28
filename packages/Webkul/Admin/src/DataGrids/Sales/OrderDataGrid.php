@@ -42,7 +42,7 @@ class OrderDataGrid extends DataGrid
                 DB::raw('CONCAT('.DB::getTablePrefix().'order_address_billing.city, ", ", '.DB::getTablePrefix().'order_address_billing.state,", ", '.DB::getTablePrefix().'order_address_billing.country) as location'),
                 DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
                     "qty_ordered", oi.qty_ordered,
-                    "image_path", (SELECT pi.path FROM '.DB::getTablePrefix().'product_images pi WHERE pi.product_id = oi.product_id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1)
+                    "image_path", (SELECT pi.path FROM '.DB::getTablePrefix().'product_images pi WHERE pi.product_id = oi.product_id ORDER BY pi.position ASC, pi.id ASC LIMIT 1)
                 )) FROM '.DB::getTablePrefix().'order_items oi WHERE oi.order_id = '.DB::getTablePrefix().'orders.id) as items_data')
             )
             ->groupBy('orders.id');

@@ -504,28 +504,66 @@
                                     {!! view_render_event('bagisto.admin.catalog.products.create_form.attributes.controls.before') !!}
 
                                     <div
-                                        class="mb-2.5"
+                                        class="mb-4"
                                         v-for="attribute in attributes"
                                     >
+                                        <!-- Label -->
                                         <label
-                                            class="block text-xs font-medium leading-6 text-gray-800 dark:text-white"
+                                            class="mb-1.5 block text-xs font-medium leading-6 text-gray-800 dark:text-white"
                                             v-text="attribute.name"
                                         >
                                         </label>
 
+                                        <!-- Selected options tags -->
                                         <div class="flex min-h-[38px] flex-wrap gap-1 rounded-md border p-1.5 dark:border-gray-800">
                                             <p
-                                                class="flex items-center rounded bg-gray-600 px-2 py-1 font-semibold text-white"
+                                                class="flex items-center gap-1 rounded bg-gray-600 px-2 py-1 font-semibold text-white"
                                                 v-for="option in attribute.options"
                                             >
+                                                <!-- Color swatch -->
+                                                <span
+                                                    v-if="attribute.swatch_type === 'color' && option.swatch_value"
+                                                    class="inline-block h-3 w-3 rounded-full border border-white/40"
+                                                    :style="{ backgroundColor: option.swatch_value }"
+                                                ></span>
+
                                                 @{{ option.name }}
 
                                                 <span
-                                                    class="icon-cross cursor-pointer text-lg text-white ltr:ml-1.5 rtl:mr-1.5"
+                                                    class="icon-cross cursor-pointer text-lg text-white ltr:ml-0.5 rtl:mr-0.5"
                                                     @click="removeOption(option)"
                                                 >
                                                 </span>
                                             </p>
+                                        </div>
+
+                                        <!-- Add new option row -->
+                                        <div class="mt-1.5 flex items-center gap-2">
+                                            <input
+                                                v-if="attribute.swatch_type === 'color'"
+                                                type="color"
+                                                v-model="newOptionColors[attribute.code]"
+                                                class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-0.5"
+                                                title="Pick color"
+                                            />
+
+                                            <input
+                                                type="text"
+                                                v-model="newOptionInputs[attribute.code]"
+                                                class="h-8 flex-1 rounded-md border border-gray-300 px-3 text-sm focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                                :placeholder="'+ Add new ' + attribute.name"
+                                                @keyup.enter="addNewOption(attribute)"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                class="secondary-button whitespace-nowrap py-1.5 text-xs"
+                                                :disabled="!newOptionInputs[attribute.code]?.trim() || addingOption[attribute.code]"
+                                                @click="addNewOption(attribute)"
+                                            >
+                                                <span v-if="addingOption[attribute.code]">…</span>
+                                                <span v-else>+ @lang('admin::app.catalog.products.index.create.add-option')</span>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -572,6 +610,12 @@
                         superAttributes: {},
 
                         isLoading: false,
+
+                        newOptionInputs: {},
+
+                        newOptionColors: {},
+
+                        addingOption: {},
                     };
                 },
 
@@ -626,7 +670,45 @@
                                 this.superAttributes[attribute.code].push(option.id);
                             });
                         });
-                    }
+                    },
+
+                    async addNewOption(attribute) {
+                        const name = (this.newOptionInputs[attribute.code] ?? '').trim();
+
+                        if (! name) return;
+
+                        this.addingOption = { ...this.addingOption, [attribute.code]: true };
+
+                        try {
+                            const response = await this.$axios.post(
+                                `/admin/catalog/attributes/${attribute.id}/options`,
+                                {
+                                    admin_name:    name,
+                                    swatch_value:  attribute.swatch_type === 'color'
+                                        ? (this.newOptionColors[attribute.code] || null)
+                                        : null,
+                                }
+                            );
+
+                            attribute.options.push({
+                                id:           response.data.id,
+                                name:         response.data.admin_name,
+                                swatch_value: response.data.swatch_value,
+                            });
+
+                            this.setSuperAttributes();
+
+                            this.newOptionInputs = { ...this.newOptionInputs, [attribute.code]: '' };
+
+                        } catch (err) {
+                            this.$emitter.emit('add-flash', {
+                                type:    'danger',
+                                message: err?.response?.data?.message ?? 'Failed to add option.',
+                            });
+                        } finally {
+                            this.addingOption = { ...this.addingOption, [attribute.code]: false };
+                        }
+                    },
                 }
             })
         </script>

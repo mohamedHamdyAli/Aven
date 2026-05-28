@@ -11,13 +11,17 @@ class ShopTheLookController extends Controller
 {
     public function items(int $productId): JsonResponse
     {
-        $items = ProductLookItem::with('lookProduct.productFlat')
+        $locale = core()->getCurrentLocale()?->code ?? config('app.locale', 'en');
+
+        $items = ProductLookItem::with('lookProduct.product_flats')
             ->where('product_id', $productId)
             ->orderBy('sort_order')
             ->get()
             ->map(fn($item) => [
                 'id'    => $item->look_product_id,
-                'name'  => $item->lookProduct?->productFlat?->name ?? $item->lookProduct?->sku,
+                'name'  => $item->lookProduct?->product_flats?->firstWhere('locale', $locale)?->name
+                           ?? $item->lookProduct?->product_flats?->first()?->name
+                           ?? $item->lookProduct?->sku,
                 'sku'   => $item->lookProduct?->sku,
                 'image' => $item->lookProduct?->base_image?->url,
             ]);
@@ -29,11 +33,12 @@ class ShopTheLookController extends Controller
     {
         $q = trim($request->input('q', ''));
 
+        $locale = core()->getCurrentLocale()?->code ?? config('app.locale', 'en');
+
         $query = \DB::table('products as p')
-            ->join('product_flat as pf', function ($j) {
+            ->join('product_flat as pf', function ($j) use ($locale) {
                 $j->on('pf.product_id', '=', 'p.id')
-                  ->where('pf.locale', config('app.locale', 'en'))
-                  ->whereNull('p.parent_id');
+                  ->where('pf.locale', $locale);
             })
             ->select('p.id', 'pf.name', 'p.sku')
             ->whereNull('p.parent_id')

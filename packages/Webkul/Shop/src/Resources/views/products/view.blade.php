@@ -11,13 +11,55 @@
     $attributeData = collect($customAttributeValues)->filter(fn ($item) => ! empty($item['value']));
 @endphp
 
+@php
+    $currentProductId = $product->id ?? null;
+    if ($currentProductId) {
+        $recentlyViewed = session('recently_viewed', []);
+        $recentlyViewed = array_values(array_filter($recentlyViewed, fn ($id) => $id != $currentProductId));
+        array_unshift($recentlyViewed, $currentProductId);
+        session(['recently_viewed' => array_slice($recentlyViewed, 0, 8)]);
+    }
+
+    $recentIds = array_values(array_filter(session('recently_viewed', []), fn ($id) => $id != ($currentProductId ?? 0)));
+    $recentIds = array_slice($recentIds, 0, 6);
+    $recentProducts = count($recentIds) > 0
+        ? \Illuminate\Support\Facades\DB::table('product_flat')
+            ->whereIn('product_id', $recentIds)
+            ->where('locale', app()->getLocale())
+            ->where('channel', core()->getCurrentChannelCode())
+            ->whereNotNull('url_key')
+            ->get()
+            ->keyBy('product_id')
+        : collect();
+@endphp
+
+@if (core()->getConfigData('general.content.google_analytics.enabled') && core()->getConfigData('general.content.google_analytics.measurement_id'))
+@push('scripts')
+<script>
+    window.addEventListener('load', function () {
+        if (typeof gtag === 'undefined') return;
+        gtag('event', 'view_item', {
+            currency: '{{ core()->getCurrentCurrencyCode() }}',
+            value:    {{ (float) ($product->getTypeInstance()->getMinimalPrice() ?? 0) }},
+            items: [{
+                item_id:   '{{ $product->sku }}',
+                item_name: @json($product->name),
+                price:     {{ (float) ($product->getTypeInstance()->getMinimalPrice() ?? 0) }},
+                quantity:  1,
+            }],
+        });
+    });
+</script>
+@endpush
+@endif
+
 <!-- SEO Meta Content -->
 @push('meta')
     <meta name="description" content="{{ trim($product->meta_description) != "" ? $product->meta_description : \Illuminate\Support\Str::limit(strip_tags($product->description), 120, '') }}"/>
 
     <meta name="keywords" content="{{ $product->meta_keywords }}"/>
 
-    @if (core()->getConfigData('catalog.rich_snippets.products.enable'))
+    @if (core()->getConfigData('catalog.rich_snippets.products.enable') !== '0')
         <script type="application/ld+json">
             {!! app('Webkul\Product\Helpers\SEO')->getProductJsonLd($product) !!}
         </script>
@@ -172,6 +214,9 @@
                 </x-shop::tabs.item>
             </x-shop::tabs>
         </div>
+
+        <!-- Product Q&A -->
+        @includeIf('product_qa::shop.widget', ['productId' => $product->id])
     </div>
 
     <!-- Information Section -->
@@ -276,12 +321,227 @@
         </x-shop::accordion>
     </div>
 
-    <!-- Shop The Look -->
-    @include('shop-the-look::shop.product-look-section')
+    {{-- Frequently Bought Together --}}
+    @php $relatedProducts = $product->related_products()->whereHas('product_flats', fn ($q) => $q->where('status', 1))->limit(3)->get(); @endphp
+
+    @if ($relatedProducts->isNotEmpty())
+        <div class="container mt-12 px-[60px] max-1180:px-5 max-sm:px-4">
+            <h2 class="mb-6 text-2xl font-medium max-sm:text-lg">
+                @lang('shop::app.products.view.frequently-bought-together')
+            </h2>
+
+            <div class="flex flex-wrap items-center gap-4">
+                {{-- Current product --}}
+                <div class="flex w-36 flex-col items-center text-center max-sm:w-28">
+                    <div class="overflow-hidden rounded-xl bg-gray-50">
+                        <img src="{{ $product->base_image->small_image_url ?? '' }}" class="aspect-square w-full object-cover" alt="{{ $product->name }}">
+                    </div>
+                    <p class="mt-2 line-clamp-2 text-xs font-medium text-gray-700">{{ $product->name }}</p>
+                    <p class="mt-0.5 text-xs text-gray-500">{!! $product->getTypeInstance()->getPriceHtml() !!}</p>
+                </div>
+
+                @foreach ($relatedProducts as $related)
+                    <span class="text-2xl font-light text-gray-400">+</span>
+
+                    <a href="{{ route('shop.product_or_category.index', $related->url_key) }}" class="flex w-36 flex-col items-center text-center max-sm:w-28 group">
+                        <div class="overflow-hidden rounded-xl bg-gray-50">
+                            <img src="{{ $related->base_image->small_image_url ?? '' }}" class="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105" alt="{{ $related->name }}">
+                        </div>
+                        <p class="mt-2 line-clamp-2 text-xs font-medium text-gray-700">{{ $related->name }}</p>
+                        <p class="mt-0.5 text-xs text-gray-500">{!! $related->getTypeInstance()->getPriceHtml() !!}</p>
+                    </a>
+                @endforeach
+
+                <div class="ml-2 flex flex-col items-start gap-2 max-sm:w-full max-sm:ml-0">
+                    <a
+                        href="{{ route('shop.checkout.onepage.index') }}"
+                        class="primary-button whitespace-nowrap"
+                    >
+                        @lang('shop::app.products.view.buy-all-together')
+                    </a>
+                    <p class="text-xs text-gray-400">
+                        @lang('shop::app.products.view.add-each-separately')
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Recently Viewed -->
+    <v-recently-viewed></v-recently-viewed>
 
     <v-product-associations></v-product-associations>
 
     {!! view_render_event('bagisto.shop.products.view.after', ['product' => $product]) !!}
+
+    @push('scripts')
+        @if (core()->getConfigData('general.design.countdown_timer.enabled'))
+        <script>
+            (function () {
+                const key   = 'aven_ct';
+                const hours = {{ (int)(core()->getConfigData('general.design.countdown_timer.hours') ?? 6) }};
+                let end     = parseInt(localStorage.getItem(key) || '0');
+
+                if (!end || Date.now() > end) {
+                    end = Date.now() + hours * 3600000;
+                    localStorage.setItem(key, end);
+                }
+
+                function pad(n) { return String(n).padStart(2, '0'); }
+
+                function tick() {
+                    const left = Math.max(0, end - Date.now());
+                    if (left === 0) {
+                        end = Date.now() + hours * 3600000;
+                        localStorage.setItem(key, end);
+                    }
+                    const h = Math.floor(left / 3600000);
+                    const m = Math.floor((left % 3600000) / 60000);
+                    const s = Math.floor((left % 60000) / 1000);
+                    const elH = document.getElementById('ct-h');
+                    const elM = document.getElementById('ct-m');
+                    const elS = document.getElementById('ct-s');
+                    if (elH) { elH.textContent = pad(h); elM.textContent = pad(m); elS.textContent = pad(s); }
+                }
+
+                tick();
+                setInterval(tick, 1000);
+            })();
+        </script>
+        @endif
+
+        {{-- Viewing Now Counter --}}
+        <script>
+            (function () {
+                const el = document.getElementById('viewing-count');
+                if (!el) return;
+                const base = {{ 8 + ($product->id % 17) }};
+                const update = () => {
+                    const delta = Math.floor(Math.random() * 5) - 2;
+                    const count = Math.max(6, Math.min(32, base + delta));
+                    el.textContent = count;
+                };
+                update();
+                setInterval(update, 30000);
+            })();
+        </script>
+
+        {{-- Flash Sale Countdown --}}
+        <script>
+            function flashCountdown(isoEnd) {
+                return {
+                    display: '--:--:--',
+                    interval: null,
+                    init() {
+                        const end = new Date(isoEnd).getTime();
+                        this.tick(end);
+                        this.interval = setInterval(() => this.tick(end), 1000);
+                    },
+                    tick(end) {
+                        const diff = end - Date.now();
+                        if (diff <= 0) { this.display = 'Ended'; clearInterval(this.interval); return; }
+                        const h = Math.floor(diff / 3600000);
+                        const m = Math.floor((diff % 3600000) / 60000);
+                        const s = Math.floor((diff % 60000) / 1000);
+                        this.display = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                    },
+                };
+            }
+        </script>
+
+        {{-- Back in Stock Notify --}}
+        <script>
+            function submitStockNotify(e, productId) {
+                e.preventDefault();
+                var form  = e.target;
+                var email = form.querySelector('[name="email"]').value;
+                var msg   = document.getElementById('stock-notify-msg');
+
+                fetch('{{ route('shop.stock_notification.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({ product_id: productId, email: email }),
+                })
+                .then(r => r.json())
+                .then(function (data) {
+                    form.classList.add('hidden');
+                    msg.textContent = data.message;
+                    msg.classList.remove('hidden');
+                })
+                .catch(function () {
+                    msg.textContent = 'Something went wrong. Please try again.';
+                    msg.classList.remove('hidden');
+                });
+            }
+        </script>
+
+        {{-- Save current product to Recently Viewed in localStorage --}}
+        <script>
+            (function () {
+                const key = 'aven_rv';
+                const current = {
+                    id:    {{ $product->id }},
+                    name:  @json($product->name),
+                    url:   @json(route('shop.product_or_category.index', $product->url_key)),
+                    image: @json($productBaseImage['small_image_url'] ?? ''),
+                    price: @json(core()->currency($product->getTypeInstance()->getMinimalPrice())),
+                };
+                try {
+                    let rv = JSON.parse(localStorage.getItem(key) || '[]');
+                    rv = rv.filter(p => p && p.id && p.id !== current.id);
+                    rv.unshift(current);
+                    localStorage.setItem(key, JSON.stringify(rv.slice(0, 10)));
+                } catch (e) {}
+            })();
+        </script>
+
+        <script type="text/x-template" id="v-recently-viewed-template">
+            <div v-if="products.length" class="container mt-12 px-[60px] max-1180:px-5 max-sm:px-4">
+                <h2 class="mb-5 text-2xl font-medium max-sm:text-lg">
+                    @lang('shop::app.products.view.recently-viewed')
+                </h2>
+
+                <div class="flex gap-4 overflow-x-auto pb-2">
+                    <a
+                        v-for="product in products"
+                        :key="product.id"
+                        :href="product.url"
+                        class="w-44 flex-shrink-0 group max-sm:w-32"
+                    >
+                        <div class="overflow-hidden rounded-xl bg-gray-50">
+                            <img
+                                :src="product.image"
+                                :alt="product.name"
+                                class="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            >
+                        </div>
+                        <p class="mt-2 line-clamp-2 text-sm font-medium text-gray-800">@{{ product.name }}</p>
+                        <p class="mt-0.5 text-sm text-gray-500" v-html="product.price"></p>
+                    </a>
+                </div>
+            </div>
+        </script>
+
+        <script type="module">
+            app.component('v-recently-viewed', {
+                template: '#v-recently-viewed-template',
+
+                data() {
+                    return { products: [] };
+                },
+
+                mounted() {
+                    try {
+                        const rv = JSON.parse(localStorage.getItem('aven_rv') || '[]');
+                        this.products = rv.filter(p => p && p.id && p.id !== {{ $product->id }});
+                    } catch (e) {}
+                },
+            });
+        </script>
+    @endpush
 
     @pushOnce('scripts')
         <script
@@ -359,8 +619,52 @@
 
                                 {!! view_render_event('bagisto.shop.products.rating.after', ['product' => $product]) !!}
 
+                                {{-- Social Proof --}}
+                                @php
+                                    $soldCount = \Illuminate\Support\Facades\DB::table('order_items')
+                                        ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                                        ->where('order_items.product_id', $product->id)
+                                        ->where('orders.created_at', '>=', now()->subHours(24))
+                                        ->whereIn('orders.status', ['processing', 'completed', 'pending', 'complete'])
+                                        ->sum('order_items.qty_ordered');
+                                @endphp
+
+                                <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+                                    @if ($soldCount > 0)
+                                        <span class="flex items-center gap-1.5 font-medium text-orange-600">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                                            @lang('shop::app.products.view.sold-today', ['count' => $soldCount])
+                                        </span>
+                                    @endif
+
+                                    <span
+                                        class="flex items-center gap-1.5 font-medium text-green-600"
+                                        id="viewing-now-badge"
+                                    >
+                                        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500"></span>
+                                        <span id="viewing-count">--</span>
+                                        @lang('shop::app.products.view.viewing-now')
+                                    </span>
+                                </div>
+
                                 <!-- Pricing -->
                                 {!! view_render_event('bagisto.shop.products.price.before', ['product' => $product]) !!}
+
+                                @php
+                                    $flashSale = app(\Webkul\FlashSale\Services\FlashSaleService::class)
+                                        ->getActiveForProduct($product->id);
+                                @endphp
+
+                                @if ($flashSale)
+                                    <div
+                                        class="mt-3 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-2"
+                                        x-data="flashCountdown('{{ $flashSale->ends_at->toIso8601String() }}')"
+                                        x-init="init()"
+                                    >
+                                        <span class="text-red-600 font-bold text-sm">⚡ Flash Sale ends in:</span>
+                                        <span class="font-mono font-bold text-red-600 text-sm" x-text="display">--:--:--</span>
+                                    </div>
+                                @endif
 
                                 <p class="mt-[22px] flex items-center gap-2.5 text-2xl !font-medium max-sm:mt-2 max-sm:gap-x-2.5 max-sm:gap-y-0 max-sm:text-lg">
                                     {!! $product->getTypeInstance()->getPriceHtml() !!}
@@ -383,6 +687,25 @@
                                 @endif
 
                                 {!! view_render_event('bagisto.shop.products.price.after', ['product' => $product]) !!}
+
+                                {{-- Low Stock Counter --}}
+                                @php $stockQty = $product->totalQuantity(); @endphp
+
+                                @if ($stockQty > 0 && $stockQty <= 10)
+                                    <div class="mt-3">
+                                        @if ($stockQty <= 3)
+                                            <span class="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-600 dark:bg-red-900/20">
+                                                <span class="h-2 w-2 animate-pulse rounded-full bg-red-500"></span>
+                                                @lang('shop::app.products.view.only-left', ['qty' => $stockQty]) — @lang('shop::app.products.view.order-soon')
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-600 dark:bg-orange-900/20">
+                                                <span class="h-2 w-2 rounded-full bg-orange-400"></span>
+                                                @lang('shop::app.products.view.only-left', ['qty' => $stockQty])
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endif
 
                                 {!! view_render_event('bagisto.shop.products.short_description.before', ['product' => $product]) !!}
 
@@ -407,8 +730,26 @@
                                 <!-- Size Guide -->
                                 @include('size-guide::shop.size-guide-modal')
 
+                                {{-- Countdown Timer --}}
+                                @if (core()->getConfigData('general.design.countdown_timer.enabled'))
+                                    @php
+                                        $ctMessage = core()->getConfigData('general.design.countdown_timer.message') ?? 'Limited time offer! Ends in:';
+                                        $ctHours   = (int)(core()->getConfigData('general.design.countdown_timer.hours') ?? 6);
+                                    @endphp
+                                    <div class="mt-4 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 max-sm:flex-wrap dark:bg-red-900/20">
+                                        <span class="text-sm font-medium text-red-700 dark:text-red-400">{{ $ctMessage }}</span>
+                                        <div class="flex items-center gap-1 font-mono text-base font-bold text-red-700 dark:text-red-400">
+                                            <span id="ct-h" class="rounded bg-red-100 px-1.5 py-0.5">00</span>
+                                            <span>:</span>
+                                            <span id="ct-m" class="rounded bg-red-100 px-1.5 py-0.5">00</span>
+                                            <span>:</span>
+                                            <span id="ct-s" class="rounded bg-red-100 px-1.5 py-0.5">00</span>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <!-- Product Actions and Quantity Box -->
-                                <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">
+                                <div id="atc-trigger" class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">
 
                                     {!! view_render_event('bagisto.shop.products.view.quantity.before', ['product' => $product]) !!}
 
@@ -454,8 +795,19 @@
                                 @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                                     {!! view_render_event('bagisto.shop.products.view.buy_now.before', ['product' => $product]) !!}
 
-                                    @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display'))
+                                    @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display') !== '0')
+                                        <!-- Go To Checkout — shown when cart already has items -->
+                                        <a
+                                            v-if="cartItemsQty > 0"
+                                            href="{{ route('shop.checkout.onepage.index') }}"
+                                            class="primary-button mt-5 flex w-full max-w-[470px] items-center justify-center max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
+                                        >
+                                            Continue to Checkout
+                                        </a>
+
+                                        <!-- Buy Now — shown when cart is empty -->
                                         <x-shop::button
+                                            v-else
                                             type="submit"
                                             class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
                                             button-type="primary-button"
@@ -468,6 +820,40 @@
                                     @endif
 
                                     {!! view_render_event('bagisto.shop.products.view.buy_now.after', ['product' => $product]) !!}
+                                @endif
+
+                                <!-- Shop The Look -->
+                                <div class="mt-6 border-t border-gray-100 pt-6 dark:border-gray-700">
+                                    @include('shop-the-look::shop.product-look-section')
+                                </div>
+
+                                @if ($product->totalQuantity() <= 0)
+                                    <!-- Back in Stock Notification Form -->
+                                    <div class="mt-5 w-full max-w-[470px] rounded-xl border border-orange-200 bg-orange-50 p-4">
+                                        <p class="mb-3 text-sm font-semibold text-orange-700">
+                                            📦 @lang('shop::app.products.view.out-of-stock-notify')
+                                        </p>
+
+                                        <form
+                                            id="stock-notify-form"
+                                            onsubmit="submitStockNotify(event, {{ $product->id }})"
+                                            class="flex gap-2"
+                                        >
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                required
+                                                placeholder="@lang('shop::app.products.view.notify-email-placeholder')"
+                                                class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-navyBlue focus:ring-1 focus:ring-navyBlue"
+                                            />
+                                            <button
+                                                type="submit"
+                                                class="secondary-button whitespace-nowrap"
+                                            >@lang('shop::app.products.view.notify-me')</button>
+                                        </form>
+
+                                        <p id="stock-notify-msg" class="mt-2 hidden text-sm font-medium text-green-600"></p>
+                                    </div>
                                 @endif
 
                                 {!! view_render_event('bagisto.shop.products.view.additional_actions.before', ['product' => $product]) !!}
@@ -501,6 +887,39 @@
                     </div>
                 </form>
             </x-shop::form>
+
+            <!-- Sticky Add to Cart Bar -->
+            <div
+                class="fixed bottom-0 left-0 right-0 z-[100] bg-white shadow-[0_-2px_16px_rgba(0,0,0,0.12)] transition-transform duration-300"
+                :class="showStickyBar ? 'translate-y-0' : 'translate-y-full'"
+            >
+                <div class="container flex items-center justify-between gap-4 px-[60px] py-3 max-sm:px-4 max-sm:py-2">
+                    <div class="flex min-w-0 items-center gap-3">
+                        @if ($product->base_image)
+                            <img
+                                src="{{ $product->base_image->small_image_url }}"
+                                class="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                                alt="{{ $product->name }}"
+                            >
+                        @endif
+
+                        <div class="min-w-0">
+                            <p class="truncate font-medium text-gray-900 max-sm:text-sm">{{ $product->name }}</p>
+                            <p class="text-sm text-gray-500 max-sm:text-xs">{!! $product->getTypeInstance()->getPriceHtml() !!}</p>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="primary-button flex-shrink-0 whitespace-nowrap max-sm:px-4 max-sm:py-2 max-sm:text-sm"
+                        :disabled="isStoring.addToCart"
+                        @click="triggerAddToCart"
+                    >
+                        <span v-if="! isStoring.addToCart">@lang('shop::app.products.view.add-to-cart')</span>
+                        <span v-else class="icon-spinner animate-spin text-xl"></span>
+                    </button>
+                </div>
+            </div>
 
             <!-- Contact Us Modal -->
             <x-shop::modal ref="contactUsModal">
@@ -625,14 +1044,44 @@
 
                             buyNow: false,
                         },
+
+                        showStickyBar: false,
+
+                        cartItemsQty: 0,
                     }
                 },
 
                 mounted() {
                     this.checkWishlistStatus();
+
+                    this.$nextTick(() => {
+                        const trigger = document.getElementById('atc-trigger');
+
+                        if (trigger) {
+                            const observer = new IntersectionObserver(
+                                ([entry]) => { this.showStickyBar = ! entry.isIntersecting; },
+                                { threshold: 0 }
+                            );
+
+                            observer.observe(trigger);
+                        }
+                    });
+
+                    this.$axios.get('{{ route('shop.api.checkout.cart.index') }}')
+                        .then(r => { this.cartItemsQty = r.data?.data?.items_qty || 0; })
+                        .catch(() => {});
+
+                    this.$emitter.on('update-mini-cart', (cart) => {
+                        this.cartItemsQty = cart?.items_qty || 0;
+                    });
                 },
 
                 methods: {
+                    triggerAddToCart() {
+                        this.is_buy_now = 0;
+                        this.$refs.formData.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    },
+
                     addToCart(params) {
                         const operation = this.is_buy_now ? 'buyNow' : 'addToCart';
 
@@ -873,4 +1322,26 @@
             {!! \Webkul\Customer\Facades\Captcha::renderJS() !!}
         @endif
     @endPushOnce
+
+    {{-- Recently Viewed Products --}}
+    @if ($recentProducts->count() > 0)
+        <div class="container mx-auto mt-10 px-4 py-6">
+            <h2 class="mb-4 text-xl font-bold text-navyBlue">Recently Viewed</h2>
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                @foreach ($recentIds as $rid)
+                    @if (isset($recentProducts[$rid]))
+                        @php $rp = $recentProducts[$rid]; @endphp
+                        <a href="{{ url('/' . $rp->url_key) }}" class="group block overflow-hidden rounded-lg border border-gray-100 p-3 transition hover:shadow-md">
+                            @php $rpImg = \Illuminate\Support\Facades\DB::table('product_images')->where('product_id', $rp->product_id)->orderBy('id')->value('path'); @endphp
+                            @if ($rpImg)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($rpImg) }}" alt="{{ $rp->name }}" class="mb-2 h-28 w-full rounded object-contain"/>
+                            @endif
+                            <p class="line-clamp-2 text-xs font-medium leading-tight text-gray-800">{{ $rp->name }}</p>
+                            <p class="mt-1 text-sm font-bold text-navyBlue">{{ core()->currency($rp->price) }}</p>
+                        </a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    @endif
 </x-shop::layouts>

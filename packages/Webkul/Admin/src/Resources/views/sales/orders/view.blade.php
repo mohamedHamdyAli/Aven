@@ -35,6 +35,31 @@
         <div class="flex gap-1.5">
             {!! view_render_event('bagisto.admin.sales.order.page_action.before', ['order' => $order]) !!}
 
+            {{-- Auto-Invoice / Mark as Processing --}}
+            @if($order->canInvoice() && bouncer()->hasPermission('sales.invoices.create'))
+                <form method="POST" action="{{ route('admin.sales.orders.auto_invoice', $order->id) }}" style="display:inline;">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="primary-button px-3 py-1.5 text-sm"
+                        onclick="return confirm('Create invoice and mark order as Processing?')"
+                    >
+                        <span class="icon-processing text-lg"></span>
+                        Mark as Processing
+                    </button>
+                </form>
+            @endif
+
+            {{-- Packing Slip --}}
+            <a
+                href="{{ route('admin.sales.orders.packing_slip', $order->id) }}"
+                target="_blank"
+                class="transparent-button px-1 py-1.5 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+            >
+                <span class="icon-printer text-2xl"></span>
+                Packing Slip
+            </a>
+
             @if (
                 $order->canReorder()
                 && bouncer()->hasPermission('sales.orders.create')

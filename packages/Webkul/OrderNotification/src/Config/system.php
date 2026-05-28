@@ -1,0 +1,87 @@
+<?php
+
+return [
+    [
+        'key'  => 'sales.order_notification',
+        'name' => 'Order Notifications',
+        'info' => 'WhatsApp notifications for order lifecycle events',
+        'sort' => 100,
+    ],
+    [
+        'key'    => 'sales.order_notification.general',
+        'name'   => 'WhatsApp Order Notifications',
+        'info'   => 'Automatically notify customers via WhatsApp when their order is placed, shipped, or delivered. Uses the same WhatsApp API configured in Abandoned Cart settings.',
+        'sort'   => 1,
+        'fields' => [
+            [
+                'name'          => 'enabled',
+                'title'         => 'Enable Order Notifications',
+                'type'          => 'boolean',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => false,
+            ],
+            [
+                'name'          => 'template_placed',
+                'title'         => 'Template: Order Placed',
+                'type'          => 'text',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => 'order_placed',
+                'info'          => 'WhatsApp approved template name. Body variables: {{1}} = customer name, {{2}} = order ID, {{3}} = total amount.',
+            ],
+            [
+                'name'          => 'template_shipped',
+                'title'         => 'Template: Order Shipped',
+                'type'          => 'text',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => 'order_shipped',
+                'info'          => 'Body variables: {{1}} = customer name, {{2}} = order ID, {{3}} = tracking number.',
+            ],
+            [
+                'name'          => 'template_delivered',
+                'title'         => 'Template: Order Delivered',
+                'type'          => 'text',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => 'order_delivered',
+                'info'          => 'Body variables: {{1}} = customer name, {{2}} = order ID.',
+            ],
+        ],
+    ],
+    [
+        'key'    => 'sales.order_notification.low_stock',
+        'name'   => 'Low Stock Alerts',
+        'info'   => 'Get notified via email and WhatsApp when product inventory falls below the threshold.',
+        'sort'   => 2,
+        'fields' => [
+            [
+                'name'          => 'threshold',
+                'title'         => 'Low Stock Threshold (qty)',
+                'type'          => 'number',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => 5,
+                'info'          => 'Alert fires when remaining stock reaches this quantity (0 = disabled)',
+            ],
+            [
+                'name'          => 'admin_phone',
+                'title'         => 'Admin WhatsApp Number',
+                'type'          => 'text',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'info'          => 'E.164 format e.g. +201012345678. Leave empty to skip WhatsApp alert.',
+            ],
+            [
+                'name'          => 'template',
+                'title'         => 'WhatsApp Template Name',
+                'type'          => 'text',
+                'channel_based' => false,
+                'locale_based'  => false,
+                'default'       => 'low_stock_alert',
+                'info'          => 'Body variables: {{1}} = product name, {{2}} = remaining qty.',
+            ],
+        ],
+    ],
+];

@@ -67,6 +67,18 @@ class ProductForm extends FormRequest
     }
 
     /**
+     * Prepare data before validation: auto-generate url_key from sku if empty.
+     */
+    protected function prepareForValidation()
+    {
+        if (empty($this->url_key)) {
+            $this->merge([
+                'url_key' => \Illuminate\Support\Str::slug($this->sku ?? ''),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array

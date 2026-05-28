@@ -3,11 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use Webkul\Core\Http\Middleware\NoCacheMiddleware;
 use Webkul\Shop\Http\Controllers\Customer\Account\AddressController;
+use Webkul\Shop\Http\Controllers\Customer\Account\LoyaltyController as AccountLoyaltyController;
 use Webkul\Shop\Http\Controllers\Customer\Account\DownloadableProductController;
 use Webkul\Shop\Http\Controllers\Customer\Account\OrderController;
 use Webkul\Shop\Http\Controllers\Customer\Account\RMAController;
 use Webkul\Shop\Http\Controllers\Customer\Account\WishlistController;
 use Webkul\Shop\Http\Controllers\Customer\CustomerController;
+use Webkul\Shop\Http\Controllers\WishlistShareController;
 use Webkul\Shop\Http\Controllers\Customer\ForgotPasswordController;
 use Webkul\Shop\Http\Controllers\Customer\GDPRController;
 use Webkul\Shop\Http\Controllers\Customer\RegistrationController;
@@ -89,6 +91,8 @@ Route::prefix('customer')->group(function () {
              * Wishlist.
              */
             Route::get('wishlist', [WishlistController::class, 'index'])->name('shop.customers.account.wishlist.index');
+
+            Route::post('wishlist/share', [WishlistShareController::class, 'generate'])->name('shop.wishlist.share.generate');
 
             /**
              * Profile.
@@ -197,6 +201,18 @@ Route::prefix('customer')->group(function () {
 
                 Route::post('send-message', 'sendMessage')->name('shop.customers.account.rma.send-message');
             });
+
+            /**
+             * Loyalty Points.
+             */
+            Route::get('loyalty', [AccountLoyaltyController::class, 'loyaltyIndex'])
+                ->name('shop.customers.account.loyalty.index');
+
+            /**
+             * Referral Program.
+             */
+            Route::get('referral', [AccountLoyaltyController::class, 'referralIndex'])
+                ->name('shop.customers.account.referral.index');
         });
     });
 });

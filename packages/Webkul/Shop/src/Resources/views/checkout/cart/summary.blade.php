@@ -275,6 +275,31 @@
 
         {!! view_render_event('bagisto.shop.checkout.cart.summary.grand_total.after') !!}
 
+        {{-- Loyalty Points Redeem Widget --}}
+        @auth('customer')
+            @if (core()->getConfigData('general.loyalty.settings.enabled'))
+                <div id="loyalty-widget" class="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-indigo-800">
+                                ⭐ @lang('shop::app.checkout.cart.summary.loyalty.title')
+                            </p>
+                            <p id="loyalty-balance-text" class="mt-0.5 text-xs text-indigo-600">
+                                @lang('shop::app.checkout.cart.summary.loyalty.loading')
+                            </p>
+                        </div>
+                        <button
+                            id="loyalty-redeem-btn"
+                            class="hidden rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                            onclick="redeemLoyaltyPoints()"
+                        >
+                            @lang('shop::app.checkout.cart.summary.loyalty.redeem')
+                        </button>
+                    </div>
+                </div>
+            @endif
+        @endauth
+
         {!! view_render_event('bagisto.shop.checkout.cart.summary.proceed_to_checkout.before') !!}
 
         <a
@@ -285,5 +310,28 @@
         </a>
 
         {!! view_render_event('bagisto.shop.checkout.cart.summary.proceed_to_checkout.after') !!}
+
+        <!-- Trust Badges -->
+        <div class="mt-5 grid grid-cols-2 gap-x-3 gap-y-3 border-t border-gray-100 pt-5">
+            <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span class="text-xs text-gray-500">@lang('shop::app.checkout.cart.trust.secure')</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                <span class="text-xs text-gray-500">@lang('shop::app.checkout.cart.trust.returns')</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span class="text-xs text-gray-500">@lang('shop::app.checkout.cart.trust.guarantee')</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                <span class="text-xs text-gray-500">@lang('shop::app.checkout.cart.trust.delivery')</span>
+            </div>
+        </div>
     </div>
 </div>

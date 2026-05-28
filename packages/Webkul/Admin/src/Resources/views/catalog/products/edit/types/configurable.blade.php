@@ -105,12 +105,25 @@
                     <div
                         v-for="(attribute, index) in superAttributes"
                         :key="index"
-                        class="mb-4"
+                        class="mb-5"
                     >
-                        <p class="mb-2 text-sm font-semibold text-gray-700 dark:text-white">
-                            @{{ attribute.admin_name }} *
-                        </p>
+                        <!-- Header: label + Deselect All -->
+                        <div class="mb-2 flex items-center justify-between">
+                            <p class="text-sm font-semibold text-gray-700 dark:text-white">
+                                @{{ attribute.admin_name }} *
+                            </p>
 
+                            <button
+                                type="button"
+                                v-if="selectedOptions[attribute.code]?.length"
+                                class="text-xs text-red-500 hover:text-red-700"
+                                @click="deselectAll(attribute.code)"
+                            >
+                                @lang('admin::app.catalog.products.edit.types.configurable.create.deselect-all')
+                            </button>
+                        </div>
+
+                        <!-- Existing Options -->
                         <div class="flex flex-wrap gap-2">
                             <label
                                 v-for="option in attribute.options"
@@ -121,6 +134,13 @@
                                     : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'"
                                 @click="toggleOption(attribute.code, option.id)"
                             >
+                                <!-- Color swatch circle -->
+                                <span
+                                    v-if="attribute.swatch_type === 'color' && option.swatch_value"
+                                    class="inline-block h-3.5 w-3.5 rounded-full border border-gray-300"
+                                    :style="{ backgroundColor: option.swatch_value }"
+                                ></span>
+
                                 <span
                                     class="flex h-4 w-4 items-center justify-center rounded border text-xs"
                                     :class="isOptionSelected(attribute.code, option.id)
@@ -131,6 +151,35 @@
                                 </span>
                                 @{{ option.admin_name }}
                             </label>
+                        </div>
+
+                        <!-- Add new option row -->
+                        <div class="mt-2.5 flex items-center gap-2">
+                            <input
+                                v-if="attribute.swatch_type === 'color'"
+                                type="color"
+                                v-model="newOptionColors[attribute.code]"
+                                class="h-8 w-8 cursor-pointer rounded border border-gray-300 p-0.5"
+                                title="Pick color"
+                            />
+
+                            <input
+                                type="text"
+                                v-model="newOptionInputs[attribute.code]"
+                                class="h-8 flex-1 rounded-md border border-gray-300 px-3 text-sm focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                :placeholder="'+ Add new ' + attribute.admin_name"
+                                @keyup.enter="addNewOption(attribute)"
+                            />
+
+                            <button
+                                type="button"
+                                class="secondary-button whitespace-nowrap py-1.5 text-xs"
+                                :disabled="!newOptionInputs[attribute.code]?.trim() || addingOption[attribute.code]"
+                                @click="addNewOption(attribute)"
+                            >
+                                <span v-if="addingOption[attribute.code]">…</span>
+                                <span v-else>@lang('admin::app.catalog.products.edit.types.configurable.create.add-option')</span>
+                            </button>
                         </div>
 
                         <p
@@ -251,13 +300,14 @@
 
                 <!-- Dropdown Content -->
                 <x-slot:menu>
-                    <x-admin::dropdown.menu.item
-                        v-for="type in updateTypes"
-                        v-if="!type.hidden"
-                        @click="edit(type.key)"
-                    >
-                        @{{ type.title }}
-                    </x-admin::dropdown.menu.item>
+                    <template v-for="type in updateTypes">
+                        <x-admin::dropdown.menu.item
+                            v-if="!type.hidden"
+                            @click="edit(type.key)"
+                        >
+                            @{{ type.title }}
+                        </x-admin::dropdown.menu.item>
+                    </template>
                 </x-slot>
             </x-admin::dropdown>
 
@@ -1138,6 +1188,12 @@
                     selectedOptions: {},
 
                     selectionErrors: {},
+
+                    newOptionInputs: {},
+
+                    newOptionColors: {},
+
+                    addingOption: {},
                 }
             },
 
@@ -1162,6 +1218,44 @@
 
                 isOptionSelected(code, id) {
                     return this.selectedOptions[code]?.includes(id) ?? false;
+                },
+
+                deselectAll(code) {
+                    this.selectedOptions = { ...this.selectedOptions, [code]: [] };
+                },
+
+                async addNewOption(attribute) {
+                    const name = (this.newOptionInputs[attribute.code] ?? '').trim();
+
+                    if (! name) return;
+
+                    this.addingOption = { ...this.addingOption, [attribute.code]: true };
+
+                    try {
+                        const response = await this.$axios.post(
+                            `/admin/catalog/attributes/${attribute.id}/options`,
+                            {
+                                admin_name:   name,
+                                swatch_value: attribute.swatch_type === 'color'
+                                    ? (this.newOptionColors[attribute.code] || null)
+                                    : null,
+                            }
+                        );
+
+                        attribute.options.push(response.data);
+
+                        this.toggleOption(attribute.code, response.data.id);
+
+                        this.newOptionInputs = { ...this.newOptionInputs, [attribute.code]: '' };
+
+                    } catch (err) {
+                        this.$emitter.emit('add-flash', {
+                            type:    'danger',
+                            message: err?.response?.data?.message ?? 'Failed to add option.',
+                        });
+                    } finally {
+                        this.addingOption = { ...this.addingOption, [attribute.code]: false };
+                    }
                 },
 
                 cartesianProduct(arrays) {

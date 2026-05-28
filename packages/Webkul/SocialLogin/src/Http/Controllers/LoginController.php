@@ -58,6 +58,14 @@ class LoginController extends Controller
 
         Event::dispatch('customer.after.login', $customer);
 
-        return redirect()->intended(route('shop.customers.account.profile.index'));
+        $intended = session()->pull('url.intended', route('shop.checkout.onepage.index'));
+
+        if (empty($customer->phone)) {
+            session()->put('social_login_intended', $intended);
+            session()->flash('warning', 'Please add your phone number and address to complete your order.');
+            return redirect()->route('shop.customers.account.profile.index');
+        }
+
+        return redirect($intended);
     }
 }

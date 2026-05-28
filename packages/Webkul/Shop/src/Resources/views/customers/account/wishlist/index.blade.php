@@ -55,12 +55,22 @@
 
                         {!! view_render_event('bagisto.shop.customers.account.wishlist.delete_all.before') !!}
 
-                        <div
-                            class="secondary-button border-zinc-200 px-5 py-3 font-normal max-md:rounded-lg max-md:py-2 max-sm:py-1.5 max-sm:text-sm"
-                            @click="removeAll"
-                            v-if="wishlistItems.length"
-                        >
-                            @lang('shop::app.customers.account.wishlist.delete-all')
+                        <div class="flex items-center gap-3">
+                            <button
+                                onclick="shareWishlist()"
+                                class="rounded border border-navyBlue px-4 py-2 text-sm text-navyBlue hover:bg-navyBlue hover:text-white max-md:rounded-lg max-md:py-2 max-sm:py-1.5 max-sm:text-xs"
+                                v-if="wishlistItems.length"
+                            >
+                                Share Wishlist
+                            </button>
+
+                            <div
+                                class="secondary-button border-zinc-200 px-5 py-3 font-normal max-md:rounded-lg max-md:py-2 max-sm:py-1.5 max-sm:text-sm"
+                                @click="removeAll"
+                                v-if="wishlistItems.length"
+                            >
+                                @lang('shop::app.customers.account.wishlist.delete-all')
+                            </div>
                         </div>
 
                         {!! view_render_event('bagisto.shop.customers.account.wishlist.delete_all.after') !!}
@@ -364,6 +374,22 @@
                     },
                 },
             });
+        </script>
+        <script>
+            function shareWishlist() {
+                fetch('{{ route("shop.wishlist.share.generate") }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                }).then(r => r.json()).then(d => {
+                    if (d.url) {
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(d.url).then(() => alert('Link copied! Share it with friends:\n' + d.url));
+                        } else {
+                            prompt('Share this link:', d.url);
+                        }
+                    }
+                });
+            }
         </script>
     @endpushOnce
 </x-shop::layouts.account>

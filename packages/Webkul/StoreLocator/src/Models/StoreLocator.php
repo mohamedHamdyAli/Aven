@@ -2,11 +2,13 @@
 
 namespace Webkul\StoreLocator\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\StoreLocator\Contracts\StoreLocator as StoreLocatorContract;
 
 class StoreLocator extends Model implements StoreLocatorContract
 {
+    use HasFactory;
     protected $table = 'store_locators';
 
     protected $fillable = [
