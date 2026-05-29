@@ -1,2 +1,0 @@
-<?php echo $__env->make('shop::products.view.customizable-options', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-<?php /**PATH D:\aven\packages\Webkul\Shop\src/resources/views/products/view/types/simple.blade.php ENDPATH**/ ?>
