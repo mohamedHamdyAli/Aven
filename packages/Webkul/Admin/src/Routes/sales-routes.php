@@ -61,6 +61,12 @@ Route::prefix('sales')->group(function () {
         Route::get('{id}/packing-slip', 'packingSlip')->name('admin.sales.orders.packing_slip');
 
         Route::get('picking-list', 'pickingList')->name('admin.sales.orders.picking_list');
+
+        Route::post('{orderId}/items', 'addItem')->name('admin.sales.orders.items.add');
+
+        Route::post('{orderId}/items/{itemId}/cancel', 'cancelItem')->name('admin.sales.orders.items.cancel');
+
+        Route::post('{orderId}/items/{itemId}/update-qty', 'updateItemQty')->name('admin.sales.orders.items.update_qty');
     });
 
     /**

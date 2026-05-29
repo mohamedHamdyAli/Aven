@@ -243,7 +243,12 @@
                     updateCartItemQty(itemId, newQty) {
                         if (newQty < 1) return;
                         this.$axios.put("{{ route('shop.api.checkout.cart.update') }}", { qty: { [itemId]: newQty } })
-                            .then(() => this.getCart())
+                            .then((response) => {
+                                if (response.data?.message && !response.data?.data) {
+                                    this.$emitter.emit('add-flash', { type: 'error', message: response.data.message });
+                                }
+                                this.getCart();
+                            })
                             .catch(() => {});
                     },
 

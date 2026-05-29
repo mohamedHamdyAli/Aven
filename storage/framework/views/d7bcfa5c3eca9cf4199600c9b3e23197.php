@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    <?php if (! $__env->hasRenderedOnce('9f6bbddb-153e-417c-b619-b3419d1a99cf')): $__env->markAsRenderedOnce('9f6bbddb-153e-417c-b619-b3419d1a99cf');
+    <?php if (! $__env->hasRenderedOnce('234dccd4-1ad3-4fa1-867c-2c891cc23290')): $__env->markAsRenderedOnce('234dccd4-1ad3-4fa1-867c-2c891cc23290');
 $__env->startPush('scripts'); ?>
         <script>
         function createShipment(orderId, btn) {

@@ -36,7 +36,7 @@
     <p id="stl-msg" class="mt-2 hidden text-center text-xs text-green-600">✓ تم الحفظ</p>
 </div>
 
-<?php if (! $__env->hasRenderedOnce('732fb636-0891-4767-a9e5-e34f9b377515')): $__env->markAsRenderedOnce('732fb636-0891-4767-a9e5-e34f9b377515');
+<?php if (! $__env->hasRenderedOnce('1e090e72-3fa2-4808-9671-80ebed04d76e')): $__env->markAsRenderedOnce('1e090e72-3fa2-4808-9671-80ebed04d76e');
 $__env->startPush('scripts'); ?>
 <script>
 (function () {

@@ -60,6 +60,17 @@
                 Packing Slip
             </a>
 
+            {{-- Add Item --}}
+            @if(in_array($order->status, ['pending', 'processing']))
+                <div
+                    class="transparent-button cursor-pointer px-1 py-1.5 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+                    @click="$refs.addItemComponent.openDrawer()"
+                >
+                    <span class="icon-add text-2xl"></span>
+                    Add Item
+                </div>
+            @endif
+
             @if (
                 $order->canReorder()
                 && bouncer()->hasPermission('sales.orders.create')
@@ -254,6 +265,31 @@
 
                                                 {{ $item->qty_canceled ? trans('admin::app.sales.orders.view.item-canceled', ['qty_canceled' => $item->qty_canceled]) : '' }}
                                             </p>
+
+                                            @if($item->canCancel(force: true))
+                                                <div class="mt-2 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2 dark:border-gray-800">
+                                                    <form method="POST" action="{{ route('admin.sales.orders.items.update_qty', [$order->id, $item->id]) }}" class="flex items-center gap-1.5">
+                                                        @csrf
+                                                        <label class="text-xs text-gray-500 dark:text-gray-400">Qty:</label>
+                                                        <input
+                                                            type="number"
+                                                            name="qty"
+                                                            min="{{ max(1, $item->qty_invoiced) }}"
+                                                            max="{{ $item->qty_ordered - $item->qty_canceled - 1 }}"
+                                                            value="{{ $item->qty_ordered - $item->qty_canceled }}"
+                                                            class="w-16 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                                        >
+                                                        <button type="submit" class="secondary-button px-2 py-1 text-xs">Update</button>
+                                                    </form>
+
+                                                    <form method="POST" action="{{ route('admin.sales.orders.items.cancel', [$order->id, $item->id]) }}" onsubmit="return confirm('Remove this item from the order?')">
+                                                        @csrf
+                                                        <button type="submit" class="transparent-button px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                            Remove Item
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -984,4 +1020,296 @@
             </div>
         </div>
     </div>
+
+    {{-- Add Item Drawer Component --}}
+    @if(in_array($order->status, ['pending', 'processing']))
+        <v-add-order-item
+            ref="addItemComponent"
+            order-id="{{ $order->id }}"
+        ></v-add-order-item>
+    @endif
+
+    @pushOnce('scripts')
+        <script type="text/x-template" id="v-add-order-item-template">
+            <div>
+                <x-admin::drawer
+                    ref="addItemDrawer"
+                    @close="reset()"
+                >
+                    <x-slot:header>
+                        <div class="grid gap-3">
+                            <p class="py-2 text-xl font-medium dark:text-white">Add Item to Order</p>
+
+                            <div class="relative w-full">
+                                <input
+                                    type="text"
+                                    class="block w-full rounded-lg border bg-white py-1.5 leading-6 text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 ltr:pl-3 ltr:pr-10 rtl:pl-10 rtl:pr-3"
+                                    placeholder="Search by product name or SKU..."
+                                    v-model.lazy="searchTerm"
+                                    v-debounce="400"
+                                />
+                                <template v-if="isSearching">
+                                    <img
+                                        class="absolute top-2.5 h-5 w-5 animate-spin ltr:right-3 rtl:left-3"
+                                        src="{{ bagisto_asset('images/spinner.svg') }}"
+                                    />
+                                </template>
+                                <template v-else>
+                                    <span class="icon-search pointer-events-none absolute top-1.5 flex items-center text-2xl ltr:right-3 rtl:left-3"></span>
+                                </template>
+                            </div>
+                        </div>
+                    </x-slot>
+
+                    <x-slot:content class="!p-0">
+                        {{-- Search Results --}}
+                        <div
+                            class="grid max-h-[300px] overflow-y-auto"
+                            v-if="searchedProducts.length && !selectedProduct"
+                        >
+                            <div
+                                class="grid cursor-pointer gap-1 border-b border-slate-300 p-4 last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-950"
+                                v-for="product in searchedProducts"
+                                @click="selectProduct(product)"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <p class="font-semibold text-gray-800 dark:text-white">@{{ product.name }}</p>
+                                    <span
+                                        class="rounded px-1.5 py-0.5 text-xs"
+                                        :class="product.type === 'configurable' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'"
+                                    >
+                                        @{{ product.type }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-500">SKU: @{{ product.sku }}</p>
+                            </div>
+                        </div>
+
+                        {{-- Empty state --}}
+                        <div
+                            class="flex flex-col items-center gap-2 p-8 text-center"
+                            v-if="searchTerm.length >= 2 && !searchedProducts.length && !selectedProduct && !isSearching"
+                        >
+                            <p class="text-gray-400">No products found.</p>
+                        </div>
+
+                        {{-- Selected product detail --}}
+                        <div class="p-4" v-if="selectedProduct">
+                            {{-- Back button + product name --}}
+                            <div class="mb-4 flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    class="text-gray-400 hover:text-gray-600"
+                                    @click="selectedProduct = null; searchedProducts = [];"
+                                >
+                                    <span class="icon-back text-xl"></span>
+                                </button>
+                                <div>
+                                    <p class="font-semibold text-gray-800 dark:text-white">@{{ selectedProduct.name }}</p>
+                                    <p class="text-sm text-gray-500">SKU: @{{ selectedProduct.sku }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Configurable attribute selectors --}}
+                            <div v-if="selectedProduct.type === 'configurable'">
+                                <div v-if="!configurableOptions" class="flex justify-center py-6">
+                                    <img class="h-6 w-6 animate-spin" src="{{ bagisto_asset('images/spinner.svg') }}" />
+                                </div>
+
+                                <div v-if="configurableOptions" class="grid gap-3 mb-4">
+                                    <div v-for="attribute in configurableOptions.attributes" :key="attribute.id">
+                                        <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            @{{ attribute.label }}
+                                        </label>
+                                        <select
+                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                            v-model="selectedAttributes[attribute.id.toString()]"
+                                        >
+                                            <option value="">-- Select @{{ attribute.label }} --</option>
+                                            <option
+                                                v-for="option in attribute.options"
+                                                :key="option.id"
+                                                :value="option.id.toString()"
+                                            >
+                                                @{{ option.label }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <p v-if="resolvedVariantId === null && allAttributesSelected" class="text-sm text-red-500">
+                                        This combination is not available.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Qty --}}
+                            <div class="mb-4">
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    v-model.number="qty"
+                                    class="block w-24 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                />
+                            </div>
+
+                            {{-- Add button --}}
+                            <button
+                                type="button"
+                                class="primary-button w-full justify-center"
+                                :disabled="!canAdd || isAdding"
+                                @click="addToOrder()"
+                            >
+                                <span v-if="isAdding">Adding...</span>
+                                <span v-else>Add to Order</span>
+                            </button>
+                        </div>
+                    </x-slot>
+                </x-admin::drawer>
+            </div>
+        </script>
+
+        <script type="module">
+            app.component('v-add-order-item', {
+                template: '#v-add-order-item-template',
+
+                props: {
+                    orderId: { type: [String, Number], required: true },
+                },
+
+                data() {
+                    return {
+                        searchTerm:          '',
+                        searchedProducts:    [],
+                        selectedProduct:     null,
+                        configurableOptions: null,
+                        selectedAttributes:  {},
+                        qty:                 1,
+                        isSearching:         false,
+                        isAdding:            false,
+                    };
+                },
+
+                computed: {
+                    allAttributesSelected() {
+                        if (! this.configurableOptions) return false;
+                        return this.configurableOptions.attributes.every(
+                            attr => !! this.selectedAttributes[attr.id.toString()]
+                        );
+                    },
+
+                    resolvedVariantId() {
+                        if (! this.selectedProduct || this.selectedProduct.type !== 'configurable') return null;
+                        if (! this.configurableOptions || ! this.allAttributesSelected) return null;
+
+                        const index = this.configurableOptions.index;
+
+                        for (const [productId, attrMap] of Object.entries(index)) {
+                            const matches = this.configurableOptions.attributes.every(attr => {
+                                const selectedVal = this.selectedAttributes[attr.id.toString()];
+                                return attrMap[attr.id]?.toString() === selectedVal?.toString();
+                            });
+                            if (matches) return parseInt(productId);
+                        }
+
+                        return null;
+                    },
+
+                    canAdd() {
+                        if (! this.selectedProduct || this.qty < 1) return false;
+                        if (this.selectedProduct.type === 'configurable') return this.resolvedVariantId !== null;
+                        return true;
+                    },
+                },
+
+                watch: {
+                    searchTerm(newVal) {
+                        if (newVal.length >= 2) {
+                            this.search();
+                        } else {
+                            this.searchedProducts = [];
+                        }
+                    },
+                },
+
+                methods: {
+                    openDrawer() {
+                        this.$refs.addItemDrawer.open();
+                    },
+
+                    reset() {
+                        this.searchTerm          = '';
+                        this.searchedProducts    = [];
+                        this.selectedProduct     = null;
+                        this.configurableOptions = null;
+                        this.selectedAttributes  = {};
+                        this.qty                 = 1;
+                        this.isAdding            = false;
+                    },
+
+                    search() {
+                        this.isSearching = true;
+
+                        this.$axios.get("{{ route('admin.catalog.products.search') }}", {
+                            params: { query: this.searchTerm },
+                        }).then(response => {
+                            this.searchedProducts = response.data.data ?? response.data;
+                            this.isSearching      = false;
+                        }).catch(() => {
+                            this.isSearching = false;
+                        });
+                    },
+
+                    selectProduct(product) {
+                        this.selectedProduct     = product;
+                        this.configurableOptions = null;
+                        this.selectedAttributes  = {};
+                        this.searchedProducts    = [];
+
+                        if (product.type === 'configurable') {
+                            this.$axios.get(
+                                "{{ route('admin.catalog.products.configurable.options', ':replace') }}".replace(':replace', product.id)
+                            ).then(response => {
+                                this.configurableOptions = response.data;
+                            });
+                        }
+                    },
+
+                    addToOrder() {
+                        if (! this.canAdd) return;
+
+                        this.isAdding = true;
+
+                        const data = {
+                            product_id: this.selectedProduct.id,
+                            quantity:   this.qty,
+                        };
+
+                        if (this.selectedProduct.type === 'configurable') {
+                            data.selected_configurable_option = this.resolvedVariantId;
+                            data.super_attribute              = {};
+
+                            this.configurableOptions.attributes.forEach(attr => {
+                                data.super_attribute[attr.id] = parseInt(this.selectedAttributes[attr.id.toString()]);
+                            });
+                        }
+
+                        this.$axios.post(
+                            "{{ route('admin.sales.orders.items.add', ':id') }}".replace(':id', this.orderId),
+                            data
+                        ).then(response => {
+                            this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                            window.location.reload();
+                        }).catch(error => {
+                            this.isAdding = false;
+                            this.$emitter.emit('add-flash', {
+                                type:    'error',
+                                message: error.response?.data?.message ?? 'Failed to add item.',
+                            });
+                        });
+                    },
+                },
+            });
+        </script>
+    @endPushOnce
 </x-admin::layouts>

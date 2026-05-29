@@ -23,80 +23,75 @@ class BulkDeal
             return;
         }
 
+        $totalBaseDiscount = 0.0;
+
         foreach ($deals as $deal) {
-            $this->processDeal($cart, $deal);
+            $totalBaseDiscount += $this->computeDealDiscount($cart, $deal);
         }
+
+        if ($totalBaseDiscount <= 0) {
+            return;
+        }
+
+        $totalDiscount = core()->convertPrice($totalBaseDiscount);
+
+        $cart->base_discount_amount = round($cart->base_discount_amount + $totalBaseDiscount, 2);
+        $cart->discount_amount      = round($cart->discount_amount + $totalDiscount, 2);
+        $cart->base_grand_total     = round(max(0, $cart->base_grand_total - $totalBaseDiscount), 2);
+        $cart->grand_total          = round(max(0, $cart->grand_total - $totalDiscount), 2);
+
+        $cart->save();
     }
 
-    protected function processDeal($cart, $deal): void
+    protected function computeDealDiscount($cart, $deal): float
     {
-        $triggerQty = $deal->paid_quantity + $deal->deal_quantity;
+        $triggerQty = (int) $deal->paid_quantity + (int) $deal->deal_quantity;
 
-        // Expand items into individual units with references back to cart item
+        // Expand parent cart items into individual price units (skip child items)
         $units = [];
 
         foreach ($cart->items as $item) {
             $qty = (int) $item->quantity;
 
             for ($i = 0; $i < $qty; $i++) {
-                $units[] = [
-                    'item'       => $item,
-                    'base_price' => (float) $item->base_price,
-                    'price'      => (float) $item->price,
-                ];
+                $units[] = (float) $item->base_price;
             }
         }
 
         $totalQty = count($units);
 
         if ($totalQty < $triggerQty) {
-            return;
+            return 0.0;
         }
 
-        // Sort descending by price — most expensive first (charged at full price)
-        usort($units, fn ($a, $b) => $b['base_price'] <=> $a['base_price']);
+        // Sort descending — most expensive items pay full price
+        rsort($units);
 
-        // The first paid_quantity units get no discount
-        // The next deal_quantity units get the deal price
-        $dealUnits = array_slice($units, $deal->paid_quantity, $deal->deal_quantity);
+        // How many complete deal cycles fit in the cart?
+        $cycles = (int) floor($totalQty / $triggerQty);
 
-        if (empty($dealUnits)) {
-            return;
-        }
+        $totalBaseDiscount = 0.0;
 
-        // Calculate regular total for deal units (base currency)
-        $regularBaseTotal = array_sum(array_column($dealUnits, 'base_price'));
+        for ($cycle = 0; $cycle < $cycles; $cycle++) {
+            // Within each cycle, the first paid_quantity units are at full price,
+            // the next deal_quantity units get the deal price
+            $offset    = $cycle * $triggerQty + (int) $deal->paid_quantity;
+            $dealUnits = array_slice($units, $offset, (int) $deal->deal_quantity);
 
-        if ($regularBaseTotal <= 0) {
-            return;
-        }
+            $regularTotal = array_sum($dealUnits);
 
-        // Positive = discount (deal is cheaper than original)
-        // Negative = surcharge (deal forces a higher price than original)
-        $baseDiscount = $regularBaseTotal - (float) $deal->deal_price;
-
-        // Group deal units by cart item to apply discount in one pass
-        $discountPerItem = [];
-
-        foreach ($dealUnits as $unit) {
-            $itemId = $unit['item']->id;
-            $discountPerItem[$itemId] = ($discountPerItem[$itemId] ?? 0)
-                + ($baseDiscount * ($unit['base_price'] / $regularBaseTotal));
-        }
-
-        foreach ($cart->items as $item) {
-            if (! isset($discountPerItem[$item->id])) {
+            if ($regularTotal <= 0) {
                 continue;
             }
 
-            $baseItemDiscount = $discountPerItem[$item->id];
-            $itemDiscount     = core()->convertPrice($baseItemDiscount);
+            // deal_price is the total replacement cost for the deal_quantity units
+            $discount = $regularTotal - (float) $deal->deal_price;
 
-            // Allow negative discount_amount (acts as a surcharge when deal_price > original price)
-            $item->base_discount_amount = (float) ($item->base_discount_amount ?? 0) + $baseItemDiscount;
-            $item->discount_amount      = (float) ($item->discount_amount ?? 0) + $itemDiscount;
-
-            $item->save();
+            if ($discount > 0) {
+                $totalBaseDiscount += $discount;
+            }
         }
+
+        return $totalBaseDiscount;
     }
 }

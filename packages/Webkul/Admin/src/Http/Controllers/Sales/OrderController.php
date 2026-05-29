@@ -11,6 +11,8 @@ use Illuminate\View\View;
 use Webkul\Admin\DataGrids\Sales\OrderDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Sales\Repositories\InvoiceRepository;
+use Webkul\Product\Repositories\ProductRepository;
+use Webkul\Sales\Repositories\OrderItemRepository;
 use Webkul\Admin\Http\Resources\AddressResource;
 use Webkul\Admin\Http\Resources\CartResource;
 use Webkul\Checkout\Facades\Cart;
@@ -33,6 +35,8 @@ class OrderController extends Controller
         protected CartRepository $cartRepository,
         protected CustomerGroupRepository $customerGroupRepository,
         protected InvoiceRepository $invoiceRepository,
+        protected OrderItemRepository $orderItemRepository,
+        protected ProductRepository $productRepository,
     ) {}
 
     /**
@@ -249,7 +253,7 @@ class OrderController extends Controller
     /**
      * Auto-create invoice for all items → marks order as Processing.
      */
-    public function autoInvoice(int $id): Response
+    public function autoInvoice(int $id)
     {
         $order = $this->orderRepository->findOrFail($id);
 
@@ -302,12 +306,18 @@ class OrderController extends Controller
 
         foreach ($orders as $order) {
             foreach ($order->items as $item) {
+                $qty = (int) max(0, $item->qty_ordered - $item->qty_shipped - $item->qty_canceled);
+
+                if ($qty <= 0) {
+                    continue;
+                }
+
                 $lines->push([
                     'order_id'      => $order->increment_id,
                     'order_db_id'   => $order->id,
                     'product_name'  => $item->name,
                     'sku'           => $item->sku,
-                    'qty'           => (int) ($item->qty_ordered - $item->qty_shipped),
+                    'qty'           => $qty,
                     'options'       => $item->additional['attributes'] ?? [],
                     'status'        => $order->status,
                 ]);
@@ -317,6 +327,162 @@ class OrderController extends Controller
         $grouped = $lines->groupBy('sku')->sortKeys();
 
         return view('admin::sales.orders.picking-list', compact('grouped', 'orders'));
+    }
+
+    /**
+     * Add a product (simple or configurable) to an existing order.
+     */
+    public function addItem(int $orderId): JsonResponse
+    {
+        $order = $this->orderRepository->findOrFail($orderId);
+
+        if (! in_array($order->status, ['pending', 'processing'])) {
+            return response()->json(['message' => 'Cannot add items to this order status.'], 422);
+        }
+
+        $qty     = max(1, (int) request()->input('quantity', 1));
+        $product = $this->productRepository->findOrFail((int) request()->input('product_id'));
+
+        try {
+            $cartItems = $product->getTypeInstance()->prepareForCart(
+                array_merge(request()->all(), ['quantity' => $qty])
+            );
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        if ($cartItems instanceof \Exception) {
+            return response()->json(['message' => $cartItems->getMessage()], 422);
+        }
+
+        $parentOrderItem = null;
+
+        foreach ($cartItems as $index => $itemData) {
+            $isChild = $index > 0;
+
+            $orderItem = $this->orderItemRepository->create([
+                'order_id'              => $order->id,
+                'product_id'            => $itemData['product_id'],
+                'parent_id'             => $isChild ? $parentOrderItem?->id : null,
+                'sku'                   => $itemData['sku'],
+                'type'                  => $itemData['type'],
+                'name'                  => $itemData['name'],
+                'weight'                => $itemData['weight'] ?? 0,
+                'total_weight'          => $itemData['total_weight'] ?? 0,
+                'base_total_weight'     => $itemData['base_total_weight'] ?? 0,
+                'qty_ordered'           => $qty,
+                'price'                 => $itemData['price'] ?? 0,
+                'base_price'            => $itemData['base_price'] ?? 0,
+                'total'                 => $itemData['total'] ?? (($itemData['price'] ?? 0) * $qty),
+                'base_total'            => $itemData['base_total'] ?? (($itemData['base_price'] ?? 0) * $qty),
+                'tax_amount'            => 0,
+                'base_tax_amount'       => 0,
+                'tax_percent'           => 0,
+                'discount_amount'       => 0,
+                'base_discount_amount'  => 0,
+                'discount_percent'      => 0,
+                'additional'            => $itemData['additional'] ?? [],
+            ]);
+
+            if (! $isChild) {
+                $parentOrderItem = $orderItem;
+                $this->orderItemRepository->manageInventory($orderItem);
+            }
+        }
+
+        $addedBase   = $cartItems[0]['base_total'] ?? (($cartItems[0]['base_price'] ?? 0) * $qty);
+        $addedNormal = $cartItems[0]['total'] ?? (($cartItems[0]['price'] ?? 0) * $qty);
+
+        $order->base_sub_total   = $order->base_sub_total + $addedBase;
+        $order->sub_total        = $order->sub_total + $addedNormal;
+        $order->base_grand_total = $order->base_sub_total + $order->base_tax_amount + $order->base_shipping_amount - $order->base_discount_amount;
+        $order->grand_total      = $order->sub_total + $order->tax_amount + $order->shipping_amount - $order->discount_amount;
+        $order->save();
+
+        $this->orderRepository->updateOrderStatus($order);
+
+        return response()->json(['message' => 'Item added to order.']);
+    }
+
+    /**
+     * Cancel a single item from an order (removes all non-invoiced qty).
+     */
+    public function cancelItem(int $orderId, int $itemId)
+    {
+        $order = $this->orderRepository->findOrFail($orderId);
+        $item  = $order->items()->where('id', $itemId)->firstOrFail();
+
+        if (! $item->canCancel(force: true)) {
+            session()->flash('error', 'This item cannot be cancelled (already invoiced or shipped).');
+
+            return redirect()->route('admin.sales.orders.view', $orderId);
+        }
+
+        $qtyToCancel     = $item->qty_to_cancel;
+        $cancelledBase   = $qtyToCancel * $item->base_price;
+        $cancelledNormal = $qtyToCancel * $item->price;
+
+        $this->orderItemRepository->returnQtyToProductInventory($item);
+
+        $item->qty_canceled += $qtyToCancel;
+        $item->save();
+
+        $order->base_sub_total  = max(0, $order->base_sub_total - $cancelledBase);
+        $order->sub_total       = max(0, $order->sub_total - $cancelledNormal);
+        $order->base_grand_total = max(0, $order->base_sub_total + $order->base_tax_amount + $order->base_shipping_amount - $order->base_discount_amount);
+        $order->grand_total      = max(0, $order->sub_total + $order->tax_amount + $order->shipping_amount - $order->discount_amount);
+        $order->save();
+
+        $this->orderRepository->updateOrderStatus($order);
+
+        session()->flash('success', 'Item removed from order.');
+
+        return redirect()->route('admin.sales.orders.view', $orderId);
+    }
+
+    /**
+     * Reduce the active quantity of a single order item.
+     */
+    public function updateItemQty(int $orderId, int $itemId)
+    {
+        $order = $this->orderRepository->findOrFail($orderId);
+        $item  = $order->items()->where('id', $itemId)->firstOrFail();
+
+        $newQty = (int) request()->validate(['qty' => 'required|integer|min:1'])['qty'];
+
+        $currentEffective = $item->qty_ordered - $item->qty_canceled;
+        $minAllowed       = max(1, $item->qty_invoiced);
+
+        if ($newQty >= $currentEffective) {
+            session()->flash('info', 'No change — enter a lower quantity to reduce.');
+
+            return redirect()->route('admin.sales.orders.view', $orderId);
+        }
+
+        if ($newQty < $minAllowed) {
+            session()->flash('error', "Cannot reduce below {$minAllowed} (already invoiced).");
+
+            return redirect()->route('admin.sales.orders.view', $orderId);
+        }
+
+        $extraToCancel   = $currentEffective - $newQty;
+        $cancelledBase   = $extraToCancel * $item->base_price;
+        $cancelledNormal = $extraToCancel * $item->price;
+
+        $item->qty_canceled += $extraToCancel;
+        $item->save();
+
+        $order->base_sub_total  = max(0, $order->base_sub_total - $cancelledBase);
+        $order->sub_total       = max(0, $order->sub_total - $cancelledNormal);
+        $order->base_grand_total = max(0, $order->base_sub_total + $order->base_tax_amount + $order->base_shipping_amount - $order->base_discount_amount);
+        $order->grand_total      = max(0, $order->sub_total + $order->tax_amount + $order->shipping_amount - $order->discount_amount);
+        $order->save();
+
+        $this->orderRepository->updateOrderStatus($order);
+
+        session()->flash('success', 'Item quantity updated.');
+
+        return redirect()->route('admin.sales.orders.view', $orderId);
     }
 
     /**

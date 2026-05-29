@@ -11,7 +11,7 @@
     >
         <!-- Grid Card -->
         <div
-            class="1180:transtion-all group w-full rounded-md 1180:relative 1180:grid 1180:content-start 1180:overflow-hidden 1180:duration-300 1180:hover:shadow-[0_5px_10px_rgba(0,0,0,0.1)]"
+            class="1180:transtion-all group relative w-full rounded-md 1180:grid 1180:content-start 1180:overflow-hidden 1180:duration-300 1180:hover:shadow-[0_5px_10px_rgba(0,0,0,0.1)]"
             v-if="mode != 'list'"
         >
             <div class="shop-card-img-wrap relative max-h-[300px] max-w-[291px] overflow-hidden max-md:max-h-60 max-md:max-w-full max-md:rounded-lg max-sm:max-h-[200px] max-sm:max-w-full">
@@ -150,7 +150,76 @@
                         @lang('shop::app.components.products.card.quick-view')
                     </button>
                 </div>
+
+                <!-- Quick Add overlay — gradient, anchored to bottom of image -->
+                <div
+                    v-if="showQuickAdd"
+                    class="absolute inset-x-0 top-0 z-20 flex flex-col justify-end"
+                    :style="{ height: quickAddHeight, background: 'linear-gradient(to top, rgba(0,0,0,0.93) 0%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,0) 100%)' }"
+                >
+                    <!-- Close top-right -->
+                    <button
+                        style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.35);border:none;cursor:pointer;color:white;font-size:15px;display:flex;align-items:center;justify-content:center;line-height:1"
+                        @click.stop="showQuickAdd = false"
+                    >&times;</button>
+
+                    <!-- Loading -->
+                    <div v-if="quickAddLoading" style="display:flex;justify-content:center;padding:24px 0">
+                        <svg style="width:20px;height:20px;animation:spin 1s linear infinite;color:rgba(255,255,255,0.5)" fill="none" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity:.25"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" style="opacity:.75"></path>
+                        </svg>
+                    </div>
+
+                    <!-- Attributes + button -->
+                    <template v-else>
+                        <div style="padding:0 12px 8px">
+                            <!-- Each attribute -->
+                            <div v-for="attribute in quickAddAttributes" :key="attribute.id" style="margin-bottom:10px">
+                                <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+                                    <span style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55)">@{{ attribute.label }}</span>
+                                    <span v-if="quickAddSelected[attribute.id]" style="font-size:12px;font-weight:600;color:#fff">
+                                        @{{ attribute.options.find(o => o.id == quickAddSelected[attribute.id])?.label }}
+                                    </span>
+                                    <span v-else style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic">اختر</span>
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:5px">
+                                    <button
+                                        v-for="option in attribute.options"
+                                        :key="option.id"
+                                        type="button"
+                                        style="border-radius:7px;padding:5px 11px;font-size:12px;font-weight:700;border:1.5px solid transparent;cursor:pointer;transition:all .1s"
+                                        :style="quickAddSelected[attribute.id] == option.id
+                                            ? { background:'#fff', color:'#111', borderColor:'#fff' }
+                                            : { background:'rgba(255,255,255,.12)', color:'rgba(255,255,255,.85)', borderColor:'rgba(255,255,255,.2)' }"
+                                        @click.stop="quickAddSelected = { ...quickAddSelected, [attribute.id]: option.id }"
+                                    >@{{ option.label }}</button>
+                                </div>
+                            </div>
+
+                            <!-- Add To Cart button -->
+                            <button
+                                style="width:100%;border-radius:10px;padding:11px;font-size:13px;font-weight:700;border:none;margin-top:4px;transition:all .15s"
+                                :style="quickAddAllSelected && !isAddingToCart
+                                    ? { background:'#fff', color:'#111', cursor:'pointer' }
+                                    : { background:'rgba(255,255,255,.18)', color:'rgba(255,255,255,.35)', cursor:'not-allowed' }"
+                                :disabled="!quickAddAllSelected || isAddingToCart"
+                                @click.stop="addToCartWithVariant"
+                            >
+                                <span v-if="isAddingToCart" style="display:flex;align-items:center;justify-content:center;gap:5px">
+                                    <svg style="width:13px;height:13px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity:.25"></circle>
+                                        <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" style="opacity:.75"></path>
+                                    </svg>
+                                </span>
+                                <span v-else>@lang('shop::app.components.products.card.add-to-cart')</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
             </div>
+
 
             <!-- Product Information Section -->
             <div class="-mt-9 grid max-w-[291px] translate-y-9 content-start gap-2.5 bg-white p-2.5 transition-transform duration-300 ease-out group-hover:-translate-y-0 group-hover:rounded-t-lg max-md:relative max-md:mt-0 max-md:translate-y-0 max-md:gap-0 max-md:px-0 max-md:py-1.5 max-sm:min-w-[170px] max-sm:max-w-[192px]">
@@ -430,6 +499,8 @@
                     </div>
                 </div>
             </div>
+
+
         </teleport>
     </script>
 
@@ -446,7 +517,34 @@
                     isAddingToCart: false,
 
                     showQuickView: false,
+
+                    showQuickAdd: false,
+
+                    quickAddLoading: false,
+
+                    quickAddAttributes: [],
+
+                    quickAddSelected: {},
                 }
+            },
+
+            computed: {
+                quickAddAllSelected() {
+                    if (! this.quickAddAttributes.length) {
+                        return false;
+                    }
+
+                    return this.quickAddAttributes.every(attr => !! this.quickAddSelected[attr.id]);
+                },
+
+                quickAddHeight() {
+                    const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+
+                    if (w < 640) return '200px';
+                    if (w < 768) return '240px';
+
+                    return '300px';
+                },
             },
 
             methods: {
@@ -524,6 +622,18 @@
                 },
 
                 addToCart() {
+                    if (this.product.type === 'configurable') {
+                        this.openQuickAdd();
+
+                        return;
+                    }
+
+                    if (! this.product.type || this.product.type !== 'simple') {
+                        window.location.href = '{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', this.product.url_key);
+
+                        return;
+                    }
+
                     this.isAddingToCart = true;
 
                     this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
@@ -549,6 +659,65 @@
                             }
 
                             this.isAddingToCart = false;
+                        });
+                },
+
+                openQuickAdd() {
+                    this.showQuickAdd = true;
+                    this.quickAddLoading = true;
+                    this.quickAddAttributes = [];
+                    this.quickAddSelected = {};
+
+                    this.$axios.get(`{{ route('shop.api.products.configurable.options', ':id') }}`.replace(':id', this.product.id))
+                        .then(response => {
+                            const data = response.data.data;
+
+                            if (data && data.attributes) {
+                                this.quickAddAttributes = data.attributes;
+                            }
+
+                            this.quickAddLoading = false;
+                        })
+                        .catch(() => {
+                            this.quickAddLoading = false;
+                            this.showQuickAdd = false;
+                        });
+                },
+
+                addToCartWithVariant() {
+                    if (! this.quickAddAllSelected || this.isAddingToCart) {
+                        return;
+                    }
+
+                    this.isAddingToCart = true;
+
+                    const superAttribute = {};
+
+                    this.quickAddAttributes.forEach(attr => {
+                        superAttribute[attr.id] = this.quickAddSelected[attr.id];
+                    });
+
+                    this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
+                            product_id: this.product.id,
+                            quantity: 1,
+                            super_attribute: superAttribute,
+                        })
+                        .then(response => {
+                            this.isAddingToCart = false;
+                            this.showQuickAdd = false;
+
+                            if (response.data.message) {
+                                this.$emitter.emit('update-mini-cart', response.data.data);
+
+                                this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                            } else {
+                                this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
+                            }
+                        })
+                        .catch(error => {
+                            this.isAddingToCart = false;
+
+                            this.$emitter.emit('add-flash', { type: 'error', message: error.response?.data?.message || "@lang('shop::app.components.products.card.error-adding-to-cart')" });
                         });
                 },
             },

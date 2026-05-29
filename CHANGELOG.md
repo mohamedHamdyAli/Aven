@@ -2,6 +2,17 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## 2026-05-29
+
+### Feature
+- **Add item to existing order** — admin can add any product (simple or configurable with size/color selection) to a pending or processing order. Opens a search drawer: type product name, pick the variant attributes, set qty, and confirm. Order totals are updated immediately.
+- **Order item editing in admin** — added per-item "Update Qty" and "Remove Item" controls on the order view page. Admins can reduce an item's quantity (cancels the difference, updates order totals) or remove it entirely (cancels all remaining qty, restores inventory). Only shown for items that still have cancellable qty (not yet invoiced/shipped). Picking list now also excludes cancelled items correctly.
+- **Quick Add to Cart from product listing** — clicking "Add to Cart" on a configurable product card now opens a bottom-sheet modal (mobile) / dialog (desktop) with color and size pickers. Once all attributes are selected the item is added to the cart without navigating away. Simple products are added directly as before.
+
+### Fix
+- **BulkDeal discount applying incorrectly** — deal was triggering with fewer items than required (paid_qty + deal_qty) because the discount was persisted on cart items via `+=` and never reset when cart conditions changed. Redesigned to compute discount on `checkout.cart.collect.totals.after` and apply at cart level instead of item level, eliminating stale data and CartRule conflicts. Also fixed multiple cycles (e.g. 6 items with "buy 2 get 1" now correctly applies 2 discount cycles).
+- **Checkout cart +/- quantity buttons not working** — `AbandonedCart` listener `CartActivityTracker::onCartActivity` declared `CartContract $cart` but the `checkout.cart.update.after` event dispatches a `CartItem`. The resulting `TypeError` was silently swallowed by the controller's try/catch, returning HTTP 200 with no update. Fixed listener to accept both `Cart` and `CartItem` and resolve the cart accordingly.
+
 ## 2026-05-28
 
 ### Feature

@@ -4,14 +4,26 @@ namespace Webkul\AbandonedCart\Listeners;
 
 use Illuminate\Support\Str;
 use Webkul\Checkout\Contracts\Cart as CartContract;
+use Webkul\Checkout\Contracts\CartItem as CartItemContract;
 
 class CartActivityTracker
 {
     /**
      * Stamp last_activity_at and ensure notification_token exists whenever the cart changes.
+     *
+     * Some events (checkout.cart.update.after) pass the CartItem rather than the Cart itself,
+     * so we resolve the Cart from whichever object we receive.
      */
-    public function onCartActivity(CartContract $cart): void
+    public function onCartActivity(CartContract|CartItemContract $cartOrItem): void
     {
+        $cart = $cartOrItem instanceof CartItemContract
+            ? $cartOrItem->cart
+            : $cartOrItem;
+
+        if (! $cart) {
+            return;
+        }
+
         // Debounce: skip if updated within the last 2 minutes to avoid a DB write on every page load
         if (
             $cart->last_activity_at

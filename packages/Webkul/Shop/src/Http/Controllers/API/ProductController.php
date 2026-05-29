@@ -2,9 +2,11 @@
 
 namespace Webkul\Shop\Http\Controllers\API;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Webkul\Category\Repositories\CategoryRepository;
 use Webkul\Marketing\Jobs\UpdateCreateSearchTerm as UpdateCreateSearchTermJob;
+use Webkul\Product\Helpers\ConfigurableOption;
 use Webkul\Product\Repositories\ProductRepository;
 use Webkul\Shop\Http\Resources\ProductResource;
 
@@ -17,7 +19,8 @@ class ProductController extends APIController
      */
     public function __construct(
         protected CategoryRepository $categoryRepository,
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected ConfigurableOption $configurableOptionHelper,
     ) {}
 
     /**
@@ -122,5 +125,18 @@ class ProductController extends APIController
             ->get();
 
         return ProductResource::collection($upSellProducts);
+    }
+
+    public function configurableOptions(int $id): JsonResponse
+    {
+        $product = $this->productRepository->findOrFail($id);
+
+        if ($product->type !== 'configurable') {
+            return response()->json(['data' => null]);
+        }
+
+        return response()->json([
+            'data' => $this->configurableOptionHelper->getConfigurationConfig($product),
+        ]);
     }
 }

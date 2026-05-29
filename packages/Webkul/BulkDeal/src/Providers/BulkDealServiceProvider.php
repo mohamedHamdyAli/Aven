@@ -12,6 +12,6 @@ class BulkDealServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
 
-        Event::listen('checkout.cart.collect.totals.before', [Cart::class, 'applyBulkDeals']);
+        Event::listen('checkout.cart.collect.totals.after', [Cart::class, 'applyBulkDeals']);
     }
 }
