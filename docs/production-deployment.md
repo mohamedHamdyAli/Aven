@@ -41,7 +41,8 @@ DB_USERNAME=YOUR_DB_USER
 DB_PASSWORD=YOUR_DB_PASSWORD
 DB_PREFIX=
 
-SESSION_DRIVER=file
+# ✅ Redis للـ Cache والـ Session (أسرع من File)
+SESSION_DRIVER=redis
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=false
 SESSION_PATH=/
@@ -49,19 +50,20 @@ SESSION_DOMAIN=null
 
 BROADCAST_CONNECTION=log
 FILESYSTEM_DISK=public
-QUEUE_CONNECTION=sync
+QUEUE_CONNECTION=database
 
-CACHE_STORE=file
+CACHE_STORE=redis
 CACHE_PREFIX=
 
 MEMCACHED_HOST=127.0.0.1
 
-REDIS_CLIENT=phpredis
+# استخدم predis (لا يحتاج PHP extension)
+REDIS_CLIENT=predis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
 REDIS_PORT=6379
 
-# اضبطها true في البرودكشن عشان الـ Full Page Cache يشتغل
+# Full Page Cache — شغّله في البرودكشن
 RESPONSE_CACHE_ENABLED=true
 
 MAIL_MAILER=bagisto-dynamic-smtp
@@ -88,47 +90,120 @@ VITE_APP_NAME=Aven
 VITE_HOST=localhost
 VITE_PORT=
 
-# مفتاح Groq للـ AI Support — نفس المفتاح أو مفتاح بروودكشن جديد
 GROQ_API_KEY=your-groq-api-key-here
 
-# مفاتيح VAPID للـ Push Notifications — لازم تكون ثابتة (نفس القيم أو تنشئ جديدة مرة واحدة بس)
 VAPID_PUBLIC_KEY=BD5JZ0BFl_VEC948Jkf5pSLwLahsS0xxqUMXEflLVqHUBdwSXFndKPSIFAAdynh7yHsFg9NSz7gwG8pNk_aHTjs
 VAPID_PRIVATE_KEY=e2gDdvYRBxf1ewRKgQxgYgqierThmHXnexc58akhPT4
 ```
 
 ### القيم اللي لازم تتغير للبرودكشن
 
-| المتغير | القيمة المحلية | ملاحظة |
-|---------|--------------|--------|
-| `APP_ENV` | `local` | غيّره إلى `production` |
+| المتغير | القيمة المحلية | البرودكشن |
+|---------|--------------|-----------|
+| `APP_ENV` | `local` | `production` |
 | `APP_URL` | `http://aven.test` | دومين البرودكشن |
-| `DB_DATABASE` | `aven` | اسم قاعدة البيانات على السيرفر |
+| `DB_DATABASE` | `aven` | اسم DB على السيرفر |
 | `DB_USERNAME` | `root` | يوزر DB على السيرفر |
 | `DB_PASSWORD` | *(فاضي)* | باسورد DB على السيرفر |
+| `CACHE_STORE` | `redis` | `redis` (لو Redis متاح) أو `file` |
+| `SESSION_DRIVER` | `redis` | `redis` (لو Redis متاح) أو `file` |
+| `REDIS_CLIENT` | `predis` | `predis` |
+| `QUEUE_CONNECTION` | `sync` | `database` (أو `redis`) |
 | `MAIL_HOST` | `127.0.0.1` | SMTP server حقيقي |
-| `MAIL_PORT` | `2525` | عادةً `587` أو `465` |
+| `MAIL_PORT` | `2525` | `587` أو `465` |
 | `MAIL_USERNAME` | `null` | إيميل SMTP |
 | `MAIL_PASSWORD` | `null` | باسورد SMTP |
 | `MAIL_FROM_ADDRESS` | `shop@example.com` | إيميل المتجر الحقيقي |
-| `ADMIN_MAIL_ADDRESS` | `admin@example.com` | إيميل الأدمن |
-| `CONTACT_MAIL_ADDRESS` | `contact@example.com` | إيميل التواصل |
 
 ---
 
-## 2. ملفات الـ bootstrap/cache
-
-دي ملفات بتتولد أوتوماتيك — مش محتاج تنسخها. بعد الـ deploy شغّل:
+## 2. أوامر الـ Deploy الكاملة (بالترتيب)
 
 ```bash
+# 1. Pull الكود
+git pull origin 2.4
+
+# 2. PHP dependencies
+composer install --no-dev --optimize-autoloader
+
+# 3. Migrations (مفيش migrations جديدة في هذا الـ release لكن شغّلها احتياطاً)
+php artisan migrate --force
+
+# 4. Clear + Cache
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+# 5. Storage symlink (مرة واحدة بس على سيرفر جديد)
+php artisan storage:link
+
+# 6. Permissions
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
 ```
 
 ---
 
-## 3. ملف الـ storage (media uploads)
+## 3. Redis — مطلوب على السيرفر ⚠️
+
+الـ cache والـ session دلوقتي بيستخدموا Redis. لازم Redis يكون شغال على السيرفر.
+
+### تثبيت Redis على Ubuntu/Debian
+```bash
+sudo apt update
+sudo apt install redis-server -y
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# تأكد إنه شغال
+redis-cli ping   # المفروض يرجع PONG
+```
+
+### تثبيت Redis على CentOS/AlmaLinux
+```bash
+sudo dnf install redis -y
+sudo systemctl enable redis
+sudo systemctl start redis
+redis-cli ping
+```
+
+### لو السيرفر مش بيدعم Redis
+غيّر في الـ `.env`:
+```env
+CACHE_STORE=file
+SESSION_DRIVER=file
+```
+
+---
+
+## 4. Queue Worker — مطلوب لو غيّرت QUEUE_CONNECTION لـ database
+
+```bash
+# مرة واحدة — إنشاء جدول الـ queue
+php artisan queue:table
+php artisan migrate
+
+# تشغيل الـ worker (استخدم supervisor في البرودكشن)
+php artisan queue:work --sleep=3 --tries=3 --daemon
+```
+
+### Supervisor config (مثال)
+```ini
+[program:aven-queue]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/aven/artisan queue:work --sleep=3 --tries=3
+autostart=true
+autorestart=true
+numprocs=2
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/aven/storage/logs/worker.log
+```
+
+---
+
+## 5. ملفات الـ Storage (media uploads)
 
 الصور والملفات المرفوعة في:
 - `storage/app/public/product/`
@@ -141,54 +216,43 @@ php artisan view:cache
 - `public/storage/` ← symlink
 
 **على السيرفر:**
-1. ارفع محتوى `storage/app/public/` إلى مكانه على السيرفر.
-2. شغّل: `php artisan storage:link` عشان تنشئ الـ symlink.
+1. ارفع محتوى `storage/app/public/` إلى مكانه على السيرفر
+2. شغّل: `php artisan storage:link`
 
 ---
 
-## 4. أوامر الـ Deploy الكاملة (ترتيب)
+## 6. ما يحتاج تشغله بعد كل Pull
 
 ```bash
-# 1. pull الكود
 git pull origin 2.4
-
-# 2. dependencies
 composer install --no-dev --optimize-autoloader
-
-# 3. migrations
 php artisan migrate --force
-
-# 4. assets (لو الـ build مش موجود)
-cd packages/Webkul/Admin && npm install && npm run build && cd ../../..
-cd packages/Webkul/Shop  && npm install && npm run build && cd ../../..
-
-# 5. clear + cache
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-
-# 6. storage symlink (مرة واحدة بس)
-php artisan storage:link
-
-# 7. permissions
-chmod -R 775 storage bootstrap/cache
 ```
 
 ---
 
-## 5. ملف الـ Admin node_modules
+## 7. Features جديدة — إعدادات مطلوبة في Admin
 
-`packages/Webkul/Admin/node_modules/` و `package-lock.json` — متأثرين بالـ ignore.
+### Coming Soon Page
+- **Admin → Configuration → General → Content → Coming Soon Page**
+- فعّل الـ toggle لو عاوز تشغّل صفحة الـ launch
+- اضبط: Heading, Sub Text, Background Video URL (mp4 أو YouTube), Logo URL
 
-على السيرفر: شغّل `npm install` جوه الـ package directory لو هتعمل build هناك.
-البديل الأسهل: ابني الـ assets محلياً وارفع الـ `build/` folder مباشرةً.
+### Egypt Shipping — Governorate Rates
+- **Admin → Configuration → Egypt Shipping → Governorate Rates**
+- تأكد إن الـ governorates مفعّلة وليها rates
+- الـ API endpoint الجديد: `GET /api/egypt-shipping/rate/{code}`
 
 ---
 
-## 6. ملاحظات مهمة
+## 8. ملاحظات مهمة
 
-- **VAPID Keys**: لو غيّرت المفاتيح في البرودكشن، المستخدمين المشتركين في الـ Push Notifications محتاجين يشتركوا تاني.
-- **GROQ_API_KEY**: المفتاح الحالي للـ AI Support — احتفظ بيه أو اعمل مفتاح جديد من [console.groq.com](https://console.groq.com).
-- **APP_KEY**: ثبّته ومتغيّروش على السيرفر — لو اتغيّر، كل الـ sessions والـ encrypted data هتبطل.
-- **RESPONSE_CACHE_ENABLED**: خليه `true` في البرودكشن للـ Full Page Cache، `false` بس لو بتعمل debug.
+- **APP_KEY**: ثبّته ومتغيّروش — لو اتغيّر، كل الـ sessions والـ encrypted data هتبطل.
+- **VAPID Keys**: لو غيّرتهم، المستخدمين المشتركين في Push Notifications لازم يشتركوا تاني.
+- **GROQ_API_KEY**: احتفظ بيه أو اعمل مفتاح جديد من [console.groq.com](https://console.groq.com).
+- **RESPONSE_CACHE_ENABLED**: خليه `true` في البرودكشن للـ Full Page Cache.
+- **predis**: مش محتاج PHP extension — بيشتغل out of the box مع `composer install`.
