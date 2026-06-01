@@ -12,7 +12,7 @@ class GeneralExpenseController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            return app(GeneralExpenseDataGrid::class)->toJson();
+            return datagrid(GeneralExpenseDataGrid::class)->process();
         }
 
         $categories = GeneralExpense::categories();

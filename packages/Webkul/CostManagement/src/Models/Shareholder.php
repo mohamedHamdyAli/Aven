@@ -14,17 +14,27 @@ class Shareholder extends Model
         return \Webkul\CostManagement\Database\Factories\ShareholderFactory::new();
     }
 
-    protected $fillable = ['name', 'email', 'phone', 'percentage', 'active', 'notes', 'joined_at'];
+    protected $fillable = ['name', 'email', 'phone', 'shares', 'percentage', 'active', 'notes', 'joined_at'];
 
-    protected $casts = ['active' => 'boolean', 'joined_at' => 'date', 'percentage' => 'float'];
+    protected $casts = ['active' => 'boolean', 'joined_at' => 'date', 'percentage' => 'float', 'shares' => 'integer'];
 
     public function distributionItems()
     {
         return $this->hasMany(ProfitDistributionItem::class);
     }
 
+    public function contributions()
+    {
+        return $this->hasMany(CapitalContribution::class);
+    }
+
     public function totalEarned(): float
     {
         return (float) $this->distributionItems()->sum('amount');
+    }
+
+    public function totalContributed(): float
+    {
+        return (float) $this->contributions()->sum('amount');
     }
 }

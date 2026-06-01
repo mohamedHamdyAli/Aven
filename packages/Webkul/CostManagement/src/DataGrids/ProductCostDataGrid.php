@@ -20,16 +20,22 @@ class ProductCostDataGrid extends DataGrid
             })
             ->leftJoin('product_costs as pc', 'pc.product_id', '=', 'p.id')
             ->where('pf.status', 1)
+            ->where('p.type', '!=', 'configurable')
             ->selectRaw('
                 p.id,
                 p.sku,
                 COALESCE(pf.name, p.sku) as product_name,
-                COALESCE(pf.price, 0) as selling_price,
-                COALESCE(pc.cost_price, 0) as cost_price,
-                COALESCE(pc.manufacturing_fee, 0) as manufacturing_fee,
-                COALESCE(pc.shipping_cost_per_unit, 0) as shipping_cost_per_unit,
-                COALESCE(pc.other_costs, 0) as other_costs,
-                COALESCE(pc.cost_price, 0) + COALESCE(pc.manufacturing_fee, 0) + COALESCE(pc.shipping_cost_per_unit, 0) + COALESCE(pc.other_costs, 0) as total_cost
+                COALESCE(pf.price, 0) as selling_price_raw,
+                COALESCE(pc.cost_price, 0) + COALESCE(pc.manufacturing_fee, 0) + COALESCE(pc.shipping_cost_per_unit, 0) + COALESCE(pc.other_costs, 0) as total_cost_raw,
+                CASE
+                    WHEN COALESCE(pf.price, 0) > 0
+                    THEN ROUND(
+                        (COALESCE(pf.price, 0) - (COALESCE(pc.cost_price,0) + COALESCE(pc.manufacturing_fee,0) + COALESCE(pc.shipping_cost_per_unit,0) + COALESCE(pc.other_costs,0)))
+                        / COALESCE(pf.price, 0) * 100
+                    , 1)
+                    ELSE NULL
+                END as margin_pct,
+                COALESCE(pf.price, 0) - (COALESCE(pc.cost_price,0) + COALESCE(pc.manufacturing_fee,0) + COALESCE(pc.shipping_cost_per_unit,0) + COALESCE(pc.other_costs,0)) as profit_raw
             ');
     }
 
@@ -51,31 +57,30 @@ class ProductCostDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index'    => 'selling_price',
+            'index'    => 'selling_price_raw',
             'label'    => 'Selling Price',
             'type'     => 'string',
             'sortable' => true,
-            'closure'  => fn ($row) => core()->formatPrice($row->selling_price),
+            'closure'  => fn ($row) => core()->formatPrice((float) $row->selling_price_raw),
         ]);
 
         $this->addColumn([
-            'index'    => 'total_cost',
+            'index'    => 'total_cost_raw',
             'label'    => 'Total Cost',
             'type'     => 'string',
             'sortable' => true,
-            'closure'  => fn ($row) => core()->formatPrice($row->total_cost),
+            'closure'  => fn ($row) => core()->formatPrice((float) $row->total_cost_raw),
         ]);
 
         $this->addColumn([
-            'index'   => 'margin',
+            'index'   => 'margin_pct',
             'label'   => 'Margin %',
             'type'    => 'string',
             'closure' => function ($row) {
-                if ($row->selling_price <= 0) {
+                if (is_null($row->margin_pct)) {
                     return '<span class="text-gray-400">—</span>';
                 }
-                $profit = $row->selling_price - $row->total_cost;
-                $margin = round(($profit / $row->selling_price) * 100, 1);
+                $margin = (float) $row->margin_pct;
                 $color  = $margin >= 30 ? 'text-green-600' : ($margin >= 10 ? 'text-yellow-600' : 'text-red-600');
 
                 return "<span class=\"font-semibold {$color}\">{$margin}%</span>";
@@ -83,10 +88,10 @@ class ProductCostDataGrid extends DataGrid
         ]);
 
         $this->addColumn([
-            'index'   => 'profit_per_unit',
+            'index'   => 'profit_raw',
             'label'   => 'Profit / Unit',
             'type'    => 'string',
-            'closure' => fn ($row) => core()->formatPrice($row->selling_price - $row->total_cost),
+            'closure' => fn ($row) => core()->formatPrice((float) $row->profit_raw),
         ]);
     }
 

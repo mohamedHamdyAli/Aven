@@ -2,6 +2,18 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## 2026-06-02
+
+### Feature
+- **Product Cost panel — bulk select & apply for configurable products** — cost panel on product edit page now has checkboxes per variant + "Select All". Selecting variants reveals a blue bulk-apply bar where you fill in cost fields once and apply to all selected variants simultaneously via parallel AJAX calls. Fixes: accordion toggle broke after adding checkbox (was using `nextElementSibling` on button now uses `querySelector('.cp-body')` from card root); bulk bar not appearing (all element refs now queried fresh at call time, not cached at init); nested forms causing Save to delete (Delete form moved outside Edit form).
+- **CostManagement DataGrid — filter configurable parent products** — ProductCostDataGrid now excludes products with `type = 'configurable'` since parent products have no price and no direct costs; only simple products and configurable variants appear.
+- **Shareholders — shares-based ownership model** — replaced percentage input with number-of-shares. Global share price stored in `cost_management_settings`. Ownership % auto-computed and resynced across all shareholders after every add/update/delete. Investment value = shares × share_price shown per shareholder.
+- **Shareholders — Capital Contributions log** — each shareholder now has an always-visible Capital Contributions panel (green card) with a list of past contributions and an inline "Add Contribution" form (amount, date, type: Cash/Asset/Loan Repayment/Other, notes). Delete individual contributions with ✕.
+- **P&L Dashboard — comprehensive connected report** — dashboard now pulls from all financial sources: gross revenue, refunds from `orders.grand_total_refunded`, shipping collected from `orders.shipping_amount`, product COGS, per-unit shipping COGS (split), general expenses, ad spend, capital contributions, profit distributions. New sections: Full P&L Waterfall (Gross Revenue → Net Revenue → Gross Profit → Net Profit), Shipping Analysis (collected vs cost vs net), Shareholder Overview (capital, contributed, distributed, per-shareholder table with shares/ownership/investment/earned).
+
+### Fix
+- **Shareholders — nested form causing Save to act as Delete** — `<form method DELETE>` was nested inside `<form method PUT>` for edit. HTML merges both `_method` inputs; Laravel read `_method=DELETE` and routed to `destroy()`. Fixed by placing Delete form as a sibling after the Edit form, never nested inside it.
+
 ## 2026-05-29
 
 ### Improvement

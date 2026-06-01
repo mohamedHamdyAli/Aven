@@ -41,7 +41,7 @@ class GeneralExpenseDataGrid extends DataGrid
         $this->addColumn([
             'index'    => 'expense_date',
             'label'    => 'Date',
-            'type'     => 'date_range',
+            'type'     => 'string',
             'sortable' => true,
         ]);
 

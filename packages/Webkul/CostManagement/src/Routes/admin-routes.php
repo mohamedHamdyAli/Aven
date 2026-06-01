@@ -5,6 +5,7 @@ use Webkul\CostManagement\Http\Controllers\AdSpendController;
 use Webkul\CostManagement\Http\Controllers\GeneralExpenseController;
 use Webkul\CostManagement\Http\Controllers\ProductCostController;
 use Webkul\CostManagement\Http\Controllers\ProfitReportController;
+use Webkul\CostManagement\Http\Controllers\CapitalContributionController;
 use Webkul\CostManagement\Http\Controllers\ShareholderController;
 use Webkul\CostManagement\Http\Controllers\ProfitDistributionController;
 use Webkul\CostManagement\Http\Controllers\ShareholderPortalController;
@@ -39,8 +40,14 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_pa
         Route::prefix('shareholders')->name('shareholders.')->group(function () {
             Route::get('/', [ShareholderController::class, 'index'])->name('index');
             Route::post('/', [ShareholderController::class, 'store'])->name('store');
+            Route::post('/settings', [ShareholderController::class, 'updateSettings'])->name('settings');
             Route::put('/{shareholder}', [ShareholderController::class, 'update'])->name('update');
             Route::delete('/{shareholder}', [ShareholderController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('contributions')->name('contributions.')->group(function () {
+            Route::post('/', [CapitalContributionController::class, 'store'])->name('store');
+            Route::delete('/{contribution}', [CapitalContributionController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('distributions')->name('distributions.')->group(function () {

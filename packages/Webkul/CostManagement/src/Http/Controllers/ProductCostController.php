@@ -15,7 +15,7 @@ class ProductCostController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            return app(ProductCostDataGrid::class)->toJson();
+            return datagrid(ProductCostDataGrid::class)->process();
         }
 
         return view('cost_management::products.index');
@@ -41,10 +41,14 @@ class ProductCostController extends Controller
 
         $data['product_id'] = $productId;
 
-        ProductCost::updateOrCreate(
+        $cost = ProductCost::updateOrCreate(
             ['product_id' => $productId],
             $data
         );
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'cost' => $cost]);
+        }
 
         session()->flash('success', 'Product cost saved successfully.');
 

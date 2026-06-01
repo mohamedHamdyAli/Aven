@@ -22,8 +22,11 @@ class ProfitDistributionController extends Controller
 
     public function create()
     {
-        $shareholders = Shareholder::where('active', true)->orderByDesc('percentage')->get();
-        $totalPct     = $shareholders->sum('percentage');
+        $shareholders = Shareholder::where('active', true)->orderByDesc('shares')->get();
+        $totalShares  = $shareholders->sum('shares');
+        $totalPct     = $totalShares > 0
+            ? $shareholders->sum(fn ($s) => round(($s->shares / $totalShares) * 100, 4))
+            : 0;
 
         // Pre-fill period: last full month
         $from = now()->subMonth()->startOfMonth()->toDateString();
@@ -51,11 +54,15 @@ class ProfitDistributionController extends Controller
             $totalDistributed = 0;
             $items = [];
 
+            // Compute ownership % from shares at distribution time
+            $totalShares = $shareholders->sum('shares');
+
             foreach ($shareholders as $sh) {
-                $amount = round(($sh->percentage / 100) * $data['net_profit'], 2);
+                $pct    = $totalShares > 0 ? round(($sh->shares / $totalShares) * 100, 4) : $sh->percentage;
+                $amount = round(($pct / 100) * $data['net_profit'], 2);
                 $items[] = [
                     'shareholder_id' => $sh->id,
-                    'percentage'     => $sh->percentage,
+                    'percentage'     => $pct,
                     'amount'         => $amount,
                 ];
                 $totalDistributed += $amount;
