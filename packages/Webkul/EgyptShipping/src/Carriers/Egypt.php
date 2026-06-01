@@ -20,11 +20,13 @@ class Egypt extends AbstractShipping
         $cart = Cart::getCart();
         $address = $cart?->shipping_address;
 
-        if (! $address || empty($address->state)) {
+        $code = $address->state ?: $address->city ?? '';
+
+        if (! $address || empty($code)) {
             return false;
         }
 
-        $governorate = EgyptGovernorate::where('code', $address->state)
+        $governorate = EgyptGovernorate::where('code', $code)
             ->where('is_active', true)
             ->whereNotNull('rate')
             ->first();

@@ -1323,25 +1323,4 @@
         @endif
     @endPushOnce
 
-    {{-- Recently Viewed Products --}}
-    @if ($recentProducts->count() > 0)
-        <div class="container mx-auto mt-10 px-4 py-6">
-            <h2 class="mb-4 text-xl font-bold text-navyBlue">Recently Viewed</h2>
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                @foreach ($recentIds as $rid)
-                    @if (isset($recentProducts[$rid]))
-                        @php $rp = $recentProducts[$rid]; @endphp
-                        <a href="{{ url('/' . $rp->url_key) }}" class="group block overflow-hidden rounded-lg border border-gray-100 p-3 transition hover:shadow-md">
-                            @php $rpImg = \Illuminate\Support\Facades\DB::table('product_images')->where('product_id', $rp->product_id)->orderBy('id')->value('path'); @endphp
-                            @if ($rpImg)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($rpImg) }}" alt="{{ $rp->name }}" class="mb-2 h-28 w-full rounded object-contain"/>
-                            @endif
-                            <p class="line-clamp-2 text-xs font-medium leading-tight text-gray-800">{{ $rp->name }}</p>
-                            <p class="mt-1 text-sm font-bold text-navyBlue">{{ core()->currency($rp->price) }}</p>
-                        </a>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-    @endif
 </x-shop::layouts>

@@ -146,22 +146,49 @@
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.country.after') !!}
 
-            <!-- City -->
+            <!-- City / Governorate -->
+            @php
+                $egyptGovernorates = \Webkul\EgyptShipping\Models\EgyptGovernorate::where('is_active', true)
+                    ->orderBy('name_en')
+                    ->get(['code', 'name_en', 'name_ar']);
+            @endphp
+
             <x-shop::form.control-group>
-                <x-shop::form.control-group.label class="!mt-0">
+                <x-shop::form.control-group.label class="required !mt-0">
                     @lang('shop::app.checkout.onepage.address.city')
                 </x-shop::form.control-group.label>
 
-                <x-shop::form.control-group.control
-                    type="text"
-                    ::name="controlName + '.city'"
-                    ::value="address.city"
-                    rules=""
-                    :label="trans('shop::app.checkout.onepage.address.city')"
-                    :placeholder="trans('shop::app.checkout.onepage.address.city')"
-                />
+                {{-- Hidden fields registered with VeeValidate so they're included in form params --}}
+                <x-shop::form.control-group class="hidden">
+                    <x-shop::form.control-group.control
+                        type="hidden"
+                        ::name="controlName + '.city'"
+                        ::value="address.city"
+                    />
+                </x-shop::form.control-group>
 
-                <x-shop::form.control-group.error ::name="controlName + '.city'" />
+                <x-shop::form.control-group class="hidden">
+                    <x-shop::form.control-group.control
+                        type="hidden"
+                        ::name="controlName + '.state'"
+                        ::value="address.state"
+                    />
+                </x-shop::form.control-group>
+
+                <select
+                    class="custom-select w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 focus:border-navyBlue focus:outline-none"
+                    @change="onGovernorateChange($event)"
+                    v-model="selectedGovernorate"
+                >
+                    <option value="">— Select Governorate —</option>
+                    @foreach($egyptGovernorates as $gov)
+                        <option value="{{ $gov->code }}">{{ $gov->name_en }} — {{ $gov->name_ar }}</option>
+                    @endforeach
+                </select>
+
+                <p v-if="!selectedGovernorate && governorateError" class="mt-1 text-xs text-red-600">
+                    Please select a governorate.
+                </p>
             </x-shop::form.control-group>
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
@@ -218,15 +245,27 @@
             },
 
             data() {
-                return {
-                    selectedCountry: this.address.country,
+                /* pre-select: use state if set, else fall back to city (old addresses stored city without state) */
+                const initCode = this.address.state || this.address.city || '';
 
+                return {
+                    selectedCountry:    this.address.country,
+                    selectedGovernorate: initCode,
+                    governorateError:   false,
                     countries: [],
                 }
             },
 
             mounted() {
                 this.getCountries();
+                /* sync address fields from initial selection */
+                this.syncGovernorate(this.selectedGovernorate);
+            },
+
+            watch: {
+                selectedGovernorate(code) {
+                    this.syncGovernorate(code);
+                },
             },
 
             methods: {
@@ -236,6 +275,34 @@
                             this.countries = response.data.data;
                         })
                         .catch(() => {});
+                },
+
+                syncGovernorate(code) {
+                    if (!code) {
+                        this.address.state = '';
+                        this.address.city  = '';
+                        this.$emitter.emit('egypt-shipping-rate', { rate: null, formatted: null });
+                        return;
+                    }
+                    const govs = @json($egyptGovernorates->keyBy('code'));
+                    const gov  = govs[code];
+                    this.address.state = code;
+                    this.address.city  = gov ? gov.name_en : code;
+
+                    this.$axios.get(`/api/egypt-shipping/rate/${code}`)
+                        .then(r => {
+                            this.$emitter.emit('egypt-shipping-rate', {
+                                rate:      r.data.rate,
+                                formatted: r.data.formatted,
+                            });
+                        })
+                        .catch(() => {
+                            this.$emitter.emit('egypt-shipping-rate', { rate: null, formatted: null });
+                        });
+                },
+
+                onGovernorateChange(event) {
+                    this.governorateError = !event.target.value;
                 },
             }
         });

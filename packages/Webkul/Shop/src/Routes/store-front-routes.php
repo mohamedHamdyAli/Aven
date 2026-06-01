@@ -14,6 +14,13 @@ use Webkul\Shop\Http\Controllers\SubscriptionController;
 use Webkul\Shop\Http\Controllers\WishlistShareController;
 
 /**
+ * Coming Soon page.
+ */
+Route::get('coming-soon', [\Webkul\Shop\Http\Controllers\ComingSoonController::class, 'index'])
+    ->name('shop.coming_soon')
+    ->withoutMiddleware(\Webkul\Shop\Http\Middleware\ComingSoon::class);
+
+/**
  * CMS pages.
  */
 Route::get('page/{slug}', [PageController::class, 'view'])

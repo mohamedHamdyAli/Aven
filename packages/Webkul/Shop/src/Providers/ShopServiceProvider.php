@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Webkul\Core\Http\Middleware\PreventRequestsDuringMaintenance;
 use Webkul\Shop\Http\Middleware\AuthenticateCustomer;
 use Webkul\Shop\Http\Middleware\CacheResponse;
+use Webkul\Shop\Http\Middleware\ComingSoon;
 use Webkul\Shop\Http\Middleware\Currency;
 use Webkul\Shop\Http\Middleware\Locale;
 use Webkul\Shop\Http\Middleware\Theme;
@@ -33,6 +34,7 @@ class ShopServiceProvider extends ServiceProvider
             Theme::class,
             Locale::class,
             Currency::class,
+            ComingSoon::class,
         ]);
 
         $router->aliasMiddleware('theme', Theme::class);

@@ -181,11 +181,16 @@
                         paymentMethods: null,
 
                         canPlaceOrder: false,
+
+                        egyptShippingPreview: null,
                     }
                 },
 
                 mounted() {
                     this.getCart();
+                    this.$emitter.on('egypt-shipping-rate', ({ rate, formatted }) => {
+                        this.egyptShippingPreview = rate !== null ? formatted : null;
+                    });
                 },
 
                 methods: {
@@ -224,6 +229,7 @@
                             this.paymentMethods = data;
                         }
 
+                        this.egyptShippingPreview = null;
                         this.getCart();
                     },
 

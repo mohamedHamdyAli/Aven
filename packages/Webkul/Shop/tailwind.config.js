@@ -39,6 +39,8 @@ module.exports = {
             fontFamily: {
                 poppins: ["Poppins", "sans-serif"],
                 dmserif: ["DM Serif Display", "serif"],
+                raleway: ["Raleway", "sans-serif"],
+                openSans: ["Open Sans", "sans-serif"],
             },
         }
     },

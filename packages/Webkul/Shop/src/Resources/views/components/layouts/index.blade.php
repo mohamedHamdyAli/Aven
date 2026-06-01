@@ -71,9 +71,9 @@
         />
 
         @php
-            $bodyFamily    = core()->getConfigData('general.design.shop_fonts.body_family')    ?? 'Poppins';
-            $headingFamily = core()->getConfigData('general.design.shop_fonts.heading_family') ?? 'DM Serif Display';
-            $navFamily     = core()->getConfigData('general.design.shop_fonts.nav_family')     ?? 'Poppins';
+            $bodyFamily    = core()->getConfigData('general.design.shop_fonts.body_family')    ?? 'Open Sans';
+            $headingFamily = core()->getConfigData('general.design.shop_fonts.heading_family') ?? 'Raleway';
+            $navFamily     = core()->getConfigData('general.design.shop_fonts.nav_family')     ?? 'Raleway';
             $bodyWeight    = core()->getConfigData('general.design.shop_fonts.body_weight')    ?? '400';
             $headingWeight = core()->getConfigData('general.design.shop_fonts.heading_weight') ?? '700';
             $navWeight     = core()->getConfigData('general.design.shop_fonts.nav_weight')     ?? '500';

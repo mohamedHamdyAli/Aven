@@ -390,6 +390,12 @@
                 this.getCustomerSavedAddresses();
             },
 
+            watch: {
+                'selectedAddresses.billing_address_id'(id) {
+                    this.emitShippingRateForSelectedAddress(id);
+                },
+            },
+
             methods: {
                 getCustomerSavedAddresses() {
                     this.$axios.get('{{ route('shop.api.customers.account.addresses.index') }}')
@@ -638,6 +644,29 @@
                     } else {
                         this.$emit('processing', 'payment');
                     }
+                },
+
+                emitShippingRateForSelectedAddress(id) {
+                    const address = this.customerSavedAddresses.billing.find(a => a.id == id);
+                    if (!address) {
+                        this.$emitter.emit('egypt-shipping-rate', { rate: null, formatted: null });
+                        return;
+                    }
+                    const code = address.state || address.city || '';
+                    if (!code) {
+                        this.$emitter.emit('egypt-shipping-rate', { rate: null, formatted: null });
+                        return;
+                    }
+                    this.$axios.get(`/api/egypt-shipping/rate/${code}`)
+                        .then(r => {
+                            this.$emitter.emit('egypt-shipping-rate', {
+                                rate:      r.data.rate,
+                                formatted: r.data.formatted,
+                            });
+                        })
+                        .catch(() => {
+                            this.$emitter.emit('egypt-shipping-rate', { rate: null, formatted: null });
+                        });
                 },
             }
         });

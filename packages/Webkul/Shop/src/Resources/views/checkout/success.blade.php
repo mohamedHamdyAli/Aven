@@ -102,13 +102,9 @@
 		foreach ($orderedProductIds as $pid) {
 			$op = app(\Webkul\Product\Repositories\ProductRepository::class)->find($pid);
 			if ($op) {
-				$upsellProducts = $upsellProducts->merge(
-					$op->up_sells()->where('products.status', 1)->get()
-				);
+				$upsellProducts = $upsellProducts->merge($op->up_sells()->get());
 				if ($upsellProducts->count() < 4) {
-					$upsellProducts = $upsellProducts->merge(
-						$op->related_products()->where('products.status', 1)->get()
-					);
+					$upsellProducts = $upsellProducts->merge($op->related_products()->get());
 				}
 			}
 		}
@@ -127,7 +123,7 @@
 			<div class="grid grid-cols-4 gap-5 max-lg:grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-2">
 				@foreach ($upsellProducts as $upsellProduct)
 					@php
-						$imgData = \Webkul\Product\ProductImage::getProductBaseImage($upsellProduct);
+						$imgData = product_image()->getProductBaseImage($upsellProduct);
 						$imgUrl  = $imgData['medium_image_url'] ?? bagisto_asset('images/product-placeholder.webp');
 						$minPrice = $upsellProduct->getTypeInstance()->getMinimalPrice();
 					@endphp

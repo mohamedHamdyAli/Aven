@@ -213,48 +213,24 @@
 
     <!-- Shipping Rates -->
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.before') !!}
-        
-    <template v-if="displayTax.shipping == 'including_tax'">
-        <div class="flex justify-between text-right">
-            <p class="text-base max-sm:text-sm">
-                @lang('shop::app.checkout.onepage.summary.delivery-charges')
-            </p>
 
-            <p class="text-base font-medium max-sm:text-sm">
+    <div class="flex justify-between text-right">
+        <p class="text-base max-sm:text-sm">
+            @lang('shop::app.checkout.onepage.summary.delivery-charges')
+        </p>
+
+        <p class="text-base font-medium max-sm:text-sm">
+            <template v-if="egyptShippingPreview">
+                <span class="text-navyBlue">+ @{{ egyptShippingPreview }}</span>
+            </template>
+            <template v-else-if="displayTax.shipping == 'including_tax'">
                 + @{{ cart.formatted_shipping_amount_incl_tax }}
-            </p>
-        </div>
-    </template>
-
-    <template v-else-if="displayTax.shipping == 'both'">
-        <div class="flex justify-between text-right">
-            <p class="text-base max-sm:text-sm">
-                @lang('shop::app.checkout.onepage.summary.delivery-charges')
-            </p>
-
-            <div>
-                <p class="text-base font-medium max-sm:text-sm">
-                    + @{{ cart.formatted_shipping_amount }}
-                </p>
-
-                <p class="text-xs italic text-gray-500 dark:text-gray-400">
-                    @lang('shop::app.checkout.onepage.summary.incl-tax') @{{ cart.formatted_shipping_amount_incl_tax }}
-                </p>
-            </div>
-        </div>
-    </template>
-
-    <template v-else>
-        <div class="flex justify-between text-right">
-            <p class="text-base max-sm:text-sm">
-                @lang('shop::app.checkout.onepage.summary.delivery-charges')
-            </p>
-
-            <p class="text-base font-medium max-sm:text-sm">
+            </template>
+            <template v-else>
                 + @{{ cart.formatted_shipping_amount }}
-            </p>
-        </div>
-    </template>
+            </template>
+        </p>
+    </div>
 
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.after') !!}
 

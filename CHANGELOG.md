@@ -4,6 +4,12 @@ This changelog consists of the bug & security fixes and new features being inclu
 
 ## 2026-05-29
 
+### Improvement
+- Changed shop fonts from Orbitron/Montserrat to Raleway (headings/nav) + Open Sans (body) for a cleaner modern look.
+
+### Fix
+- **Quick Add to Cart — "Options are missing for this product." error** — the card component was fetching the configurable variant index from the API but discarding it. `addToCartWithVariant()` now resolves the selected `super_attribute` values to the matching `selected_configurable_option` (variant product ID) using that index before posting to the cart API. Without this field the backend always rejected the request.
+
 ### Feature
 - **Add item to existing order** — admin can add any product (simple or configurable with size/color selection) to a pending or processing order. Opens a search drawer: type product name, pick the variant attributes, set qty, and confirm. Order totals are updated immediately.
 - **Order item editing in admin** — added per-item "Update Qty" and "Remove Item" controls on the order view page. Admins can reduce an item's quantity (cancels the difference, updates order totals) or remove it entirely (cancels all remaining qty, restores inventory). Only shown for items that still have cancellable qty (not yet invoiced/shipped). Picking list now also excludes cancelled items correctly.

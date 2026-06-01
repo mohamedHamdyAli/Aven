@@ -74,20 +74,20 @@
                             @lang('shop::app.components.products.card.sale')
                         </p>
 
-                        <!-- New Badge -->
+                        <!-- New Badge (hidden when Low Stock) -->
                         <p
                             class="inline-block self-start rounded-[44px] bg-navyBlue px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
-                            v-if="product.is_new && ! product.on_sale"
+                            v-if="product.is_new && ! product.on_sale && ! (product.stock_qty > 0 && product.stock_qty <= 5)"
                         >
                             @lang('shop::app.components.products.card.new')
                         </p>
 
                         <!-- Low Stock Badge -->
                         <p
-                            class="inline-block self-start rounded-[44px] bg-orange-500 px-2.5 text-sm text-white max-sm:rounded-r-xl max-sm:px-2 max-sm:py-0.5 max-sm:text-xs"
+                            style="display:inline-block;background:#dc2626;border-radius:44px;padding:3px 12px;font-size:13px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);letter-spacing:.02em"
                             v-if="product.stock_qty > 0 && product.stock_qty <= 5"
                         >
-                            @lang('shop::app.components.products.card.low-stock')
+                            ⚠ @lang('shop::app.components.products.card.low-stock')
                         </p>
 
                         <!-- Popular Badge -->
@@ -525,6 +525,8 @@
                     quickAddAttributes: [],
 
                     quickAddSelected: {},
+
+                    quickAddIndex: {},
                 }
             },
 
@@ -674,6 +676,7 @@
 
                             if (data && data.attributes) {
                                 this.quickAddAttributes = data.attributes;
+                                this.quickAddIndex = data.index ?? {};
                             }
 
                             this.quickAddLoading = false;
@@ -697,10 +700,17 @@
                         superAttribute[attr.id] = this.quickAddSelected[attr.id];
                     });
 
+                    const selectedVariantId = Object.keys(this.quickAddIndex).find(variantId => {
+                        const variantAttrs = this.quickAddIndex[variantId];
+
+                        return this.quickAddAttributes.every(attr => String(variantAttrs[attr.id]) === String(this.quickAddSelected[attr.id]));
+                    });
+
                     this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
                             product_id: this.product.id,
                             quantity: 1,
                             super_attribute: superAttribute,
+                            selected_configurable_option: selectedVariantId,
                         })
                         .then(response => {
                             this.isAddingToCart = false;

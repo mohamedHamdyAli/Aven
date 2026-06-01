@@ -1103,15 +1103,6 @@ return [
                 'delivery'  => 'Fast Delivery',
             ],
 
-            'summary' => [
-                'trust' => [
-                    'secure'    => 'Secure Checkout',
-                    'returns'   => 'Easy Returns',
-                    'guarantee' => 'Quality Guaranteed',
-                    'delivery'  => 'Fast Delivery',
-                ],
-            ],
-
             'continue-to-checkout' => 'Continue to Checkout',
             'illegal' => 'Quantity cannot be lesser than one.',
             'inactive' => 'The item has been deactivated and subsequently removed from the cart.',
@@ -1173,6 +1164,13 @@ return [
             ],
 
             'summary' => [
+                'trust' => [
+                    'secure'    => 'Secure Checkout',
+                    'returns'   => 'Easy Returns',
+                    'guarantee' => 'Quality Guaranteed',
+                    'delivery'  => 'Fast Delivery',
+                ],
+
                 'cart-summary' => 'Cart Summary',
                 'delivery-charges' => 'Delivery Charges',
                 'delivery-charges-excl-tax' => 'Delivery Charges (Excl. Tax)',
