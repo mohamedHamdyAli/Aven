@@ -118,9 +118,14 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Permissions
+# Permissions ⚠️ مهم جداً — لازم تتعمل قبل view:cache
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
+
+# تأكد إن Apache/Nginx يقدر يكتب في storage
+chmod -R g+w storage/framework/views
+chmod -R g+w storage/framework/cache
+chmod -R g+w storage/logs
 ```
 
 ---
