@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('social_channel_platforms')) { return; }
         Schema::create('social_channel_platforms', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('channel_id');

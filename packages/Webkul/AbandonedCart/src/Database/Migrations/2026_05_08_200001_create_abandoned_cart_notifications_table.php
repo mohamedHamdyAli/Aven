@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('abandoned_cart_notifications')) { return; }
         Schema::create('abandoned_cart_notifications', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('cart_id');

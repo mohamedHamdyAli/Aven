@@ -8,26 +8,30 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('customer_loyalty_points', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('customer_id')->unique();
-            $table->decimal('balance', 12, 2)->default(0);
-            $table->timestamps();
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-        });
+        if (! Schema::hasTable('customer_loyalty_points')) {
+            Schema::create('customer_loyalty_points', function (Blueprint $table) {
+                $table->increments('id');
+                $table->unsignedInteger('customer_id')->unique();
+                $table->decimal('balance', 12, 2)->default(0);
+                $table->timestamps();
+                $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            });
+        }
 
-        Schema::create('customer_loyalty_transactions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('customer_id');
-            $table->unsignedInteger('order_id')->nullable();
-            $table->enum('type', ['earn', 'redeem', 'expire', 'admin']);
-            $table->decimal('points', 12, 2);
-            $table->decimal('balance_after', 12, 2);
-            $table->string('description')->nullable();
-            $table->timestamps();
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
-        });
+        if (! Schema::hasTable('customer_loyalty_transactions')) {
+            Schema::create('customer_loyalty_transactions', function (Blueprint $table) {
+                $table->increments('id');
+                $table->unsignedInteger('customer_id');
+                $table->unsignedInteger('order_id')->nullable();
+                $table->enum('type', ['earn', 'redeem', 'expire', 'admin']);
+                $table->decimal('points', 12, 2);
+                $table->decimal('balance_after', 12, 2);
+                $table->string('description')->nullable();
+                $table->timestamps();
+                $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+                $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
+            });
+        }
 
         if (! Schema::hasColumn('cart', 'loyalty_points_applied')) {
             Schema::table('cart', function (Blueprint $table) {

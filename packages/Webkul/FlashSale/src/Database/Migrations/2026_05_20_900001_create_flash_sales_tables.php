@@ -8,27 +8,33 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('flash_sales', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->decimal('discount_percent', 5, 2)->default(0);
-            $table->dateTime('starts_at');
-            $table->dateTime('ends_at');
-            $table->boolean('active')->default(false);
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('flash_sales')) {
+            Schema::create('flash_sales', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->decimal('discount_percent', 5, 2)->default(0);
+                $table->dateTime('starts_at');
+                $table->dateTime('ends_at');
+                $table->boolean('active')->default(false);
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('flash_sale_products', function (Blueprint $table) {
-            $table->unsignedInteger('flash_sale_id');
-            $table->unsignedInteger('product_id');
-            $table->primary(['flash_sale_id', 'product_id']);
-            $table->foreign('flash_sale_id')->references('id')->on('flash_sales')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-        });
+        if (! Schema::hasTable('flash_sale_products')) {
+            Schema::create('flash_sale_products', function (Blueprint $table) {
+                $table->unsignedInteger('flash_sale_id');
+                $table->unsignedInteger('product_id');
+                $table->primary(['flash_sale_id', 'product_id']);
+                $table->foreign('flash_sale_id')->references('id')->on('flash_sales')->onDelete('cascade');
+                $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            });
+        }
 
-        Schema::table('product_flat', function (Blueprint $table) {
-            $table->dateTime('flash_sale_ends_at')->nullable()->after('special_price_to');
-        });
+        if (! Schema::hasColumn('product_flat', 'flash_sale_ends_at')) {
+            Schema::table('product_flat', function (Blueprint $table) {
+                $table->dateTime('flash_sale_ends_at')->nullable()->after('special_price_to');
+            });
+        }
     }
 
     public function down(): void

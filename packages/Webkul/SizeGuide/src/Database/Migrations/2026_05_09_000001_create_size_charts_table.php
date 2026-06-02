@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('size_charts')) { return; }
         Schema::create('size_charts', function (Blueprint $table) {
             $table->id();
             $table->string('name');

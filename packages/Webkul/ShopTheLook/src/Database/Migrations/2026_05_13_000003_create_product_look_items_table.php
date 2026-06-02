@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('product_look_items')) { return; }
         Schema::create('product_look_items', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('product_id');

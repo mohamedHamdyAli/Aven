@@ -8,8 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::dropIfExists('social_product_syncs');
-
+        if (Schema::hasTable('social_product_syncs')) { return; }
         Schema::create('social_product_syncs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('social_channel_platform_id');

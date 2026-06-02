@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('affiliates')) { return; }
         Schema::create('affiliates', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('customer_id')->nullable()->unique();

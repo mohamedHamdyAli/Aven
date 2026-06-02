@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('fawry_transactions')) { return; }
         Schema::create('fawry_transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('order_id')->nullable();

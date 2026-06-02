@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('ai_support_conversations')) { return; }
         Schema::create('ai_support_conversations', function (Blueprint $table) {
             $table->id();
             $table->enum('channel', ['web_chat', 'whatsapp', 'messenger', 'email']);

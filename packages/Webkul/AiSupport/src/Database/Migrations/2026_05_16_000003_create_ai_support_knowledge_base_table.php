@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('ai_support_knowledge_base')) { return; }
         Schema::create('ai_support_knowledge_base', function (Blueprint $table) {
             $table->id();
             $table->string('question');
