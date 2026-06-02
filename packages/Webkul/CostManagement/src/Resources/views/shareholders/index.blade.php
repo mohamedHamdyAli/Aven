@@ -20,9 +20,15 @@
                     @endif
                 </p>
             </div>
-            <a href="{{ route('admin.cost_management.distributions.index') }}" class="primary-button">
-                Profit Distributions
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ route('admin.cost_management.balance_sheet.index') }}"
+                   class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200">
+                    Balance Sheet
+                </a>
+                <a href="{{ route('admin.cost_management.distributions.index') }}" class="primary-button">
+                    Profit Distributions
+                </a>
+            </div>
         </div>
 
         {{-- Flash messages --}}

@@ -8,6 +8,7 @@ use Webkul\CostManagement\Http\Controllers\ProfitReportController;
 use Webkul\CostManagement\Http\Controllers\CapitalContributionController;
 use Webkul\CostManagement\Http\Controllers\ShareholderController;
 use Webkul\CostManagement\Http\Controllers\ProfitDistributionController;
+use Webkul\CostManagement\Http\Controllers\BalanceSheetController;
 use Webkul\CostManagement\Http\Controllers\ShareholderPortalController;
 
 Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_path', 'admin')], function () {
@@ -49,6 +50,8 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_pa
             Route::post('/', [CapitalContributionController::class, 'store'])->name('store');
             Route::delete('/{contribution}', [CapitalContributionController::class, 'destroy'])->name('destroy');
         });
+
+        Route::get('/balance-sheet', [BalanceSheetController::class, 'index'])->name('balance_sheet.index');
 
         Route::prefix('distributions')->name('distributions.')->group(function () {
             Route::get('/', [ProfitDistributionController::class, 'index'])->name('index');

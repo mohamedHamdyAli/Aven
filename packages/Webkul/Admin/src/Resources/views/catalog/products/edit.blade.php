@@ -271,6 +271,9 @@
 
                         <!-- Shop The Look Panel -->
                         @include('shop-the-look::admin.product-look-panel')
+
+                        <!-- Product Cost Panel -->
+                        @include('cost_management::admin.product.cost-panel')
                     @endif
                 </div>
 
@@ -306,6 +309,9 @@
 
                         <!-- Shop The Look Panel -->
                         @include('shop-the-look::admin.product-look-panel')
+
+                        <!-- Product Cost Panel -->
+                        @include('cost_management::admin.product.cost-panel')
                     </div>
                 @endif
 

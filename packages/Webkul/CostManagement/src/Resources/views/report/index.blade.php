@@ -97,6 +97,17 @@
         </div>
     </div>
 
+    {{-- ── Cash Flow Statement ── --}}
+    <div class="mt-6 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 p-5">
+        <p class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-200">Cash Flow Statement</p>
+        <div id="cf-skeleton" class="animate-pulse space-y-2">
+            @for ($i = 0; $i < 6; $i++)
+                <div class="h-7 bg-gray-100 dark:bg-gray-800 rounded"></div>
+            @endfor
+        </div>
+        <div id="cf-body" class="hidden"></div>
+    </div>
+
     {{-- ── Shareholder Overview ── --}}
     <div id="shareholders-section" class="mt-6 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 p-5">
         <div class="mb-4 flex items-center justify-between">
@@ -449,6 +460,78 @@
             document.getElementById('tx-table-wrap').classList.remove('hidden');
         }
 
+        // ── Cash Flow Statement ────────────────────────────────────────────────
+        function renderCashFlow(s, sh) {
+            document.getElementById('cf-skeleton').classList.add('hidden');
+            const el = document.getElementById('cf-body');
+
+            const netFinancing  = s.capital_received - s.distributions_paid;
+            const netCash       = s.net_profit + netFinancing;
+
+            function row(label, val, cls, indent) {
+                const sign = val >= 0 ? '+' : '−';
+                return `<tr class="border-b border-gray-50 dark:border-gray-800">
+                    <td class="py-2 text-sm text-gray-600 dark:text-gray-300 ${indent ? 'pl-5' : ''}">${label}</td>
+                    <td class="py-2 text-right text-sm font-semibold ${cls}">${sign} ${fmt(Math.abs(val))}</td>
+                </tr>`;
+            }
+            function header(label) {
+                return `<tr class="bg-gray-50 dark:bg-gray-800">
+                    <td colspan="2" class="py-1.5 px-1 text-xs font-bold text-gray-400 uppercase tracking-wide">${label}</td>
+                </tr>`;
+            }
+            function total(label, val) {
+                const cls = val >= 0 ? 'text-green-600' : 'text-red-600';
+                const sign = val >= 0 ? '+' : '−';
+                return `<tr class="border-b-2 border-gray-200 dark:border-gray-700 font-bold">
+                    <td class="py-2.5 text-sm font-bold text-gray-800 dark:text-white">${label}</td>
+                    <td class="py-2.5 text-right text-sm font-bold ${cls}">${sign} ${fmt(Math.abs(val))}</td>
+                </tr>`;
+            }
+
+            el.innerHTML = `
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <table class="w-full text-sm">
+                        <tbody>
+                            ${header('1. Operating Activities')}
+                            ${row('Net Profit from Operations', s.net_profit, s.net_profit >= 0 ? 'text-green-600' : 'text-red-600', true)}
+                            ${total('= Cash from Operations', s.net_profit)}
+
+                            ${header('2. Financing Activities')}
+                            ${row('Capital Contributions (deposits)', s.capital_received, 'text-green-600', true)}
+                            ${row('Profit Distributions (withdrawals)', -s.distributions_paid, 'text-red-500', true)}
+                            ${total('= Cash from Financing', netFinancing)}
+                        </tbody>
+                    </table>
+
+                    <div class="flex flex-col justify-between">
+                        <div class="rounded-xl border-2 ${netCash >= 0 ? 'border-green-400 bg-green-50 dark:bg-green-950' : 'border-red-400 bg-red-50 dark:bg-red-950'} p-5 text-center">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Net Cash Movement</p>
+                            <p class="text-3xl font-bold ${netCash >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${netCash >= 0 ? '+' : '−'} ${fmt(Math.abs(netCash))}
+                            </p>
+                            <p class="mt-2 text-xs text-gray-500">
+                                Operations ${fmt(s.net_profit)}
+                                &nbsp;+&nbsp;
+                                Financing ${netFinancing >= 0 ? '+' : ''}${fmt(netFinancing)}
+                            </p>
+                        </div>
+
+                        ${sh.shareholders.length > 0 ? `
+                        <div class="mt-4 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
+                            <p class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Per-Shareholder Distributions (All Time)</p>
+                            ${sh.shareholders.map(s => `
+                            <div class="flex items-center justify-between py-1 text-xs">
+                                <span class="text-gray-700 dark:text-gray-300">${s.name} <span class="text-gray-400">(${s.pct}%)</span></span>
+                                <span class="font-semibold text-green-600">${fmt(s.earned)}</span>
+                            </div>`).join('')}
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            el.classList.remove('hidden');
+        }
+
         // ── Fetch all data ─────────────────────────────────────────────────────
         fetch(`${dataUrl}?from=${from}&to=${to}`)
             .then(r => r.json())
@@ -456,6 +539,7 @@
                 renderKpi(data.stats);
                 renderPL(data.stats);
                 renderShipping(data.stats);
+                renderCashFlow(data.stats, data.shareholders);
                 renderShareholders(data.shareholders);
                 renderChart(data.monthly);
                 renderTopProducts(data.topProducts);

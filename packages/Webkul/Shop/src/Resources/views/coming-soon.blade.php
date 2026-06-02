@@ -1,8 +1,11 @@
 @php
-    $heading   = core()->getConfigData('general.content.coming_soon.heading')  ?? 'Coming Soon';
-    $subtext   = core()->getConfigData('general.content.coming_soon.subtext')  ?? 'We are working on something amazing. Stay tuned!';
-    $videoUrl  = core()->getConfigData('general.content.coming_soon.video_url') ?? '';
-    $logoUrl   = core()->getConfigData('general.content.coming_soon.logo_url')  ?? '';
+    $heading      = core()->getConfigData('general.content.coming_soon.heading')      ?? 'Coming Soon';
+    $subtext      = core()->getConfigData('general.content.coming_soon.subtext')      ?? 'We are working on something amazing. Stay tuned!';
+    $videoUrl     = core()->getConfigData('general.content.coming_soon.video_url')    ?? '';
+    $logoUrl      = core()->getConfigData('general.content.coming_soon.logo_url')     ?? '';
+    $logoSize     = core()->getConfigData('general.content.coming_soon.logo_size')     ?? '120px';
+    $headingSize  = core()->getConfigData('general.content.coming_soon.heading_size') ?? '5rem';
+    $subtextSize  = core()->getConfigData('general.content.coming_soon.subtext_size') ?? '1.1rem';
     $siteLogo  = core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg');
     $finalLogo = $logoUrl ?: $siteLogo;
 
@@ -136,8 +139,8 @@
         }
 
         .logo {
-            max-height: 64px;
-            max-width: 220px;
+            max-height: {{ $logoSize }};
+            max-width: 400px;
             width: auto;
             margin: 0 auto 2.5rem;
             display: block;
@@ -153,7 +156,7 @@
 
         h1 {
             font-family: 'Raleway', sans-serif;
-            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-size: clamp(2rem, 8vw, {{ $headingSize }});
             font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: uppercase;
@@ -166,7 +169,7 @@
 
         .subtext {
             font-family: 'Open Sans', sans-serif;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-size: clamp(0.8rem, 2.5vw, {{ $subtextSize }});
             font-weight: 300;
             color: rgba(255,255,255,0.7);
             line-height: 1.7;
@@ -213,9 +216,85 @@
             text-transform: uppercase;
             color: rgba(255,255,255,0.25);
         }
+
+        /* Admin edit bar */
+        .admin-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1.5rem;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.8rem;
+        }
+        .admin-bar-label {
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.05em;
+        }
+        .admin-bar-label span {
+            color: #818cf8;
+            font-weight: 600;
+        }
+        .admin-bar-actions {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .admin-btn-primary {
+            background: #6366f1;
+            color: #fff;
+        }
+        .admin-btn-primary:hover { background: #4f46e5; color: #fff; }
+        .admin-btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .admin-btn-danger:hover { background: rgba(239, 68, 68, 0.3); color: #fff; }
     </style>
 </head>
 <body>
+
+    {{-- Admin bar (only for logged-in admins) --}}
+    @if (auth()->guard('admin')->check())
+        <div class="admin-bar">
+            <div class="admin-bar-label">
+                <span>Coming Soon</span> mode is active
+            </div>
+            <div class="admin-bar-actions">
+                <a href="{{ route('admin.configuration.index', ['slug' => 'general', 'slug2' => 'content']) }}" class="admin-btn admin-btn-primary" target="_blank">
+                    ✏️ Edit Settings
+                </a>
+                <form method="POST" action="{{ route('admin.configuration.store', ['slug' => 'general', 'slug2' => 'content']) }}" style="display:inline;">
+                    @csrf
+                    <input type="hidden" name="general[content][coming_soon][enabled]" value="0">
+                    <button type="submit" class="admin-btn admin-btn-danger">
+                        ✕ Disable
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
 
     {{-- Background --}}
     <div class="bg-layer">
