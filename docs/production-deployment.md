@@ -247,6 +247,25 @@ php artisan view:cache
 - تأكد إن الـ governorates مفعّلة وليها rates
 - الـ API endpoint الجديد: `GET /api/egypt-shipping/rate/{code}`
 
+### CostManagement — Shareholders & Financial Reports
+> ✅ الـ migrations بتتشغل تلقائياً مع `php artisan migrate --force`
+>
+> الـ migrations دي بتضيف:
+> - جدول `cost_management_settings` — لتخزين قيمة السهم وإعدادات تانية
+> - عمود `shares` على جدول `shareholders` — عدد الأسهم لكل مساهم
+> - جدول `capital_contributions` — سجل إيداعات رأس المال لكل مساهم
+
+**بعد الـ deploy:**
+1. روح **Admin → Cost Management → Shareholders**
+2. اضبط **Share Price (EGP)** — قيمة السهم الواحد
+3. أضف عدد الأسهم لكل مساهم
+4. سجّل إيداعات رأس المال (Capital Contributions) لكل مساهم
+
+**الصفحات الجديدة:**
+- **P&L Report** — `/admin/cost-management/report` — تقرير الأرباح والخسائر مع Cash Flow
+- **Balance Sheet** — `/admin/cost-management/balance-sheet` — قائمة المركز المالي
+- **Profit Distributions** — `/admin/cost-management/distributions` — توزيعات الأرباح
+
 ---
 
 ## 8. ملاحظات مهمة

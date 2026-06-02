@@ -264,7 +264,37 @@ sudo apt install php8.3-redis -y
 
 ---
 
-## 9. تنبيهات مهمة
+## 9. CostManagement — إعداد بعد أول Deploy
+
+> الـ migrations بتتشغل تلقائياً مع `php artisan migrate --force` وبتضيف:
+> - `cost_management_settings` — إعدادات CostManagement (قيمة السهم إلخ)
+> - عمود `shares` على `shareholders` — عدد الأسهم
+> - `capital_contributions` — سجل إيداعات رأس المال
+
+**خطوات الإعداد بعد الـ deploy:**
+
+```
+1. Admin → Cost Management → Shareholders
+   - اضبط Share Price (EGP) — قيمة السهم الواحد
+   - أضف عدد الأسهم (Shares) لكل مساهم
+   - سجّل Capital Contributions (الإيداعات النقدية) لكل مساهم
+
+2. Admin → Cost Management → Products
+   - أضف تكاليف المنتجات (Cost Price, Manufacturing Fee, Shipping Cost)
+
+3. Admin → Cost Management → Expenses
+   - سجّل المصروفات الشهرية
+
+4. Admin → Cost Management → Report
+   - P&L تقرير الأرباح والخسائر + Cash Flow Statement
+
+5. Admin → Cost Management → Balance Sheet
+   - قائمة المركز المالي (الأصول وحقوق الملكية)
+```
+
+---
+
+## 10. تنبيهات مهمة
 
 | ⚠️ | التنبيه |
 |----|---------|
@@ -274,3 +304,4 @@ sudo apt install php8.3-redis -y
 | 📦 | **predis** — لا يحتاج PHP extension، يشتغل تلقائياً مع composer install |
 | 🚀 | **Coming Soon** — تُفعَّل من Admin → Configuration → General → Content → Coming Soon Page |
 | 💳 | **Egypt Shipping** — تأكد من إضافة rates للـ governorates من Admin → Configuration |
+| 📊 | **CostManagement** — بعد migrate، ابدأ بضبط Share Price ثم أضف عدد الأسهم لكل مساهم |
