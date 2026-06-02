@@ -43,3 +43,5 @@ skills-lock.json
 /vendor
 yarn.lock
 yarn-error.log
+dump.rdb
+/docs/*.sql
