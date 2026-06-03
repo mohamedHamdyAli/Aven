@@ -4,6 +4,9 @@ This changelog consists of the bug & security fixes and new features being inclu
 
 ## 2026-06-03
 
+### Fix
+- **Production 500 — Redis ConnectionException** — live server (`avenegypt.com`, shared hosting) had no Redis service, but `.env` used `SESSION_DRIVER=redis` and `CACHE_STORE=redis`, so every request failed with `Connection refused [tcp://127.0.0.1:6379]`. Fix: switch both drivers to `database` on the server. Added a `create_cache_table` migration (`cache` + `cache_locks` tables) since the project only had a `sessions` table — required for the `database` cache store. Verified no `Cache::tags()` usage exists, so the database store is safe.
+
 ### Feature
 - **Root `.htaccess`** — added at project root to redirect all requests into `public/` (for shared hosting where the document root points at the project root) and to block access to sensitive root files (`.env`, `.git`, `composer.*`, `*.log`, `artisan`). Harmless on Laragon since its vhost already points at `public/`.
 - **`public/.htaccess` hardening** — added HTTPS forcing (with `*.test`/`localhost`/`127.0.0.1` excluded so local dev on `http://aven.test` keeps working), blocked dotfiles, and security headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`). All rules wrapped in `<IfModule>` guards to avoid 500 errors when a module is disabled.
