@@ -32,7 +32,7 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
-            background: #0f0f0f;
+            background: #000;
             color: #fff;
             min-height: 100vh;
             overflow: hidden;
@@ -70,32 +70,19 @@
             opacity: 0.55;
         }
 
-        /* Gradient overlay */
+        /* Dark overlay on video */
         .overlay {
             position: fixed;
             inset: 0;
             z-index: 1;
-            background: linear-gradient(
-                135deg,
-                rgba(10, 10, 30, 0.82) 0%,
-                rgba(10, 10, 30, 0.55) 50%,
-                rgba(10, 10, 30, 0.82) 100%
-            );
+            background: rgba(0, 0, 0, 0.6);
         }
 
-        /* Animated gradient (no video fallback) */
+        /* Solid black background (no video fallback) */
         .bg-gradient {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: gradMove 12s ease infinite;
-        }
-
-        @keyframes gradMove {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            background: #000;
         }
 
         /* Floating particles */
