@@ -157,14 +157,11 @@
         h1 {
             font-family: 'Raleway', sans-serif;
             font-size: clamp(2rem, 8vw, {{ $headingSize }});
-            font-weight: 700;
+            font-weight: 900;
             letter-spacing: 0.15em;
             text-transform: uppercase;
             line-height: 1;
-            background: linear-gradient(135deg, #ffffff 0%, #a8b8d8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #ffffff;
         }
 
         .subtext {
@@ -319,7 +316,11 @@
 
     {{-- Main content --}}
     <div class="content">
-        <img src="{{ $finalLogo }}" alt="{{ config('app.name') }}" class="logo">
+        <img src="{{ $finalLogo }}" alt="{{ config('app.name') }}" class="logo"
+             onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block';">
+        <div id="logo-text" style="display:none; font-family:'Raleway',sans-serif; font-size:2.5rem; font-weight:900; letter-spacing:0.3em; text-transform:uppercase; color:#fff; margin-bottom:2.5rem;">
+            {{ config('app.name') }}
+        </div>
 
         <div class="divider"></div>
 
