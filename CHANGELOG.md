@@ -2,6 +2,12 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## 2026-06-03
+
+### Feature
+- **Root `.htaccess`** — added at project root to redirect all requests into `public/` (for shared hosting where the document root points at the project root) and to block access to sensitive root files (`.env`, `.git`, `composer.*`, `*.log`, `artisan`). Harmless on Laragon since its vhost already points at `public/`.
+- **`public/.htaccess` hardening** — added HTTPS forcing (with `*.test`/`localhost`/`127.0.0.1` excluded so local dev on `http://aven.test` keeps working), blocked dotfiles, and security headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`). All rules wrapped in `<IfModule>` guards to avoid 500 errors when a module is disabled.
+
 ## 2026-06-02
 
 ### Feature
