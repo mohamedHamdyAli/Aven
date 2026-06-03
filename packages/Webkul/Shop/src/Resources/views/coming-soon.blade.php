@@ -97,15 +97,29 @@
         .particle {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255,255,255,0.06);
+            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
+            border: 1px solid rgba(255,255,255,0.4);
             animation: float linear infinite;
         }
 
+        .fashion-word {
+            position: absolute;
+            color: rgba(255,255,255,0.45);
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            animation: float linear infinite;
+            pointer-events: none;
+        }
+
         @keyframes float {
-            0%   { transform: translateY(110vh) scale(0); opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+            0%   { transform: translateY(110vh); opacity: 0; }
+            8%   { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { transform: translateY(-10vh); opacity: 0; }
         }
 
         /* Content */
@@ -329,20 +343,45 @@
     <div class="brand-watermark">{{ config('app.name') }}</div>
 
     <script>
-        // Generate floating particles
         const container = document.getElementById('particles');
-        for (let i = 0; i < 18; i++) {
+
+        const fashionWords = [
+            'Couture','Chic','Vogue','Elegance','Style','Luxe','Glamour',
+            'Trend','Mode','Atelier','Runway','Bespoke','Capsule','Haute',
+            'Minimal','Classic','Velvet','Silk','Satin','Tailored','Sheer',
+            'Refined','Bold','Season','Edit','Drape','Fitted','Linen'
+        ];
+
+        // Bubbles
+        for (let i = 0; i < 14; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            const size = Math.random() * 60 + 20;
+            const size = Math.random() * 55 + 15;
             p.style.cssText = `
-                width: ${size}px;
-                height: ${size}px;
-                left: ${Math.random() * 100}%;
-                animation-duration: ${Math.random() * 15 + 10}s;
-                animation-delay: ${Math.random() * 10}s;
+                width:${size}px; height:${size}px;
+                left:${Math.random() * 100}%;
+                animation-duration:${Math.random() * 14 + 10}s;
+                animation-delay:${Math.random() * 12}s;
             `;
             container.appendChild(p);
+        }
+
+        // Fashion words — evenly distributed horizontally to avoid overlap
+        const wordSlots = [3,9,16,23,30,37,44,51,58,65,72,79,86,93,7,20];
+        for (let i = 0; i < 16; i++) {
+            const w = document.createElement('div');
+            w.className = 'fashion-word';
+            w.textContent = fashionWords[i % fashionWords.length];
+            const dur = Math.random() * 12 + 12;
+            w.style.cssText = `
+                left:${wordSlots[i]}%;
+                animation-duration:${dur}s;
+                animation-delay:${i * 1.6}s;
+            `;
+            w.addEventListener('animationiteration', () => {
+                w.textContent = fashionWords[Math.floor(Math.random() * fashionWords.length)];
+            });
+            container.appendChild(w);
         }
     </script>
 
