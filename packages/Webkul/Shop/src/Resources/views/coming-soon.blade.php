@@ -316,11 +316,13 @@
 
     {{-- Main content --}}
     <div class="content">
-        <img src="{{ $finalLogo }}" alt="{{ config('app.name') }}" class="logo"
-             onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block';">
-        <div id="logo-text" style="display:none; font-family:'Raleway',sans-serif; font-size:2.5rem; font-weight:900; letter-spacing:0.3em; text-transform:uppercase; color:#fff; margin-bottom:2.5rem;">
-            {{ config('app.name') }}
-        </div>
+        @if ($logoUrl)
+            <img src="{{ $logoUrl }}" alt="{{ config('app.name') }}" class="logo">
+        @else
+            <div style="font-family:'Raleway',sans-serif; font-size:2.8rem; font-weight:900; letter-spacing:0.35em; text-transform:uppercase; color:#fff; margin-bottom:2.5rem;">
+                {{ config('app.name') }}
+            </div>
+        @endif
 
         <div class="divider"></div>
 
