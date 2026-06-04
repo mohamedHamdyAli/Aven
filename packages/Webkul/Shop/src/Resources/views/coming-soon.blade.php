@@ -100,6 +100,7 @@
             background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
             border: 1px solid rgba(255,255,255,0.4);
             animation: float linear infinite;
+            animation-fill-mode: backwards;
         }
 
         .fashion-word {
@@ -112,6 +113,7 @@
             text-transform: uppercase;
             white-space: nowrap;
             animation: float linear infinite;
+            animation-fill-mode: backwards;
             pointer-events: none;
         }
 
@@ -366,17 +368,17 @@
             container.appendChild(p);
         }
 
-        // Fashion words — evenly distributed horizontally to avoid overlap
-        const wordSlots = [3,9,16,23,30,37,44,51,58,65,72,79,86,93,7,20];
-        for (let i = 0; i < 16; i++) {
+        // Fashion words — LEFT (1%–22%) and RIGHT (76%–97%), 6 each side, staggered
+        const wordSlots = [1, 8, 16, 23, 4, 11,   75, 84, 93, 78, 87, 96];
+        for (let i = 0; i < 12; i++) {
             const w = document.createElement('div');
             w.className = 'fashion-word';
             w.textContent = fashionWords[i % fashionWords.length];
-            const dur = Math.random() * 12 + 12;
+            const dur = 16 + (i % 3) * 3;
             w.style.cssText = `
                 left:${wordSlots[i]}%;
                 animation-duration:${dur}s;
-                animation-delay:${i * 1.6}s;
+                animation-delay:${i * 2.5}s;
             `;
             w.addEventListener('animationiteration', () => {
                 w.textContent = fashionWords[Math.floor(Math.random() * fashionWords.length)];
