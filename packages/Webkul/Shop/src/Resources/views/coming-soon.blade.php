@@ -151,29 +151,32 @@
         }
 
         .divider {
-            width: 60px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #fff, transparent);
-            margin: 1.5rem auto;
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            margin: 1.8rem auto;
         }
 
         h1 {
             font-family: 'Raleway', sans-serif;
             font-size: clamp(2rem, 8vw, {{ $headingSize }});
             font-weight: 900;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            line-height: 1;
+            line-height: 1.05;
             color: #ffffff;
+            text-shadow: 0 0 60px rgba(255,255,255,0.12);
         }
 
         .subtext {
-            font-family: 'Open Sans', sans-serif;
-            font-size: clamp(0.8rem, 2.5vw, {{ $subtextSize }});
+            font-family: 'Raleway', sans-serif;
+            font-size: clamp(0.7rem, 2vw, {{ $subtextSize }});
             font-weight: 300;
-            color: rgba(255,255,255,0.7);
-            line-height: 1.7;
-            margin-top: 1rem;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            line-height: 2;
+            margin-top: 1.2rem;
             max-width: 480px;
             margin-left: auto;
             margin-right: auto;
@@ -354,16 +357,17 @@
             'Refined','Bold','Season','Edit','Drape','Fitted','Linen'
         ];
 
-        // Bubbles
+        // Bubbles — left (0–28%) and right (72–100%) only, centre stays clear
+        const bubbleSlots = [2,8,15,22,5,12,19,   72,79,86,93,75,83,90];
         for (let i = 0; i < 14; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            const size = Math.random() * 55 + 15;
+            const size = Math.random() * 60 + 20;
             p.style.cssText = `
                 width:${size}px; height:${size}px;
-                left:${Math.random() * 100}%;
-                animation-duration:${Math.random() * 14 + 10}s;
-                animation-delay:${Math.random() * 12}s;
+                left:${bubbleSlots[i]}%;
+                animation-duration:${Math.random() * 14 + 12}s;
+                animation-delay:${i * 1.3}s;
             `;
             container.appendChild(p);
         }
